@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Orders</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+
+body {
+    margin: 0;
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(120deg, #667eea, #764ba2);
+    min-height: 100vh;
+}
+
+/* HEADER */
+.header {
+    text-align: center;
+    font-size: 32px;
+    font-weight: 700;
+    padding: 25px;
+    color: white;
+    letter-spacing: 1px;
+}
+
+/* CONTAINER */
+.container {
+    max-width: 850px;
+    margin: auto;
+    padding: 20px;
+}
+
+/* CARD */
+.card {
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(20px);
+    border-radius: 20px;
+    padding: 20px;
+    margin-bottom: 20px;
+    color: white;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+    transition: 0.4s;
+}
+
+.card:hover {
+    transform: scale(1.02);
+}
+
+/* TOP */
+.top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* ORDER TEXT */
+.order-id {
+    font-weight: bold;
+    font-size: 18px;
+}
+
+.date {
+    font-size: 14px;
+    opacity: 0.8;
+}
+
+/* STATUS */
+.status {
+    padding: 6px 14px;
+    border-radius: 50px;
+    font-size: 13px;
+    font-weight: bold;
+}
+
+.pending {
+    background: rgba(255, 193, 7, 0.2);
+    color: #ffc107;
+}
+
+.shipped {
+    background: rgba(0, 123, 255, 0.2);
+    color: #00bfff;
+}
+
+.delivered {
+    background: rgba(40, 167, 69, 0.2);
+    color: #00ff95;
+}
+
+/* ITEMS */
+.items {
+    margin-top: 15px;
+}
+
+.item {
+    padding: 10px;
+    border-bottom: 1px solid rgba(255,255,255,0.2);
+    display: flex;
+    justify-content: space-between;
+}
+
+/* TOTAL */
+.total {
+    margin-top: 10px;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+/* BUTTON */
+.delete-btn {
+    margin-top: 12px;
+    background: linear-gradient(45deg, #ff4b2b, #ff416c);
+    border: none;
+    padding: 8px 16px;
+    border-radius: 30px;
+    color: white;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.delete-btn:hover {
+    transform: scale(1.1);
+}
+
+/* EMPTY */
+.empty {
+    text-align: center;
+    color: white;
+    font-size: 18px;
+    margin-top: 50px;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="header">🧾 Your Orders</div>
+
+</div>
+
+<div class="container" id="orders"></div>
+<script>
+
+const BASE_URL = "http://localhost:3000";
+
+async function loadOrders() {
+
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+        document.getElementById("orders").innerHTML =
+            "<div class='empty'>Login required ❌</div>";
+        return;
+    }
+
+    try {
+        const res = await fetch(BASE_URL + "/api/orders", {
+            headers: {
+                "Authorization": "Bearer " + token
+            }
+        });
+
+        // 🔥 HANDLE SERVER ERROR
+        if (!res.ok) {
+            const text = await res.text();
+            console.log("SERVER ERROR:", text);
+
+            document.getElementById("orders").innerHTML =
+                "<div class='empty'>Server error ❌</div>";
+            return;
+        }
+
+        const data = await res.json();
+
+        console.log("ORDERS:", data);
+
+        let html = "";
+
+        if (!data || data.length === 0) {
+            html = "<div class='empty'>No orders yet 😔</div>";
+        } else {
+
+            data.forEach(order => {
+
+                html += `
+                <div class="card">
+                    <div class="top">
+                        <div>
+                            <div class="order-id">Order #${order._id}</div>
+                            <div class="date">
+                                ${order.createdAt ? new Date(order.createdAt).toLocaleString() : "No date"}
+                            </div>
+                        </div>
+                        ${getStatus(order.status)}
+                    </div>
+
+                    <div class="items">
+                `;
+
+                if (order.items && order.items.length > 0) {
+                    order.items.forEach(item => {
+                        html += `<div class="item">🛍 ${item.name} - ₹${item.price}</div>`;
+                    });
+                } else {
+                    html += `<div class="item">No items</div>`;
+                }
+
+                html += `
+                    </div>
+
+                    <div class="total">Total: ₹${order.total || 0}</div>
+
+                    <button class="delete-btn" onclick="deleteOrder('${order._id}')">
+                        ❌ Delete Order
+                    </button>
+                </div>
+                `;
+            });
+
+        }
+
+        document.getElementById("orders").innerHTML = html;
+
+    } catch (err) {
+        console.log("FRONTEND ERROR:", err);
+
+        document.getElementById("orders").innerHTML =
+            "<div class='empty'>Error loading orders ❌</div>";
+    }
+}
+
+
+// DELETE ORDER
+async function deleteOrder(id) {
+
+    const token = localStorage.getItem("token");
+
+    try {
+        await fetch(BASE_URL + "/api/orders/" + id, {
+            method: "DELETE",
+            headers: {
+                "Authorization": "Bearer " + token
+            }
+        });
+
+        loadOrders();
+
+    } catch (err) {
+        console.log("DELETE ERROR:", err);
+    }
+}
+
+
+// STATUS
+function getStatus(status) {
+    if (status === "Pending") {
+        return "<div class='status pending'>🕒 Pending</div>";
+    } else if (status === "Shipped") {
+        return "<div class='status shipped'>🚚 Shipped</div>";
+    } else if (status === "Delivered") {
+        return "<div class='status delivered'>✔ Delivered</div>";
+    } else {
+        return "<div class='status'>Unknown</div>";
+    }
+}
+
+
+// LOAD
+loadOrders();
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Users</title>
+
+<style>
+body {
+    margin: 0;
+    font-family: 'Inter', sans-serif;
+    display: flex;
+    background: linear-gradient(135deg, #141e30, #243b55);
+    color: white;
+}
+
+.sidebar {
+    width: 230px;
+    height: 100vh;
+    padding: 25px;
+    background: rgba(255,255,255,0.05);
+    backdrop-filter: blur(20px);
+}
+
+.menu {
+    padding: 12px;
+    margin: 10px 0;
+    cursor: pointer;
+}
+
+.main {
+    flex: 1;
+    padding: 30px;
+}
+
+.user-box {
+    background: rgba(255,255,255,0.08);
+    padding: 15px;
+    margin: 10px 0;
+    border-radius: 12px;
+}
+
+button {
+    margin-top: 8px;
+    margin-right: 5px;
+    padding: 6px 10px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.delete { background: #ff4d4d; color: white; }
+.admin { background: #007bff; color: white; }
+</style>
+</head>
+
+<body>
+
+<div class="sidebar">
+    <h2>Admin 👑</h2>
+    <div class="menu" onclick="goDashboard()">Dashboard</div>
+    <div class="menu" onclick="goAddProduct()">Add Product</div>
+    <div class="menu" onclick="goManage()">Manage Products</div>
+    <div class="menu">Users 👤</div>
+    <div class="menu" onclick="logout()">Logout</div>
+</div>
+
+<div class="main">
+    <h1>All Users 👤</h1>
+    <div id="users">Loading...</div>
+</div>
+
+<script>
+
+const BASE_URL = "http://localhost:3000";
+const token = localStorage.getItem("token");
+
+if (!token) {
+    alert("Login required ❌");
+    window.location.href = "/login.html";
+}
+
+// 🔥 LOAD USERS
+async function loadUsers() {
+    try {
+        const res = await fetch(BASE_URL + "/api/users", {
+            headers: { "Authorization": "Bearer " + token }
+        });
+
+        const data = await res.json();
+        const box = document.getElementById("users");
+
+        if (!data.length) {
+            box.innerHTML = "No users ❌";
+            return;
+        }
+
+        box.innerHTML = data.map(u => `
+            <div class="user-box">
+                <b>Email:</b> ${u.email} <br>
+                <b>ID:</b> ${u._id} <br>
+                <b>Role:</b> ${u.role || "user"} <br>
+<b>Status:</b> ${u.isBlocked ? "🚫 Blocked" : "✅ Active"} <br>
+                <button class="delete" onclick="deleteUser('${u._id}')">Delete</button>
+                <button class="admin" onclick="makeAdmin('${u._id}')">Make Admin</button>
+                   <!-- 🚫 BLOCK SYSTEM -->
+        ${
+            u.isBlocked
+            ? `<button style="background:green;color:white" onclick="unblockUser('${u._id}')">Unblock</button>`
+            : `<button style="background:orange;color:white" onclick="blockUser('${u._id}')">Block</button>`
+        }
+            </div>
+        `).join("");
+
+    } catch (err) {
+        console.log(err);
+        document.getElementById("users").innerHTML = "Error ❌";
+    }
+}
+
+loadUsers();
+
+
+// ❌ DELETE USER
+function deleteUser(id) {
+
+    fetch("http://localhost:3000/api/users/" + id, {
+        method: "DELETE",
+        headers: {
+            "Authorization": "Bearer " + localStorage.getItem("token")
+        }
+    })
+    .then(res => res.json())
+    .then(data => {
+        console.log(data);
+        alert(data.msg);
+        loadUsers();
+    });
+}
+
+
+// 👑 MAKE ADMIN
+function makeAdmin(id) {
+
+    fetch("http://localhost:3000/api/users/role/" + id, {
+        method: "PUT",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + localStorage.getItem("token")
+        }
+    })
+    .then(res => res.json())
+    .then(() => {
+        alert("Now admin 👑");
+        loadUsers();
+    });
+}
+function blockUser(id) {
+    fetch(BASE_URL + "/api/users/block/" + id, {
+        method: "PUT",
+        headers: {
+            "Authorization": "Bearer " + token
+        }
+    })
+    .then(res => {
+        console.log("STATUS:", res.status);
+        return res.json();
+    })
+    .then(data => {
+        console.log("BLOCK:", data);
+        alert(data.msg || "Blocked");
+        loadUsers();
+    })
+    .catch(err => {
+        console.log(err);
+        alert("Block failed ❌");
+    });
+}
+
+function unblockUser(id) {
+    fetch(BASE_URL + "/api/users/unblock/" + id, {
+        method: "PUT",
+        headers: {
+            "Authorization": "Bearer " + token
+        }
+    })
+    .then(res => {
+        console.log("STATUS:", res.status);
+        return res.json();
+    })
+    .then(data => {
+        console.log("UNBLOCK:", data);
+        alert(data.msg || "Unblocked");
+        loadUsers();
+    })
+    .catch(err => {
+        console.log(err);
+        alert("Unblock failed ❌");
+    });
+}
+// NAV
+function goDashboard(){ window.location.href="/admin/dashboard.html"; }
+function goAddProduct(){ window.location.href="/admin/add-product.html"; }
+function goManage(){ window.location.href="/admin/manage-products.html"; }
+
+function logout(){
+    localStorage.removeItem("token");
+    window.location.href="/login.html";
+}
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Checkout Pro Max</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body {
+    margin: 0;
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(120deg, #0f2027, #203a43, #2c5364);
+    color: white;
+}
+
+.header {
+    text-align: center;
+    padding: 20px;
+    font-size: 26px;
+    font-weight: bold;
+    background: linear-gradient(90deg, #ff416c, #ff4b2b);
+}
+
+.container {
+    max-width: 900px;
+    margin: auto;
+    padding: 20px;
+}
+
+.card {
+    background: rgba(255,255,255,0.08);
+    backdrop-filter: blur(15px);
+    padding: 20px;
+    border-radius: 20px;
+    margin-bottom: 20px;
+}
+
+.cart-item {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.cart-item img {
+    width: 70px;
+    height: 70px;
+    border-radius: 10px;
+    object-fit: cover;
+}
+
+.info .name {
+    font-weight: bold;
+}
+
+.price {
+    color: #00ffcc;
+}
+
+input {
+    width: 100%;
+    padding: 12px;
+    margin-top: 10px;
+    border-radius: 10px;
+    border: none;
+}
+
+.btn {
+    width: 100%;
+    padding: 14px;
+    background: linear-gradient(45deg, #ff4b2b, #ff416c);
+    border: none;
+    border-radius: 30px;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.total {
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.success {
+    display: none;
+    position: fixed;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.8);
+    justify-content: center;
+    align-items: center;
+}
+
+.success-box {
+    background: #111;
+    padding: 30px;
+    border-radius: 20px;
+    text-align: center;
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">💳 Checkout</div>
+
+<div class="container">
+
+<!-- ORDER SUMMARY -->
+<div class="card">
+    <h2>Order Summary</h2>
+    <div id="cart"></div>
+</div>
+
+<!-- BILL DETAILS -->
+<div class="card">
+    <h2>Bill Details</h2>
+    <p>Subtotal: ₹<span id="subtotal">0</span></p>
+    <p>Delivery: <span style="color:lightgreen;">FREE</span></p>
+    <hr>
+    <h3>Total: ₹<span id="total">0</span></h3>
+</div>
+
+<!-- CUSTOMER -->
+<div class="card">
+    <h2>Customer Details</h2>
+    <input id="name" placeholder="Name">
+    <input id="address" placeholder="Address">
+    <input id="phone" placeholder="Phone">
+</div>
+
+<!-- PAYMENT -->
+<div class="card">
+    <h2>Payment Method</h2>
+
+    <label><input type="radio" name="payment" value="cod" checked> 💵 Cash on Delivery</label><br><br>
+    <label><input type="radio" name="payment" value="upi"> 📱 UPI</label><br><br>
+    <label><input type="radio" name="payment" value="card"> 💳 Card</label>
+    <div id="upiBox" style="display:none; margin-top:15px; text-align:center;">
+    <p>Scan & Pay via UPI</p>
+
+    <img src="images/Qr.jpg.jpeg" style="width:200px; border-radius:10px;">
+    
+    <p style="margin-top:10px; font-size:14px;">
+        UPI ID: soumayadiproy138@okicici
+    </p>
+</div>
+</div>
+
+<button class="btn" onclick="placeOrder()">Place Order 🚀</button>
+
+</div>
+
+<div class="success" id="successBox">
+    <div class="success-box">
+        <h2>🎉 Order Placed!</h2>
+        <p>Thank you for shopping</p>
+    </div>
+</div>
+<script>
+const BASE_URL = "http://localhost:3000";
+window.onload = loadCheckout;
+async function loadCheckout() {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+        document.getElementById("cart").innerHTML = "Login required ❌";
+        return;
+    }
+
+    try {
+        // ✅ SAME AS CART PAGE
+        const res = await fetch(BASE_URL + "/api/cart", {
+            headers: {
+                "Authorization": "Bearer " + token
+            }
+        });
+
+        const cartData = await res.json();
+
+console.log("DATA:", cartData);
+
+let html = "";
+let total = 0;
+
+const items = cartData.items || cartData || [];
+
+if (items.length === 0) {
+    html = "<p>Cart is empty 😔</p>";
+} else {
+
+    items.forEach(item => {
+
+        total += item.price * item.quantity;
+
+        html += `
+        <div class="cart-item">
+            <img src="${BASE_URL}${item.img}">
+
+            <div class="info">
+                <div class="name">${item.name}</div>
+                <div class="price">₹${item.price} x ${item.quantity}</div>
+            </div>
+        </div>
+        `;
+    });
+}
+
+document.getElementById("cart").innerHTML = html;
+document.getElementById("subtotal").innerText = total;
+document.getElementById("total").innerText = total;
+
+    } catch (err) {
+        console.log("ERROR:", err);
+        document.getElementById("cart").innerHTML = "Error loading cart ❌";
+    }
+}
+
+// REMOVE
+async function removeItem(id) {
+    const token = localStorage.getItem("token");
+
+    await fetch(BASE_URL + "/api/cart/remove/" + id, {
+        method: "DELETE",
+        headers: {
+            "Authorization": "Bearer " + token
+        }
+    });
+
+    loadCheckout();
+}
+
+// PLACE ORDER
+async function placeOrder() {
+
+    const token = localStorage.getItem("token");
+
+    const name = document.getElementById("name").value.trim();
+    const address = document.getElementById("address").value.trim();
+    const phone = document.getElementById("phone").value.trim();
+
+    const paymentEl = document.querySelector('input[name="payment"]:checked');
+
+    if (!token) {
+        alert("Login required ❌");
+        window.location.href = "/login.html";
+        return;
+    }
+
+    if (!paymentEl) {
+        alert("Select payment ❌");
+        return;
+    }
+
+    const payment = paymentEl.value;
+
+    if (!name || !address || !phone) {
+        alert("Fill all fields ❌");
+        return;
+    }
+
+    if (phone.length < 10) {
+        alert("Invalid phone ❌");
+        return;
+    }
+
+    try {
+        const res = await fetch(BASE_URL + "/api/orders/checkout", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + token
+            },
+            body: JSON.stringify({
+                name,
+                address,
+                phone,
+                payment
+            })
+        });
+
+        const data = await res.json();
+
+        console.log("ORDER RESPONSE:", data); // 🔥 DEBUG
+
+        if (!res.ok) {
+            alert(
+                data.error || 
+                data.msg || 
+                data.message || 
+                "Order failed ❌"
+            );
+            return;
+        }
+
+        // ✅ SUCCESS
+        document.getElementById("successBox").style.display = "flex";
+
+        setTimeout(() => {
+            window.location.href = "/orders.html";
+        }, 2000);
+
+    } catch (err) {
+        console.log("ORDER ERROR:", err);
+        alert("Server error ❌");
+    }
+}
+// 🔥 ADD HERE (BOTTOM OF SCRIPT)
+document.querySelectorAll('input[name="payment"]').forEach(radio => {
+
+    radio.addEventListener("change", () => {
+
+        const val = document.querySelector('input[name="payment"]:checked').value;
+
+        if (val === "upi") {
+            document.getElementById("upiBox").style.display = "block";
+        } else {
+            document.getElementById("upiBox").style.display = "none";
+        }
+    });
+
+});
+</script>
+</body>
+</html>

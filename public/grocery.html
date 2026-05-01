@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Fresh Grocery</title>
+
+<style>
+body {
+  margin: 0;
+  font-family: "Segoe UI", sans-serif;
+  background: linear-gradient(120deg,#f0fdf4,#dcfce7);
+}
+
+/* NAVBAR */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #2e7d32;
+  color: white;
+  padding: 15px 20px;
+}
+
+.navbar input {
+  width: 40%;
+  padding: 10px;
+  border-radius: 25px;
+  border: none;
+}
+
+.cart {
+  font-weight: bold;
+}
+
+/* HERO */
+.hero {
+  margin: 20px;
+  border-radius: 15px;
+  height: 260px;
+  display: flex;
+  align-items: center;
+  padding-left: 40px;
+  color: white;
+  background: url('https://images.unsplash.com/photo-1542838132-92c53300491e') center/cover;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+}
+
+.hero h1 {
+  font-size: 38px;
+}
+
+/* CATEGORY */
+.category-cards {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin: 20px;
+}
+
+.cat {
+  background: white;
+  padding: 12px 25px;
+  border-radius: 30px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.cat.active {
+  background: #2e7d32;
+  color: white;
+}
+
+.cat:hover {
+  transform: scale(1.05);
+}
+
+/* PRODUCTS */
+.products {
+  display: grid;
+  grid-template-columns: repeat(auto-fill,minmax(220px,1fr));
+  gap: 20px;
+  padding: 20px;
+}
+
+/* CARD */
+.product {
+  background: white;
+  border-radius: 15px;
+  overflow: hidden;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+  transition: 0.3s;
+  position: relative;
+}
+
+.product:hover {
+  transform: translateY(-10px);
+}
+
+.product img {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+}
+
+.product h3 {
+  margin: 10px;
+}
+
+.product p {
+  margin: 0 10px;
+  color: green;
+  font-weight: bold;
+}
+
+.product button {
+  margin: 10px;
+  width: calc(100% - 20px);
+  background: #2e7d32;
+  border: none;
+  padding: 10px;
+  color: white;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: #ff3d00;
+  color: white;
+  padding: 5px;
+  border-radius: 5px;
+}
+
+.empty {
+  text-align: center;
+  padding: 50px;
+}
+</style>
+
+</head>
+<body>
+
+<header class="navbar">
+  <h2>FreshMart 🥬</h2>
+  <input type="text" id="search" placeholder="Search fresh groceries...">
+  <div class="cart">🛒 Cart: <span id="cartCount">0</span></div>
+    <nav>
+    <a href="index.html">Home</a>
+    <a href="grocery.html">Grocery</a>
+    <a href="cart.html">Cart</a>
+  </nav>
+</header>
+
+<section class="hero">
+  <div>
+    <h1>Fresh Grocery Delivered</h1>
+    <p>Best quality products at lowest prices</p>
+  </div>
+</section>
+
+<div class="category-cards">
+  <div class="cat active" onclick="filterType('all', this)">All</div>
+  <div class="cat" onclick="filterType('rice', this)">🍚 Rice</div>
+  <div class="cat" onclick="filterType('dairy', this)">🥛 Dairy</div>
+  <div class="cat" onclick="filterType('fruits', this)">🍎 Fruits</div>
+</div>
+
+<section class="products" id="products"></section>
+
+<script>
+let allProducts = [];
+let filtered = [];
+
+// FETCH DATA
+fetch("http://localhost:3000/api/products")
+  .then(res => res.json())
+  .then(data => {
+    allProducts = data.filter(item => item.category === "grocery");
+    filtered = [...allProducts];
+    displayProducts(filtered);
+  });
+
+// DISPLAY
+function displayProducts(data) {
+  const container = document.getElementById("products");
+  container.innerHTML = "";
+
+  if (data.length === 0) {
+    container.innerHTML = "<div class='empty'>No Items Found ❌</div>";
+    return;
+  }
+
+  data.forEach(item => {
+    const div = document.createElement("div");
+    div.className = "product";
+
+    div.innerHTML = `
+      <div class="badge">Fresh</div>
+      <img src="${item.img}">
+      <h3>${item.name}</h3>
+      <p>₹${item.price}</p>
+      <button onclick="addToCart('${item.name}',${item.price})">Add to Cart</button>
+    `;
+
+    container.appendChild(div);
+  });
+}
+
+// SEARCH
+document.getElementById("search").addEventListener("input", (e)=>{
+  const text = e.target.value.toLowerCase();
+  const result = filtered.filter(p =>
+    p.name.toLowerCase().includes(text)
+  );
+  displayProducts(result);
+});
+
+// CATEGORY FILTER
+function filterType(type, el) {
+  document.querySelectorAll(".cat").forEach(c => c.classList.remove("active"));
+  el.classList.add("active");
+
+  if (type === "all") {
+    filtered = [...allProducts];
+  } else {
+    filtered = allProducts.filter(p => p.type === type);
+  }
+
+  displayProducts(filtered);
+}
+
+// CART SYSTEM
+function addToCart(name, price) {
+  let cart = JSON.parse(localStorage.getItem("cart")) || [];
+
+  cart.push({ name, price });
+
+  localStorage.setItem("cart", JSON.stringify(cart));
+
+  updateCart();
+  alert("Added to cart 🛒");
+}
+
+// UPDATE CART COUNT
+function updateCart() {
+  let cart = JSON.parse(localStorage.getItem("cart")) || [];
+  document.getElementById("cartCount").innerText = cart.length;
+}
+
+updateCart();
+</script>
+
+</body>
+</html>

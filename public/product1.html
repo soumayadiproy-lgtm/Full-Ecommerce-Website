@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Product Details</title>
+
+<style>
+body {
+    font-family: 'Segoe UI', sans-serif;
+    margin: 0;
+    background: linear-gradient(135deg, #141e30, #243b55);
+}
+
+/* BACK */
+a.back {
+    display: block;
+    margin: 20px;
+    color: #fff;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 16px;
+}
+
+/* MAIN CARD */
+.container {
+    display: flex;
+    gap: 50px;
+    padding: 50px;
+    margin: 40px;
+    border-radius: 20px;
+
+    background: rgba(255,255,255,0.08);
+    backdrop-filter: blur(25px);
+
+    box-shadow: 
+        0 0 40px rgba(255,0,0,0.2),
+        0 10px 40px rgba(0,0,0,0.6);
+
+    color: white;
+    transition: 0.3s;
+}
+
+.container:hover {
+    transform: scale(1.01);
+}
+
+/* IMAGE */
+.left img {
+    width: 320px;
+    border-radius: 12px;
+    background: rgba(255,255,255,0.15);
+    padding: 15px;
+    transition: 0.4s;
+}
+
+.left img:hover {
+    transform: scale(1.1) rotate(1deg);
+}
+
+/* THUMB */
+.thumbs img {
+    width: 70px;
+    margin: 6px;
+    cursor: pointer;
+    border-radius: 8px;
+    border: 2px solid rgba(255,255,255,0.6);
+    transition: 0.3s;
+}
+
+.thumbs img:hover {
+    transform: scale(1.1);
+    border-color: red;
+}
+
+/* DETAILS */
+.right {
+    max-width: 500px;
+}
+
+/* TITLE */
+.right h1 {
+    font-size: 28px;
+    margin-bottom: 10px;
+}
+
+/* PRICE */
+.price {
+    color: #ffd700;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+/* BUTTON */
+.btn {
+    background: linear-gradient(45deg, #ff1a1a, #ff7300);
+    color: white;
+    border: none;
+    padding: 14px 30px;
+    margin-top: 20px;
+    cursor: pointer;
+    border-radius: 50px;
+    font-size: 16px;
+
+    box-shadow: 0 0 20px rgba(255,0,0,0.6);
+    transition: 0.3s;
+}
+
+.btn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 30px rgba(255,0,0,1);
+}
+
+/* REVIEWS */
+.reviews {
+    margin: 40px;
+    padding: 25px;
+    border-radius: 20px;
+
+    background: rgba(255,255,255,0.08);
+    backdrop-filter: blur(20px);
+
+    box-shadow: 0 0 25px rgba(0,0,0,0.4);
+    color: white;
+}
+
+/* REVIEW BOX */
+.review-box {
+    background: rgba(255,255,255,0.15);
+    padding: 12px;
+    margin: 10px 0;
+    border-radius: 12px;
+    transition: 0.3s;
+}
+
+.review-box:hover {
+    background: rgba(255,255,255,0.25);
+}
+
+/* TEXTAREA */
+textarea {
+    width: 100%;
+    padding: 12px;
+    border-radius: 12px;
+    border: none;
+    margin-top: 10px;
+    outline: none;
+}
+</style>
+</head>
+
+<body>
+
+<a href="Products.html" class="back">← Back to Products</a>
+
+<div class="container">
+
+    <div class="left">
+        <img id="img">
+        <div class="thumbs">
+            <img id="thumb1">
+            <img id="thumb2">
+        </div>
+    </div>
+
+    <div class="right">
+        <h1 id="name"></h1>
+        <p class="price" id="price"></p>
+            <span onclick="setRating(1)">⭐</span>
+            <span onclick="setRating(2)">⭐</span>
+            <span onclick="setRating(3)">⭐</span>
+            <span onclick="setRating(4)">⭐</span>
+        <p>Premium quality product with stylish design and best comfort.</p>
+
+        <button class="btn" id="cartBtn">Add to Cart 🛒</button>
+    </div>
+
+</div>
+
+<div class="reviews">
+    <h2>⭐ Customer Reviews</h2>
+    <div id="reviewList"></div>
+
+    <textarea id="reviewText" placeholder="Write your review..."></textarea>
+    <button class="btn" onclick="addReview()">Submit Review</button>
+</div>
+
+<script>
+
+const BASE_URL = "http://localhost:3000";
+
+const params = new URLSearchParams(window.location.search);
+const id = params.get("id");
+
+let currentProduct = null;
+let selectedRating = 4; // ⭐ DEFAULT
+
+
+// 🔥 LOAD PRODUCT
+async function loadProduct() {
+    try {
+
+        const res = await fetch(BASE_URL + "/api/products");
+        const data = await res.json();
+
+        const p = data.find(x => x._id === id);
+
+        if (!p) {
+            document.body.innerHTML = "<h2 style='color:white'>Product not found ❌</h2>";
+            return;
+        }
+
+        currentProduct = p;
+
+        document.getElementById("name").innerText = p.name;
+        document.getElementById("img").src = BASE_URL + p.img;
+        document.getElementById("price").innerText = "₹" + p.price;
+
+        document.getElementById("thumb1").src = BASE_URL + p.img;
+        document.getElementById("thumb2").src = BASE_URL + p.img;
+
+        loadReviews();
+        setupCartButton();
+
+    } catch (err) {
+        console.error(err);
+        document.body.innerHTML = "<h2 style='color:white'>Server Error ❌</h2>";
+    }
+}
+
+
+// 🔐 CART BUTTON
+function setupCartButton() {
+
+    const btn = document.getElementById("cartBtn");
+    const token = localStorage.getItem("token");
+
+    if (!token || token === "null" || token === "undefined") {
+
+        btn.innerText = "Login first";
+        btn.onclick = () => {
+            alert("⚠️ Please login first!");
+            window.location.href = "login.html";
+        };
+
+    } else {
+        btn.innerText = "Add to Cart 🛒";
+        btn.onclick = addToCart;
+    }
+}
+
+
+// 🛒 ADD TO CART
+async function addToCart() {
+
+    const token = localStorage.getItem("token");
+
+    if (!token || token === "null" || token === "undefined") {
+        alert("⚠️ Login first!");
+        window.location.href = "login.html";
+        return;
+    }
+
+    try {
+
+        const res = await fetch(BASE_URL + "/api/cart/add", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + token
+            },
+            body: JSON.stringify({
+                productId: currentProduct._id
+            })
+        });
+
+        const data = await res.json();
+
+        alert(data.message || "✅ Added to cart");
+
+    } catch (err) {
+        console.error(err);
+        alert("Server error ❌");
+    }
+}
+
+
+// ⭐ LOAD REVIEWS
+async function loadReviews() {
+
+    try {
+
+        const res = await fetch(BASE_URL + "/api/reviews/" + id);
+        const data = await res.json();
+
+        let html = "";
+
+        if (!data || data.length === 0) {
+            html = "<p>No reviews yet</p>";
+        } else {
+            data.forEach(r => {
+                html += `
+                <div class="review-box">
+                    ${"⭐".repeat(r.rating || 4)} ${r.text}
+                </div>`;
+            });
+        }
+
+        document.getElementById("reviewList").innerHTML = html;
+
+    } catch (err) {
+        console.error(err);
+    }
+}
+
+
+// ✍️ ADD REVIEW (FIXED)
+async function addReview() {
+
+    const text = document.getElementById("reviewText").value;
+
+    if (!text.trim()) {
+        alert("Write something!");
+        return;
+    }
+
+    try {
+
+        await fetch(BASE_URL + "/api/add-review/" + id, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                text: text,
+                rating: selectedRating   // ⭐ FIXED
+            })
+        });
+
+        document.getElementById("reviewText").value = "";
+
+        // 🔥 FORCE REFRESH
+        setTimeout(loadReviews, 300);
+
+    } catch (err) {
+        console.error(err);
+        alert("Error adding review ❌");
+    }
+}
+
+
+// ⭐ SELECT RATING (NO UI CHANGE)
+function setRating(n) {
+    selectedRating = n;
+    alert("Selected " + n + " ⭐");
+}
+
+
+window.onload = loadProduct;
+
+</script>
+
+</body>
+</html>

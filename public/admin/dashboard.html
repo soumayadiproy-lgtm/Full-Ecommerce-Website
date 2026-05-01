@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Dashboard</title>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            background: linear-gradient(120deg, #141e30, #243b55);
+            color: white;
+        }
+
+        /* 🔥 SIDEBAR */
+        .sidebar {
+            width: 230px;
+            height: 100vh;
+            padding: 25px;
+            background: rgba(255,255,255,0.05);
+            backdrop-filter: blur(20px);
+        }
+
+        .sidebar h2 {
+            margin-bottom: 30px;
+        }
+
+        .sidebar a {
+            display: block;
+            margin: 10px 0;
+            padding: 12px;
+            border-radius: 10px;
+            text-decoration: none;
+            color: white;
+            transition: 0.3s;
+        }
+
+        .sidebar a:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
+        .logout {
+            margin-top: 30px;
+            cursor: pointer;
+            color: #ff4d4d;
+        }
+
+        /* 🔥 MAIN */
+        .main {
+            flex: 1;
+            padding: 40px;
+        }
+
+        h1 {
+            margin-bottom: 30px;
+        }
+
+        /* 🔥 CARDS */
+        .cards {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .card {
+            flex: 1;
+            padding: 25px;
+            border-radius: 15px;
+            background: rgba(255,255,255,0.08);
+            backdrop-filter: blur(25px);
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+            font-size: 18px;
+            text-align: center;
+            transition: 0.3s;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .user-box {
+            font-size: 18px;
+            padding: 25px;
+        }
+    </style>
+</head>
+
+<body>
+
+<!-- 🔥 SIDEBAR -->
+<div class="sidebar">
+    <h2>Admin Panel 👑</h2>
+
+    <a href="/admin/dashboard.html">📊 Dashboard</a>
+    <a href="/admin/add-product.html">➕ Add Product</a>
+    <a href="/admin/manage-products.html">📦 Manage Products</a>
+    <a href="/admin/users.html">👤 Users</a>
+    <a href="/admin/admin-contacts.html">👤 Customer Support</a>
+    <a href="/admin/orders.html">📦 Orders</a>
+
+    <div class="logout" onclick="logout()">🚪 Logout</div>
+</div>
+
+<!-- 🔥 MAIN -->
+<div class="main">
+    <h1>Dashboard</h1>
+
+    <div class="cards">
+        <div class="card" id="productCount">📦 Products: 0</div>
+        <div class="card" id="orderCount">🛒 Orders: 0</div>
+        <div class="card">👤 Users: <span id="userCount">0</span></div>
+    </div>
+</div>
+
+<script>
+const BASE_URL = "http://localhost:3000";
+const token = localStorage.getItem("token");
+
+// 🔐 LOGIN CHECK
+if (!token) {
+    alert("Login first ❌");
+    window.location.href = "/login.html";
+}
+
+// 🔥 LOAD USER COUNT
+async function loadUserCount() {
+    try {
+        const res = await fetch(BASE_URL + "/api/users");
+        const data = await res.json();
+
+        document.getElementById("userCount").innerText = data.length;
+    } catch (err) {
+        console.log(err);
+    }
+}
+
+// 🔥 LOAD PRODUCTS
+async function loadProducts() {
+    try {
+        const res = await fetch(BASE_URL + "/api/products");
+        const data = await res.json();
+
+        document.getElementById("productCount").innerText =
+            "📦 Products: " + data.length;
+    } catch (err) {
+        console.log(err);
+    }
+}
+
+// 🔥 LOAD ORDERS
+async function loadOrders() {
+    try {
+        const res = await fetch(BASE_URL + "/api/orders/all-orders", {
+            headers: {
+                "Authorization": "Bearer " + token
+            }
+        });
+
+        console.log("ORDER STATUS:", res.status);
+
+        // ❌ If not admin / unauthorized
+        if (res.status === 401 || res.status === 403) {
+            document.getElementById("orderCount").innerText =
+                "🛒 Orders: Access Denied ❌";
+            return;
+        }
+
+        const data = await res.json();
+        console.log("ORDER DATA:", data);
+
+        // ❌ If backend didn't return array
+        if (!Array.isArray(data)) {
+            document.getElementById("orderCount").innerText =
+                "🛒 Orders: Error ❌";
+            return;
+        }
+
+        // ✅ SUCCESS
+        document.getElementById("orderCount").innerText =
+            "🛒 Orders: " + data.length;
+
+    } catch (err) {
+        console.log("ORDER ERROR:", err);
+        document.getElementById("orderCount").innerText =
+            "🛒 Orders: Failed ❌";
+    }
+}
+
+// 🔥 INIT
+loadUserCount();
+loadProducts();
+loadOrders();
+
+// 🔥 LOGOUT
+function logout() {
+    localStorage.removeItem("token");
+    window.location.href = "/login.html";
+}
+</script>
+
+</body>
+</html>

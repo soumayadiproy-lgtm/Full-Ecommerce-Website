@@ -1,0 +1,131 @@
+/* 🌐 GLOBAL */
+body {
+  margin: 0;
+  font-family: "Segoe UI", sans-serif;
+  background: linear-gradient(120deg,#f5f7fa,#c3cfe2);
+}
+
+/* 🔝 NAVBAR */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #2874f0;
+  color: white;
+  padding: 15px 20px;
+}
+
+.navbar input {
+  width: 40%;
+  padding: 8px;
+  border-radius: 20px;
+  border: none;
+}
+
+.navbar nav a {
+  margin-left: 15px;
+  color: white;
+  text-decoration: none;
+}
+
+.navbar .active {
+  font-weight: bold;
+}
+
+/* 🎯 HERO */
+.hero {
+  background: url('https://images.unsplash.com/photo-1542838132-92c53300491e') no-repeat center/cover;
+  height: 280px;
+  display: flex;
+  align-items: center;
+  padding-left: 50px;
+  color: white;
+  border-radius: 15px;
+  margin: 20px;
+}
+
+.hero h1 {
+  font-size: 40px;
+}
+
+/* 🧭 CATEGORY */
+.category-cards {
+  display: flex;
+  justify-content: space-around;
+  margin: 20px;
+}
+
+.cat {
+  background: white;
+  padding: 15px 25px;
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.cat:hover {
+  transform: scale(1.1);
+  background: #2874f0;
+  color: white;
+}
+
+/* 🛍️ PRODUCTS */
+.products {
+  display: grid;
+  grid-template-columns: repeat(auto-fill,minmax(220px,1fr));
+  gap: 20px;
+  padding: 20px;
+}
+
+/* 📦 PRODUCT CARD */
+.product {
+  background: white;
+  border-radius: 15px;
+  overflow: hidden;
+  transition: 0.3s;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+  position: relative;
+}
+
+.product:hover {
+  transform: translateY(-10px);
+}
+
+.product img {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+}
+
+.product h3 {
+  margin: 10px;
+}
+
+.product p {
+  margin: 0 10px;
+  color: green;
+  font-weight: bold;
+}
+
+.product button {
+  margin: 10px;
+  width: calc(100% - 20px);
+  background: linear-gradient(90deg,#ff9f00,#ff6f00);
+  border: none;
+  padding: 10px;
+  color: white;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+/* 🔥 BADGE */
+.badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: #e53935;
+  color: white;
+  padding: 5px;
+  border-radius: 5px;
+}

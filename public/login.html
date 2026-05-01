@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Login - Soumyadip Store</title>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: linear-gradient(-45deg, #ff6a00, #ff4d4d, #667eea, #764ba2);
+            background-size: 400% 400%;
+            animation: bgMove 12s ease infinite;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        @keyframes bgMove {
+            0% {background-position: 0% 50%;}
+            50% {background-position: 100% 50%;}
+            100% {background-position: 0% 50%;}
+        }
+
+        .box {
+            width: 320px;
+            background: #e6e6e6;
+            padding: 30px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+        }
+
+        .logo span {
+            font-size: 26px;
+            font-weight: bold;
+            color: red;
+        }
+
+        .brand {
+            font-size: 18px;
+            color: #ff4d4d;
+        }
+
+        input {
+            width: 90%;
+            padding: 10px;
+            margin: 8px 0;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+
+        button {
+            width: 95%;
+            padding: 10px;
+            background: #ff4d4d;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            margin-top: 10px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #e60000;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="box">
+
+    <div class="logo">
+        <span>YS</span>
+        <div class="brand">soumyadip STORE</div>
+    </div>
+
+    <h3>Login</h3>
+
+    <input type="text" id="userInput" placeholder="Enter Email or Phone">
+
+    <input type="password" id="password" placeholder="Enter Password" style="display:none;">
+    <input type="text" id="otp" placeholder="Enter OTP" style="display:none;">
+
+    <button id="sendOtpBtn" onclick="sendOTP()" style="display:none;">Send OTP</button>
+
+    <button onclick="login()">Login</button>
+
+    <p>Don't have account? <a href="register.html">Register</a></p>
+
+</div>
+
+<script>
+const input = document.getElementById("userInput");
+const passwordInput = document.getElementById("password");
+const otpInput = document.getElementById("otp");
+const sendOtpBtn = document.getElementById("sendOtpBtn");
+
+const BASE_URL = "http://localhost:3000"; // backend
+
+// 🔍 Detect email or phone
+input.addEventListener("input", () => {
+    const value = input.value;
+
+    if (value.includes("@")) {
+        passwordInput.style.display = "block";
+        otpInput.style.display = "none";
+        sendOtpBtn.style.display = "none";
+    } 
+    else if (value.length >= 10) {
+        passwordInput.style.display = "none";
+        otpInput.style.display = "block";
+        sendOtpBtn.style.display = "block";
+    } 
+    else {
+        passwordInput.style.display = "none";
+        otpInput.style.display = "none";
+        sendOtpBtn.style.display = "none";
+    }
+});
+
+// 🔥 SEND OTP (FIXED ROUTE)
+async function sendOTP() {
+    try {
+        const res = await fetch(BASE_URL + "/api/users/send-otp", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ phone: input.value })
+        });
+
+        const data = await res.json();
+        alert(data.msg || data.error);
+
+    } catch (err) {
+        alert("❌ Backend not running");
+    }
+}
+
+// 🔥 LOGIN (FIXED ROUTES)
+async function login() {
+    const value = input.value;
+
+    try {
+        if (value.includes("@")) {
+            // EMAIL LOGIN
+            const res = await fetch(BASE_URL + "/api/users/login", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    email: value,
+                    password: passwordInput.value
+                })
+            });
+
+            const data = await res.json();
+            alert(data.msg || data.error);
+
+            if (res.ok) {
+                localStorage.setItem("user", JSON.stringify(data.user));
+                localStorage.setItem("token", data.token);
+                window.location.href = "Products.html";
+            }
+
+        } else {
+            // OTP LOGIN
+            const res = await fetch(BASE_URL + "/api/users/verify-otp", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    phone: value,
+                    otp: otpInput.value
+                })
+            });
+
+            const data = await res.json();
+            alert(data.msg || data.error);
+
+            if (res.ok) {
+                localStorage.setItem("user", JSON.stringify(data.user));
+                localStorage.setItem("token", data.token);
+                window.location.href = "Products.html";
+            }
+        }
+
+    } catch (err) {
+        alert("❌ Network Error (Start backend)");
+    }
+}
+</script>
+
+</body>
+</html>

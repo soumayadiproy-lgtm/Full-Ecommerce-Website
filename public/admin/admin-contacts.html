@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<title>Admin - Queries</title>
+
+<style>
+body {
+    margin: 0;
+    font-family: 'Segoe UI', sans-serif;
+    background: linear-gradient(135deg, #1e2f4d, #243b55);
+    color: white;
+}
+
+/* HEADER */
+.header {
+    padding: 25px;
+    font-size: 30px;
+    font-weight: bold;
+}
+
+/* FILTER BAR */
+.filters {
+    display: flex;
+    gap: 10px;
+    padding: 0 25px 15px;
+}
+
+.filter-btn {
+    padding: 8px 16px;
+    border-radius: 20px;
+    border: none;
+    background: rgba(255,255,255,0.1);
+    color: white;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.filter-btn.active {
+    background: #3b82f6;
+}
+
+.filter-btn:hover {
+    background: rgba(255,255,255,0.2);
+}
+
+/* CONTAINER */
+.container {
+    padding: 20px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 20px;
+}
+
+/* CARD */
+.card {
+    background: rgba(255,255,255,0.08);
+    padding: 20px;
+    border-radius: 15px;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    transition: 0.3s;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+}
+
+/* TEXT */
+.card h3 {
+    margin: 0;
+    font-size: 18px;
+}
+
+.card p {
+    margin: 6px 0;
+    opacity: 0.8;
+}
+
+/* STATUS */
+.status {
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    display: inline-block;
+    margin-bottom: 10px;
+}
+
+.pending {
+    background: rgba(255,193,7,0.2);
+    color: #ffc107;
+}
+
+.resolved {
+    background: rgba(40,167,69,0.2);
+    color: #00ff95;
+}
+
+/* REPLY TEXT */
+.reply-text {
+    margin-top: 10px;
+    padding: 8px;
+    border-radius: 10px;
+    background: rgba(0,255,200,0.1);
+    color: #00ffcc;
+}
+
+/* TEXTAREA */
+textarea {
+    width: 100%;
+    margin-top: 10px;
+    padding: 10px;
+    border-radius: 10px;
+    border: none;
+    background: rgba(255,255,255,0.1);
+    color: white;
+}
+
+/* BUTTONS */
+button {
+    margin-top: 8px;
+    padding: 10px;
+    border: none;
+    border-radius: 10px;
+    width: 100%;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+/* COLORS */
+.reply-btn {
+    background: #28a745;
+    color: white;
+}
+
+.resolve-btn {
+    background: #ffc107;
+    color: black;
+}
+
+.delete-btn {
+    background: #dc3545;
+    color: white;
+}
+
+button:hover {
+    opacity: 0.85;
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="header">
+    📩 Customer Queries
+</div>
+
+<!-- FILTER BAR UNDER HEADER -->
+<div class="filters">
+    <button class="filter-btn active" onclick="setFilter('all', this)">All</button>
+    <button class="filter-btn" onclick="setFilter('Pending', this)">Pending</button>
+    <button class="filter-btn" onclick="setFilter('Resolved', this)">Resolved</button>
+</div>
+
+<div class="container" id="data"></div>
+
+<script>
+const BASE_URL = "http://localhost:3000";
+const token = localStorage.getItem("token");
+
+// 🔐 CHECK ADMIN ACCESS
+function parseJwt(token) {
+    try {
+        return JSON.parse(atob(token.split('.')[1]));
+    } catch {
+        return null;
+    }
+}
+
+const user = parseJwt(token);
+
+if (!token || user.role !== "admin") {
+    alert("Access denied ❌ Admin only");
+    window.location.href = "/login.html";
+}
+
+// 🔎 FILTER
+let currentFilter = "all";
+
+function setFilter(type, btn) {
+    currentFilter = type;
+
+    document.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+
+    loadMessages();
+}
+
+// 📩 LOAD MESSAGES
+async function loadMessages() {
+    const container = document.getElementById("data");
+
+    try {
+        const res = await fetch(BASE_URL + "/contact/all", {
+            headers: {
+                "Authorization": "Bearer " + token
+            }
+        });
+
+        const data = await res.json();
+
+        if (!data.length) {
+            container.innerHTML = "<h2>No queries 😢</h2>";
+            return;
+        }
+
+        let html = "";
+
+        data
+        .filter(msg => {
+            if (currentFilter === "all") return true;
+            return msg.status === currentFilter;
+        })
+        .forEach(msg => {
+
+            html += `
+            <div class="card">
+
+                <div class="status ${msg.status === "Resolved" ? "resolved" : "pending"}">
+                    ${msg.status || "Pending"}
+                </div>
+
+                <h3>${msg.name}</h3>
+                <p>${msg.email}</p>
+                <p>${msg.message}</p>
+
+                ${msg.reply ? `<div class="reply-text">💬 ${msg.reply}</div>` : ""}
+
+                <textarea id="reply-${msg._id}" placeholder="Write reply..."></textarea>
+
+                <button class="reply-btn" onclick="sendReply('${msg._id}')">
+                    💬 Reply
+                </button>
+
+                <button class="resolve-btn" onclick="markResolved('${msg._id}')">
+                    ✅ Resolve
+                </button>
+
+                <button class="delete-btn" onclick="deleteMsg('${msg._id}')">
+                    🗑 Delete
+                </button>
+
+            </div>
+            `;
+        });
+
+        container.innerHTML = html;
+
+    } catch (err) {
+        console.log(err);
+        document.getElementById("data").innerHTML = "<h2>Error ❌</h2>";
+    }
+}
+
+// 💬 REPLY
+async function sendReply(id) {
+    const reply = document.getElementById("reply-" + id).value;
+
+    if (!reply) return alert("Write reply");
+
+    await fetch(BASE_URL + "/contact/reply", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + token
+        },
+        body: JSON.stringify({ id, reply })
+    });
+
+    loadMessages();
+}
+
+// 🗑 DELETE
+async function deleteMsg(id) {
+    await fetch(BASE_URL + "/contact/delete/" + id, {
+        method: "DELETE",
+        headers: {
+            "Authorization": "Bearer " + token
+        }
+    });
+
+    loadMessages();
+}
+
+// ✅ RESOLVE
+async function markResolved(id) {
+    await fetch(BASE_URL + "/contact/resolve/" + id, {
+        method: "PUT",
+        headers: {
+            "Authorization": "Bearer " + token
+        }
+    });
+
+    loadMessages();
+}
+
+// 🚀 INIT
+loadMessages();
+</script>
+</body>
+</html>

@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Orders</title>
+
+    <!-- 🔥 PREMIUM STYLE -->
+    <style>
+    body {
+        margin: 0;
+        font-family: 'Inter', sans-serif;
+        background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+        color: white;
+    }
+
+    /* NAVBAR */
+    .navbar {
+        background: rgba(255,255,255,0.08);
+        backdrop-filter: blur(20px);
+        padding: 15px;
+    }
+
+    /* LAYOUT */
+    .container {
+        display: flex;
+    }
+
+    /* SIDEBAR */
+    .sidebar {
+        width: 230px;
+        height: 100vh;
+        padding: 25px;
+        background: rgba(255,255,255,0.05);
+        backdrop-filter: blur(20px);
+    }
+
+    .sidebar a {
+        display: block;
+        padding: 12px;
+        margin: 10px 0;
+        border-radius: 10px;
+        text-decoration: none;
+        color: white;
+        transition: 0.3s;
+    }
+
+    .sidebar a:hover {
+        background: rgba(255,255,255,0.1);
+    }
+
+    /* MAIN */
+    .main {
+        flex: 1;
+        padding: 30px;
+    }
+
+    /* ORDER CARD */
+    .product {
+        background: rgba(255,255,255,0.08);
+        backdrop-filter: blur(20px);
+        padding: 20px;
+        margin: 15px 0;
+        border-radius: 15px;
+        box-shadow: 0 0 25px rgba(0,0,0,0.4);
+        transition: 0.3s;
+    }
+
+    .product:hover {
+        transform: translateY(-5px);
+    }
+
+    /* STATUS */
+    .status {
+        margin-top: 8px;
+        font-weight: bold;
+    }
+
+    /* BUTTONS */
+    .actions {
+        margin-top: 12px;
+    }
+
+    button, select {
+        padding: 6px 12px;
+        margin-right: 8px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        color: white;
+        font-weight: 500;
+    }
+
+    select {
+        background: rgba(255,255,255,0.2);
+        color: white;
+    }
+
+    .delete {
+        background: #ff4d4d;
+    }
+    </style>
+
+</head>
+<body>
+<div class="container">
+
+    <div class="sidebar">
+    <a href="/admin/dashboard.html">📊 Dashboard</a>
+    <a href="/admin/add-product.html">➕ Add Product</a>
+    <a href="/admin/manage-products.html">📦 Manage Products</a>
+    <a href="/admin/users.html">👤 Users</a>
+    <a href="/admin/admin-contacts.html">👤 Customer Support</a>
+    <a href="/admin/orders.html">📦 Orders</a>
+    </div>
+
+    <div class="main">
+        <h1>All Orders 📦</h1>
+        <div id="orders"></div>
+    </div>
+
+</div>
+
+<script src="/admin/admin.js"></script>
+
+<script>
+
+const BASE_URL = "http://localhost:3000";
+const token = localStorage.getItem("token");
+
+if (!token) {
+    alert("Login required ❌");
+    window.location.href = "/login.html";
+}
+
+// 🔥 LOAD ORDERS
+async function loadOrders() {
+    try {
+        const res = await fetch(BASE_URL + "/api/orders/all-orders", {
+            headers: {
+                // ✅ FIX: use same header as backend
+                "token": "Bearer " + token
+            }
+        });
+
+        console.log("STATUS:", res.status);
+
+        const data = await res.json();
+        console.log("DATA:", data);
+
+        const box = document.getElementById("orders");
+
+        // ✅ CLEAN CHECK
+        if (!Array.isArray(data)) {
+            box.innerHTML = "Not authorized ❌ (Admin only)";
+            return;
+        }
+
+        if (data.length === 0) {
+            box.innerHTML = "No orders found ❌";
+            return;
+        }
+
+        box.innerHTML = data.map(o => {
+
+            const itemsHTML = (o.items && o.items.length > 0)
+                ? o.items.map(item => `
+                    <div style="display:flex;align-items:center;margin:8px 0;
+                    background:rgba(255,255,255,0.05);padding:8px;border-radius:8px;">
+                        <img src="${BASE_URL}${item.img || ''}" 
+                             style="width:50px;height:50px;border-radius:8px;margin-right:10px;">
+
+                        <div>
+                            <b>${item.name || "No name"}</b><br>
+                            ₹${item.price || 0} × ${item.quantity || 1}
+                        </div>
+                    </div>
+                `).join("")
+                : "<p>No items</p>";
+
+            return `
+                <div class="product">
+
+                    <h3>📦 Order</h3>
+
+                    <b>Customer:</b> ${o.customer?.name || "N/A"} <br>
+                    <b>Phone:</b> ${o.customer?.phone || "N/A"} <br>
+                    <b>Total:</b> ₹${o.total || 0} <br>
+
+                    <b>Items:</b>
+                    ${itemsHTML}
+
+                    <div class="status">
+                        Status: <span style="color:#00ffcc">${o.status || "Unknown"}</span>
+                    </div>
+
+                    <div class="actions">
+                        <select onchange="updateStatus('${o._id}', this.value)">
+                            <option ${o.status==="Ordered"?"selected":""}>Ordered</option>
+                            <option ${o.status==="Shipped"?"selected":""}>Shipped</option>
+                            <option ${o.status==="Out for Delivery"?"selected":""}>Out for Delivery</option>
+                            <option ${o.status==="Delivered"?"selected":""}>Delivered</option>
+                        </select>
+
+                        <button class="delete" onclick="deleteOrder('${o._id}')">
+                            Delete ❌
+                        </button>
+                    </div>
+
+                </div>
+            `;
+        }).join("");
+
+    } catch (err) {
+        console.log(err);
+        document.getElementById("orders").innerHTML = "Error loading orders ❌";
+    }
+}
+
+loadOrders();
+
+
+// 🔥 UPDATE STATUS
+async function updateStatus(id, status) {
+
+    await fetch(BASE_URL + "/api/orders/update-status/" + id, {
+        method: "PUT",
+        headers: {
+            "Content-Type": "application/json",
+            // ✅ FIX
+            "token": "Bearer " + token
+        },
+        body: JSON.stringify({ status })
+    });
+
+    alert("Status Updated ✅");
+    loadOrders();
+}
+
+
+// 🔥 DELETE ORDER
+async function deleteOrder(id) {
+
+    if (!confirm("Delete this order?")) return;
+
+    await fetch(BASE_URL + "/api/orders/admin-delete/" + id, {
+        method: "DELETE",
+        headers: {
+            // ✅ FIX
+            "token": "Bearer " + token
+        }
+    });
+
+    alert("Order deleted ❌");
+    loadOrders();
+}
+
+</script>
+
+</body>
+</html>

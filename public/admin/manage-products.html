@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Manage Products</title>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            background: linear-gradient(135deg, #141e30, #243b55);
+            color: white;
+        }
+
+        .sidebar {
+            width: 230px;
+            height: 100vh;
+            padding: 25px;
+            background: rgba(255,255,255,0.05);
+            backdrop-filter: blur(20px);
+        }
+
+        .menu {
+            padding: 12px;
+            margin: 10px 0;
+            cursor: pointer;
+        }
+
+        .main {
+            flex: 1;
+            padding: 30px;
+        }
+
+        .table-box {
+            background: rgba(255,255,255,0.08);
+            padding: 20px;
+            border-radius: 15px;
+        }
+
+        table {
+            width: 100%;
+        }
+
+        td, th {
+            padding: 10px;
+        }
+
+        img {
+            width: 50px;
+            border-radius: 8px;
+        }
+
+        button {
+            margin: 2px;
+            padding: 6px 10px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .delete { background: red; color: white; }
+        .edit { background: orange; color: white; }
+
+        .modal {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7);
+            display: none;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: rgba(255,255,255,0.1);
+            padding: 25px;
+            border-radius: 15px;
+        }
+
+        input {
+            width: 100%;
+            margin: 8px 0;
+            padding: 10px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="sidebar">
+    <h2>Admin 👑</h2>
+    <div class="menu" onclick="goDashboard()">Dashboard</div>
+    <div class="menu" onclick="goAddProduct()">Add Product</div>
+    <div class="menu">Manage Products</div>
+    <div class="menu" onclick="logout()">Logout</div>
+</div>
+
+<div class="main">
+    <h1>Manage Products</h1>
+
+    <div class="table-box">
+        <table>
+            <thead>
+                <tr>
+                    <th>Img</th>
+                    <th>Name</th>
+                    <th>Price</th>
+                    <th>Type</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+
+            <tbody id="table"></tbody>
+        </table>
+    </div>
+</div>
+
+<!-- 🔥 MODAL -->
+<div class="modal" id="modal">
+    <div class="modal-content">
+        <h3>Edit Product</h3>
+        <input id="editName">
+        <input id="editPrice">
+        <input id="editImg">
+        <input id="editType">
+        <button onclick="updateProduct()">Update</button>
+        <button onclick="closeModal()">Cancel</button>
+    </div>
+</div>
+
+
+<script>
+
+const BASE_URL = "http://localhost:3000";
+const token = localStorage.getItem("token");
+
+let currentId = "";
+
+// 🔐 PROTECT PAGE
+if (!token) {
+    alert("Login required ❌");
+    window.location.href = "/login.html";
+}
+
+// 🔥 LOAD PRODUCTS (FIXED)
+async function loadProducts() {
+    try {
+        const res = await fetch(BASE_URL + "/api/products");
+        const data = await res.json();
+
+        const table = document.getElementById("table");
+        table.innerHTML = ""; // 🔥 CLEAR OLD DATA
+
+        if (!data || data.length === 0) {
+            table.innerHTML = "<tr><td colspan='5'>No products found ❌</td></tr>";
+            return;
+        }
+
+        data.forEach(p => {
+            table.innerHTML += `
+                <tr>
+                    <td>
+                        <img src="${p.img.startsWith('http') ? p.img : BASE_URL + p.img}">
+                    </td>
+                    <td>${p.name}</td>
+                    <td>${p.price}</td>
+                    <td>${p.type}</td>
+                    <td>
+                        <button class="edit" onclick='openEdit(${JSON.stringify(p)})'>Edit</button>
+                        <button class="delete" onclick="deleteProduct('${p._id}')">Delete</button>
+                    </td>
+                </tr>
+            `;
+        });
+
+    } catch (err) {
+        console.log(err);
+        document.getElementById("table").innerHTML =
+            "<tr><td colspan='5'>Error loading products ❌</td></tr>";
+    }
+}
+
+loadProducts();
+
+
+// 🔥 DELETE
+function deleteProduct(id) {
+    fetch(BASE_URL + "/api/products/delete-product/" + id, {
+        method: "DELETE",
+        headers: { "Authorization": "Bearer " + token }
+    })
+    .then(() => loadProducts()); // 🔥 NO RELOAD
+}
+
+
+// 🔥 OPEN EDIT
+function openEdit(p) {
+    currentId = p._id;
+
+    editName.value = p.name;
+    editPrice.value = p.price;
+    editImg.value = p.img;
+    editType.value = p.type;
+
+    document.getElementById("modal").style.display = "flex";
+}
+
+
+// 🔥 UPDATE
+function updateProduct() {
+    fetch(BASE_URL + "/api/products/update-product/" + currentId, {
+        method: "PUT",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + token
+        },
+        body: JSON.stringify({
+            name: editName.value,
+            price: editPrice.value,
+            img: editImg.value,
+            type: editType.value
+        })
+    })
+    .then(() => {
+        closeModal();
+        loadProducts(); // 🔥 LIVE UPDATE (NO RELOAD)
+    });
+}
+
+
+// 🔥 CLOSE
+function closeModal() {
+    document.getElementById("modal").style.display = "none";
+}
+
+
+// 🔥 NAV
+function goDashboard(){ window.location.href="/admin/dashboard.html"; }
+function goAddProduct(){ window.location.href="/admin/add-product.html"; }
+
+function logout(){
+    localStorage.removeItem("token");
+    window.location.href="/login.html";
+}
+
+</script>
+</body>
+</html>

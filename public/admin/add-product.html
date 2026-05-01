@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Add Product - Admin</title>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #141e30, #243b55);
+            display: flex;
+            color: white;
+        }
+        .sidebar {
+            width: 230px;
+            height: 100vh;
+            padding: 25px;
+            background: rgba(255,255,255,0.05);
+            backdrop-filter: blur(20px);
+        }
+
+        .menu {
+            padding: 12px;
+            margin: 10px 0;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+
+        .menu:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
+        .main {
+            flex: 1;
+            padding: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .card {
+            width: 420px;
+            padding: 35px;
+            border-radius: 20px;
+            background: rgba(255,255,255,0.08);
+            backdrop-filter: blur(25px);
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            border-radius: 10px;
+            border: none;
+            background: rgba(255,255,255,0.2);
+            color: white;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            border-radius: 10px;
+            border: none;
+            background: linear-gradient(45deg, #00ffe7, #0072ff);
+            color: white;
+            cursor: pointer;
+        }
+
+        .back {
+            margin-top: 10px;
+            text-align: center;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="sidebar">
+    <h2>Admin 👑</h2>
+
+    <div class="menu" onclick="goDashboard()">📊 Dashboard</div>
+    <div class="menu">➕ Add Product</div>
+    <div class="menu" onclick="logout()">🚪 Logout</div>
+</div>
+
+<div class="main">
+    <div class="card">
+        <h2>➕ Add Product</h2>
+
+        <div class="input-group">
+            <input id="name" placeholder="Product Name">
+        </div>
+
+        <div class="input-group">
+            <input id="price" placeholder="Price">
+        </div>
+
+        <div class="input-group">
+            <input id="img" placeholder="Image URL">
+        </div>
+
+        <div class="input-group">
+            <input id="type" placeholder="Category">
+        </div>
+
+        <button onclick="addProduct()">Add Product 🚀</button>
+
+        <div class="back" onclick="goDashboard()">⬅ Back</div>
+    </div>
+</div>
+
+<script>
+
+const BASE_URL = "http://localhost:3000";
+const token = localStorage.getItem("token");
+
+// 🔒 PROTECT PAGE
+if (!token) {
+    alert("Login first ❌");
+    window.location.href = "/login.html";
+}
+
+// 🔥 ADD PRODUCT
+function addProduct() {
+
+    const data = {
+        name: document.getElementById("name").value,
+        price: document.getElementById("price").value,
+        img: document.getElementById("img").value,
+        type: document.getElementById("type").value
+    };
+
+    // ✅ VALIDATION
+    if (!data.name || !data.price || !data.img || !data.type) {
+        alert("All fields required ❌");
+        return;
+    }
+
+    fetch(BASE_URL + "/api/products/add-product", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + token
+        },
+        body: JSON.stringify(data)
+    })
+    .then(res => res.json())
+    .then(result => {
+
+        alert(result.msg || "Added ✅");
+
+        // 🔥 CLEAR FORM
+        document.getElementById("name").value = "";
+        document.getElementById("price").value = "";
+        document.getElementById("img").value = "";
+        document.getElementById("type").value = "";
+
+    })
+    .catch(err => {
+        console.log(err);
+        alert("Error ❌");
+    });
+}
+
+
+// 🔥 NAV FIX
+function goDashboard(){
+    window.location.href = "/admin/dashboard.html";
+}
+
+function logout(){
+    localStorage.removeItem("token");
+    window.location.href = "/login.html";
+}
+
+</script>
+
+</body>
+</html>
