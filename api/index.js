@@ -1,5 +1,6 @@
 require("dotenv").config();
 const express = require("express");
+const path = require("path");
 const connectDB = require("../config/db");
 const cors = require("cors");
 
@@ -17,7 +18,15 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// ✅ Test Route
+// ✅ Serve Static Files from public directory
+app.use(express.static(path.join(__dirname, "../public")));
+
+// ✅ Explicit GET / handler
+app.get("/", (req, res) => {
+    res.sendFile(path.join(__dirname, "../public/index.html"));
+});
+
+// ✅ Health Check Route
 app.get(["/api/test", "/test"], (req, res) => {
     res.json({
         status: "online",
@@ -53,6 +62,24 @@ app.use(["/api/payment", "/payment"], paymentRoutes);
 // ✅ Direct root fallbacks for requests stripped of prefixes
 app.use("/api", userRoutes);
 app.use("/api", productRoutes);
+
+// ✅ Catch-all HTML page handler
+app.get("*", (req, res, next) => {
+    if (req.path.startsWith("/api/")) return next();
+
+    const requestPath = req.path.toLowerCase();
+    let fileName = requestPath.replace(/^\//, "");
+    if (!fileName) fileName = "index.html";
+    if (!fileName.endsWith(".html") && !fileName.includes(".")) fileName += ".html";
+
+    const targetFile = path.join(__dirname, "../public", fileName);
+
+    res.sendFile(targetFile, (err) => {
+        if (err) {
+            res.sendFile(path.join(__dirname, "../public/index.html"));
+        }
+    });
+});
 
 // ✅ Global Error Handler
 app.use((err, req, res, next) => {

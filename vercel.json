@@ -1,36 +1,13 @@
 {
   "version": 2,
-  "routes": [
-    { "src": "/api/(.*)", "dest": "/api/index.js" },
-    { "src": "/api", "dest": "/api/index.js" },
-    { "src": "/", "dest": "/public/index.html" },
-    { "src": "/index.html", "dest": "/public/index.html" },
-    { "src": "/products", "dest": "/public/products.html" },
-    { "src": "/products.html", "dest": "/public/products.html" },
-    { "src": "/cart", "dest": "/public/cart.html" },
-    { "src": "/cart.html", "dest": "/public/cart.html" },
-    { "src": "/about", "dest": "/public/about.html" },
-    { "src": "/about.html", "dest": "/public/about.html" },
-    { "src": "/contact", "dest": "/public/contact.html" },
-    { "src": "/contact.html", "dest": "/public/contact.html" },
-    { "src": "/login", "dest": "/public/login.html" },
-    { "src": "/login.html", "dest": "/public/login.html" },
-    { "src": "/register", "dest": "/public/register.html" },
-    { "src": "/register.html", "dest": "/public/register.html" },
-    { "src": "/account", "dest": "/public/account.html" },
-    { "src": "/account.html", "dest": "/public/account.html" },
-    { "src": "/checkout", "dest": "/public/checkout.html" },
-    { "src": "/checkout.html", "dest": "/public/checkout.html" },
-    { "src": "/orders", "dest": "/public/orders.html" },
-    { "src": "/orders.html", "dest": "/public/orders.html" },
-    { "src": "/grocery", "dest": "/public/grocery.html" },
-    { "src": "/grocery.html", "dest": "/public/grocery.html" },
-    { "src": "/forgot", "dest": "/public/forgot.html" },
-    { "src": "/forgot.html", "dest": "/public/forgot.html" },
-    { "src": "/menu", "dest": "/public/menu.html" },
-    { "src": "/menu.html", "dest": "/public/menu.html" },
-    { "src": "/logout", "dest": "/public/logout.html" },
-    { "src": "/logout.html", "dest": "/public/logout.html" },
-    { "src": "/(.*)", "dest": "/public/$1" }
+  "functions": {
+    "api/index.js": {
+      "includeFiles": "public/**"
+    }
+  },
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "/api/index.js" },
+    { "source": "/api", "destination": "/api/index.js" },
+    { "source": "/(.*)", "destination": "/api/index.js" }
   ]
 }
