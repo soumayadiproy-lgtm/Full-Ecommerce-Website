@@ -1,6 +1,5 @@
 require("dotenv").config();
 const express = require("express");
-const path = require("path");
 const connectDB = require("../config/db");
 const cors = require("cors");
 
@@ -18,15 +17,7 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// ✅ Serve Static Frontend Files from public directory
-app.use(express.static(path.join(__dirname, "../public")));
-
-// ✅ Serve Root index.html
-app.get("/", (req, res) => {
-    res.sendFile(path.join(__dirname, "../public/index.html"));
-});
-
-// ✅ Health Check Route
+// ✅ Test Route
 app.get(["/api/test", "/test"], (req, res) => {
     res.json({
         status: "online",
@@ -38,7 +29,7 @@ app.get(["/api/test", "/test"], (req, res) => {
 // ✅ Public Products Route (Works with DB or fallback data)
 app.use(["/api/products", "/products"], productRoutes);
 
-// ✅ DB Middleware (Awaited for Serverless write/auth operations)
+// ✅ DB Middleware for authenticated/write operations
 app.use(async (req, res, next) => {
     try {
         await connectDB();
@@ -62,22 +53,6 @@ app.use(["/api/payment", "/payment"], paymentRoutes);
 // ✅ Direct root fallbacks for requests stripped of prefixes
 app.use("/api", userRoutes);
 app.use("/api", productRoutes);
-
-// ✅ Fallback HTML handler for routes without .html extension (e.g., /contact -> public/contact.html)
-app.get("*", (req, res, next) => {
-    if (req.path.startsWith("/api/")) return next();
-    
-    // Clean URL resolution
-    const cleanPath = req.path.toLowerCase().replace(/\/$/, "");
-    const possibleHtmlFile = path.join(__dirname, "../public", cleanPath + ".html");
-    
-    res.sendFile(possibleHtmlFile, (err) => {
-        if (err) {
-            // Default to index.html for SPA/frontend navigation
-            res.sendFile(path.join(__dirname, "../public/index.html"));
-        }
-    });
-});
 
 // ✅ Global Error Handler
 app.use((err, req, res, next) => {
