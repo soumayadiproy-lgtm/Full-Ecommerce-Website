@@ -25,7 +25,10 @@ app.get(["/api/test", "/test"], (req, res) => {
     });
 });
 
-// ✅ DB Middleware (Awaited for Serverless)
+// ✅ Public Products Route (Works with DB or fallback data)
+app.use(["/api/products", "/products"], productRoutes);
+
+// ✅ DB Middleware (Awaited for Serverless write/auth operations)
 app.use(async (req, res, next) => {
     try {
         await connectDB();
@@ -39,8 +42,7 @@ app.use(async (req, res, next) => {
     }
 });
 
-// ✅ Routes - Support both /api/... and root relative routes
-app.use(["/api/products", "/products"], productRoutes);
+// ✅ Auth & Write Routes
 app.use(["/api/orders", "/orders"], orderRoutes);
 app.use(["/api/users", "/users"], userRoutes);
 app.use(["/api/cart", "/cart"], cartRoutes);
