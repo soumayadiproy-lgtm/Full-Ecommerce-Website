@@ -19,7 +19,9 @@ app.use(express.static("public"));
 app.use(express.static("images"));
 
 // ✅ DB
-connectDB();
+connectDB().catch(err => {
+    console.error("⚠️ Server started but MongoDB connection failed. Retries will occur on requests.");
+});
 
 // ✅ ROUTES (🔥 FIXED)
 app.use("/api/products", productRoutes);

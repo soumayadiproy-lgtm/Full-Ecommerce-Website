@@ -17,7 +17,9 @@ app.use(express.static("public"));
 app.use(express.static("images"));
 
 // ✅ Connect MongoDB
-connectDB();
+connectDB().catch(err => {
+    console.error("⚠️ Initial MongoDB connection failed. Will retry on requests.");
+});
 
 // ✅ Routes
 app.use("/api", productRoutes);

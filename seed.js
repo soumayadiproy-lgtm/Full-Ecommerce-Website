@@ -1,7 +1,7 @@
+require("dotenv").config();
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
-
-const uri = "mongodb+srv://rsoumyadip651_db_user:zEb1TmxRoRFStIyG@cluster0.jgikzuy.mongodb.net/ecommerce?retryWrites=true&w=majority";
+const connectDB = require("./config/db");
 
 const productSchema = new mongoose.Schema({
     name: String,
@@ -126,9 +126,8 @@ const sampleProducts = [
 
 async function seed() {
     try {
-        console.log("Connecting to MongoDB Atlas...");
-        await mongoose.connect(uri, { serverSelectionTimeoutMS: 8000 });
-        console.log("Connected to MongoDB Atlas ✅");
+        console.log("Connecting to MongoDB...");
+        await connectDB();
 
         // Clear existing products and re-insert
         await Product.deleteMany({});

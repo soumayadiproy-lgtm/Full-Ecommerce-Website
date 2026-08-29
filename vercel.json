@@ -1,9 +1,17 @@
 {
+  "version": 2,
   "rewrites": [
     { "source": "/Products.html", "destination": "/products.html" },
     { "source": "/Cart.html", "destination": "/cart.html" },
     { "source": "/About.html", "destination": "/about.html" },
     { "source": "/Contact.html", "destination": "/contact.html" },
+    { "source": "/Login.html", "destination": "/login.html" },
+    { "source": "/Register.html", "destination": "/register.html" },
+    { "source": "/Account.html", "destination": "/account.html" },
+    { "source": "/Checkout.html", "destination": "/checkout.html" },
+    { "source": "/Orders.html", "destination": "/orders.html" },
+    { "source": "/Grocery.html", "destination": "/grocery.html" },
+    { "source": "/Forgot.html", "destination": "/forgot.html" },
     { "source": "/api", "destination": "/api/index.js" },
     { "source": "/api/(.*)", "destination": "/api/index.js" }
   ]
