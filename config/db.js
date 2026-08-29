@@ -13,6 +13,11 @@ const connectDB = async () => {
         return cached.conn;
     }
 
+    if (mongoose.connection.readyState !== 1) {
+        cached.conn = null;
+        cached.promise = null;
+    }
+
     const primaryUri = process.env.MONGODB_URI || DEFAULT_URI;
 
     if (!cached.promise) {

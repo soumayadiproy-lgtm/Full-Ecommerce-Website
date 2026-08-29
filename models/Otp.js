@@ -3,8 +3,7 @@ const mongoose = require("mongoose");
 const otpSchema = new mongoose.Schema({
     key: {
         type: String,
-        required: true,
-        unique: true
+        required: true
     },
     otp: {
         type: Number,
@@ -21,5 +20,7 @@ const otpSchema = new mongoose.Schema({
         expires: 300 // auto-delete after 5 minutes (TTL index)
     }
 });
+
+otpSchema.index({ key: 1, type: 1 }, { unique: true });
 
 module.exports = mongoose.model("Otp", otpSchema);

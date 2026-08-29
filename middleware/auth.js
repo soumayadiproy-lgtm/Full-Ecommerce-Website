@@ -22,11 +22,15 @@ function verifyToken(req, res, next) {
 
         console.log("DECODED TOKEN:", decoded);
 
-        // ✅ attach full user object
-        req.user = decoded;
-
-        // ✅ safe userId
+        // ✅ safe userId & user role
         req.userId = decoded.id || decoded._id;
+        req.role = decoded.role || "user";
+        req.user = {
+            ...decoded,
+            id: req.userId,
+            _id: req.userId,
+            role: req.role
+        };
 
         if (!req.userId) {
             return res.status(401).json({ message: "Invalid token data ❌" });

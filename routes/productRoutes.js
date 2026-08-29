@@ -24,9 +24,24 @@ const fallbackProducts = [
     { _id: "f13", name: "Red Apples 1kg", price: 180, type: "fruits", category: "grocery", img: "https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?w=400" }
 ];
 
+// ✅ Auto-seed helper
+async function ensureProductsSeeded() {
+    try {
+        const count = await Product.countDocuments();
+        if (count === 0) {
+            const seedData = fallbackProducts.map(({ _id, ...rest }) => rest);
+            await Product.insertMany(seedData);
+            console.log("Auto-seeded products into MongoDB ✅");
+        }
+    } catch (err) {
+        console.error("Auto-seed notice:", err.message);
+    }
+}
+
 // ✅ 1. GET PRODUCTS
 router.get("/", async (req, res) => {
     try {
+        await ensureProductsSeeded();
         const { type } = req.query;
 
         let filter = {};
@@ -47,6 +62,42 @@ router.get("/", async (req, res) => {
     }
 });
 
+// ✅ 1b. GET REVIEWS FOR A PRODUCT
+router.get(["/reviews/:id", "/:id/reviews", "/:id"], async (req, res, next) => {
+    if (req.baseUrl.includes("reviews") || req.path.startsWith("/reviews")) {
+        try {
+            const product = await Product.findById(req.params.id);
+            if (!product) {
+                return res.json([]);
+            }
+            return res.json(product.reviews || []);
+        } catch (err) {
+            return res.json([]);
+        }
+    }
+    next();
+});
+
+// ✅ 1c. GET SINGLE PRODUCT BY ID
+router.get("/:id", async (req, res, next) => {
+    // Skip static route names
+    if (["premium-products", "add-product"].includes(req.params.id)) {
+        return next();
+    }
+    try {
+        const product = await Product.findById(req.params.id);
+        if (!product) {
+            const fallback = fallbackProducts.find(p => p._id === req.params.id);
+            if (fallback) return res.json(fallback);
+            return res.status(404).json({ message: "Product not found ❌" });
+        }
+        return res.json(product);
+    } catch (err) {
+        const fallback = fallbackProducts.find(p => p._id === req.params.id);
+        if (fallback) return res.json(fallback);
+        return res.status(404).json({ message: "Product not found ❌" });
+    }
+});
 
 // ✅ 2. ADD PRODUCT
 router.post("/add-product", verifyToken, isAdmin, async (req, res) => {
@@ -54,24 +105,28 @@ router.post("/add-product", verifyToken, isAdmin, async (req, res) => {
         const { name, price, img, type } = req.body;
 
         if (!name || !price || !img || !type) {
-            return res.json({ msg: "All fields required ❌" });
+            return res.status(400).json({ msg: "All fields required ❌" });
         }
 
         const product = new Product({ name, price, img, type });
         await product.save();
 
-        res.json({ msg: "Product added ✅" });
+        res.json({ msg: "Product added ✅", product });
     } catch (err) {
         console.log(err);
-        res.json({ msg: "Error ❌" });
+        res.status(500).json({ msg: "Error ❌" });
     }
 });
 
 
 // ✅ 3. ADD REVIEW
-router.post("/add-review/:id", verifyToken, async (req, res) => {
+router.post("/add-review/:id", async (req, res) => {
     try {
         const { text, rating } = req.body;
+
+        if (!text || !text.trim()) {
+            return res.status(400).json({ message: "Review text required ❌" });
+        }
 
         const product = await Product.findById(req.params.id);
 
@@ -79,15 +134,29 @@ router.post("/add-review/:id", verifyToken, async (req, res) => {
             return res.status(404).json({ message: "Product not found ❌" });
         }
 
+        // Optional user token extraction
+        let userId = null;
+        const authHeader = req.headers.authorization;
+        if (authHeader && authHeader.startsWith("Bearer ")) {
+            try {
+                const token = authHeader.split(" ")[1];
+                const SECRET = process.env.JWT_SECRET || "secretkey";
+                const jwt = require("jsonwebtoken");
+                const decoded = jwt.verify(token, SECRET);
+                userId = decoded.id || decoded._id;
+            } catch (e) {}
+        }
+
         product.reviews.push({
             text,
-            rating,
-            user: req.userId // ⚠️ keep consistent
+            rating: Number(rating) || 5,
+            user: userId,
+            date: new Date()
         });
 
         await product.save();
 
-        return res.json({ msg: "Review added ✅" });
+        return res.json({ msg: "Review added ✅", reviews: product.reviews });
 
     } catch (err) {
         console.log("❌ REVIEW ERROR:", err);
@@ -137,7 +206,7 @@ router.get("/premium-products", verifyToken, async (req, res) => {
     try {
         const user = await User.findById(req.userId);
 
-        if (user.membership !== "premium_plus") {
+        if (!user || user.membership !== "premium_plus") {
             return res.status(403).json({ message: "Premium required ❌" });
         }
 
@@ -156,7 +225,7 @@ router.post("/fast-delivery", verifyToken, async (req, res) => {
     try {
         const user = await User.findById(req.userId);
 
-        if (user.membership !== "premium_plus") {
+        if (!user || user.membership !== "premium_plus") {
             return res.status(403).json({ message: "Upgrade to Premium Plus 🚀" });
         }
 

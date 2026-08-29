@@ -11,7 +11,7 @@ const { verifyToken, isAdmin } = require("../middleware/auth");
 router.post("/checkout", verifyToken, async (req, res) => {
     try {
         // ✅ FIX: use same pattern everywhere
-        const userId = req.user.id;
+        const userId = req.userId;
 
         const { name, address, phone, payment } = req.body;
 
@@ -67,7 +67,7 @@ router.post("/checkout", verifyToken, async (req, res) => {
 // ================= USER ORDERS =================
 router.get("/", verifyToken, async (req, res) => {
     try {
-        const userId = req.user.id;
+        const userId = req.userId;
 
         const orders = await Order.find({ userId: String(userId) })
             .sort({ createdAt: -1 });
@@ -84,7 +84,7 @@ router.get("/", verifyToken, async (req, res) => {
 // ================= DELETE ORDER (USER) =================
 router.delete("/:id", verifyToken, async (req, res) => {
     try {
-        const userId = req.user.id;
+        const userId = req.userId;
 
         const order = await Order.findOne({
             _id: req.params.id,

@@ -26,27 +26,34 @@ app.get("/", (req, res) => {
     res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
+// ✅ Database connection middleware to prevent Mongoose buffering timeouts
+app.use(async (req, res, next) => {
+    if (req.path.startsWith("/api")) {
+        try {
+            await connectDB();
+        } catch (err) {
+            console.error("⚠️ DB Connection Middleware notice:", err.message);
+            return res.status(500).json({ error: "Database connection failed. Please try again." });
+        }
+    }
+    next();
+});
+
 // ✅ Health check
 app.get(["/api/test", "/test"], (req, res) => {
     res.json({ status: "online", msg: "API WORKING ✅" });
 });
 
-// ✅ DB
-connectDB().catch(err => {
-    console.error("⚠️ Initial MongoDB connection notice:", err.message);
-});
-
 // ✅ ROUTES
-app.use(["/api/products", "/products"], productRoutes);
+app.use(["/api/products", "/products", "/api/reviews"], productRoutes);
 app.use(["/api/orders", "/orders"], orderRoutes);
 app.use(["/api/users", "/users"], userRoutes);
 app.use(["/api/cart", "/cart"], cartRoutes);
 app.use(["/api/contact", "/contact"], contactRoutes);
 app.use(["/api/payment", "/payment"], paymentRoutes);
 
-// ✅ Fallback for /api root
+// ✅ Alias direct /api/* auth & user routes (e.g. /api/login, /api/register, /api/send-otp)
 app.use("/api", userRoutes);
-app.use("/api", productRoutes);
 
 // ✅ Catch-all HTML fallback
 app.get("*", (req, res, next) => {
