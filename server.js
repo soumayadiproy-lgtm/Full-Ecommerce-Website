@@ -1,3 +1,4 @@
+require("dotenv").config();
 const express = require("express");
 const connectDB = require("./config/db");
 const cors = require("cors");
@@ -13,7 +14,6 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
 // ✅ Static
 app.use(express.static("public"));
 app.use(express.static("images"));
@@ -28,7 +28,6 @@ app.use("/api/users", userRoutes);
 app.use("/api/cart", cartRoutes);
 app.use("/api/contact", contactRoutes);
 app.use("/api/payment", paymentRoutes);
-
 
 // ✅ Test
 app.get("/test", (req, res) => {

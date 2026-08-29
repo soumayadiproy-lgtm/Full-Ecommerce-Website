@@ -147,7 +147,7 @@ async function sendMessage() {
     const email = document.getElementById("email").value;
     const message = document.getElementById("message").value;
 
-    await fetch("http://localhost:3000/contact", {
+    await fetch("/api/contact", {
         method: "POST",
         headers: {
             "Content-Type": "application/json"

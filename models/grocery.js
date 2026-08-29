@@ -3,7 +3,7 @@ let productsData = [];
 let filteredData = [];
 
 // 🔗 Fetch from backend
-fetch("http://localhost:3000/api/products?category=grocery")
+fetch("/api/products?category=grocery")
   .then(res => res.json())
   .then(data => {
     productsData = data;

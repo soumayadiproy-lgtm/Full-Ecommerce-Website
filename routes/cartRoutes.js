@@ -4,7 +4,7 @@ const Cart = require("../models/cart");
 const Product = require("../models/Product");
 const jwt = require("jsonwebtoken");
 
-const SECRET = "secretkey";
+const SECRET = process.env.JWT_SECRET || "secretkey";
 
 // 🔐 AUTH
 function auth(req, res, next) {

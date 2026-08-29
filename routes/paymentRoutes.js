@@ -5,10 +5,10 @@ const Razorpay = require("razorpay");
 const User = require("../models/User");
 const { verifyToken } = require("../middleware/auth");
 
-// 🔥 USE REAL TEST KEYS FROM RAZORPAY
+// 🔥 USE REAL KEYS FROM ENVIRONMENT VARIABLES
 const razorpay = new Razorpay({
-    key_id: "rzp_test_abc123xxxx",     // ✅ your real Key ID
-    key_secret: "abcd1234xxxxxx"       // ✅ your real Secret
+    key_id: process.env.RAZORPAY_KEY_ID || "rzp_test_abc123xxxx",
+    key_secret: process.env.RAZORPAY_KEY_SECRET || "abcd1234xxxxxx"
 });
 
 // ✅ CREATE ORDER

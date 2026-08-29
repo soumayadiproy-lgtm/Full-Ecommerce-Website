@@ -2,14 +2,12 @@ const express = require("express");
 const router = express.Router();
 
 const User = require("../models/User");
+const Otp = require("../models/Otp");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const { verifyToken, isAdmin } = require("../middleware/auth");
 
-const SECRET = "secretkey";
-
-// 🔥 OTP STORE WITH EXPIRY
-let otpStore = {};
+const SECRET = process.env.JWT_SECRET || "secretkey";
 
 // ================= REGISTER =================
 router.post("/register", async (req, res) => {
@@ -46,7 +44,6 @@ router.post("/register", async (req, res) => {
 
 
 // ================= LOGIN =================
-// ================= LOGIN =================
 router.post("/login", async (req, res) => {
     try {
         const { email, password } = req.body;
@@ -61,7 +58,7 @@ router.post("/login", async (req, res) => {
             return res.status(400).json({ msg: "User not found ❌" });
         }
 
-        // 🚫 BLOCK CHECK (🔥 THIS WAS MISSING)
+        // 🚫 BLOCK CHECK
         if (user.isBlocked) {
             return res.status(403).json({ msg: "Account blocked 🚫 Contact admin" });
         }
@@ -96,7 +93,7 @@ router.post("/login", async (req, res) => {
 
 
 // ================= SEND OTP =================
-router.post("/send-otp", (req, res) => {
+router.post("/send-otp", async (req, res) => {
     try {
         const { phone } = req.body;
 
@@ -106,11 +103,12 @@ router.post("/send-otp", (req, res) => {
 
         const otp = Math.floor(1000 + Math.random() * 9000);
 
-        // ⏳ store with expiry (2 minutes)
-        otpStore[phone] = {
-            otp,
-            expires: Date.now() + 2 * 60 * 1000
-        };
+        // ✅ Store OTP in MongoDB (auto-expires via TTL)
+        await Otp.findOneAndUpdate(
+            { key: phone, type: "login" },
+            { otp, createdAt: new Date() },
+            { upsert: true, new: true }
+        );
 
         console.log("📲 OTP for", phone, ":", otp);
 
@@ -131,14 +129,10 @@ router.post("/verify-otp", async (req, res) => {
             return res.status(400).json({ msg: "All fields required ❌" });
         }
 
-        const record = otpStore[phone];
+        // ✅ Find OTP from MongoDB
+        const record = await Otp.findOne({ key: phone, type: "login" });
 
         if (!record) {
-            return res.status(400).json({ msg: "OTP expired ❌" });
-        }
-
-        if (Date.now() > record.expires) {
-            delete otpStore[phone];
             return res.status(400).json({ msg: "OTP expired ❌" });
         }
 
@@ -148,7 +142,7 @@ router.post("/verify-otp", async (req, res) => {
 
         let user = await User.findOne({ phone });
 
-        // 🚫 BLOCK CHECK (🔥 ADD HERE)
+        // 🚫 BLOCK CHECK
         if (user && user.isBlocked) {
             return res.status(403).json({ msg: "Account blocked 🚫" });
         }
@@ -164,7 +158,8 @@ router.post("/verify-otp", async (req, res) => {
             await user.save();
         }
 
-        delete otpStore[phone];
+        // ✅ Delete used OTP
+        await Otp.deleteOne({ key: phone, type: "login" });
 
         const token = jwt.sign(
             {
@@ -288,6 +283,91 @@ router.put("/unblock/:id", verifyToken, isAdmin, async (req, res) => {
     } catch (err) {
         console.log(err);
         res.status(500).json({ msg: "Unblock failed ❌" });
+    }
+});
+
+// ================= FORGOT PASSWORD =================
+router.post("/send-reset-otp", async (req, res) => {
+    try {
+        const { email } = req.body;
+
+        const user = await User.findOne({ email });
+
+        if (!user) {
+            return res.status(404).json({
+                msg: "User not found ❌"
+            });
+        }
+
+        const otp = Math.floor(
+            100000 + Math.random() * 900000
+        );
+
+        // ✅ Store reset OTP in MongoDB (auto-expires via TTL)
+        await Otp.findOneAndUpdate(
+            { key: email, type: "reset" },
+            { otp, createdAt: new Date() },
+            { upsert: true, new: true }
+        );
+
+        console.log("RESET OTP:", otp);
+
+        res.json({
+            msg: "OTP Sent Successfully ✅"
+        });
+
+    } catch (err) {
+        res.status(500).json({
+            msg: err.message
+        });
+    }
+});
+
+router.post("/verify-reset-otp", async (req, res) => {
+    try {
+        const { email, otp, newPassword } = req.body;
+
+        // ✅ Find reset OTP from MongoDB
+        const record = await Otp.findOne({ key: email, type: "reset" });
+
+        if (!record) {
+            return res.status(400).json({
+                msg: "OTP expired ❌"
+            });
+        }
+
+        if (record.otp != otp) {
+            return res.status(400).json({
+                msg: "Invalid OTP ❌"
+            });
+        }
+
+        const user = await User.findOne({ email });
+
+        if (!user) {
+            return res.status(404).json({
+                msg: "User not found ❌"
+            });
+        }
+
+        user.password = await bcrypt.hash(
+            newPassword,
+            10
+        );
+
+        await user.save();
+
+        // ✅ Delete used OTP
+        await Otp.deleteOne({ key: email, type: "reset" });
+
+        res.json({
+            msg: "Password changed successfully ✅"
+        });
+
+    } catch (err) {
+        res.status(500).json({
+            msg: err.message
+        });
     }
 });
 

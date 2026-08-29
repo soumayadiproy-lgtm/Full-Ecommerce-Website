@@ -288,23 +288,66 @@ small{
     width: 28px;
     margin-left: 20px;
     }
+/* 🔥 MOBILE MENU FIX */
 @media only screen and (max-width:800px){
+
     nav ul{
         position: absolute;
         top: 70px;
         left: 0;
-        background: #333;
-        width:100%;
-    }
-    nav ul li{
-        display: block;
-        margin-right:50px;
-        margin-top: 10px;
-        margin-bottom: 10px;
-    }
-    nav ul li a{
-        color:#fff;
+        width: 100%;
+
+        background: transparent;
+
+        /* 🔥 animation setup */
+        max-height: 0;
+        overflow: hidden;
+        opacity: 0;
+        transform: translateY(-20px);
+
+        transition: all 0.4s ease;
         
+        /* 🔥 spacing like Flipkart */
+        padding: 0;
+        text-align: center;
+    }
+
+    /* 🔥 ACTIVE (OPEN MENU) */
+    nav ul.active{
+        max-height: 300px;   /* enough height */
+        opacity: 1;
+        transform: translateY(0);
+        padding: 10px 0;
+    }
+
+    nav ul li{
+        display: inline-block;
+        margin: 8px 12px;   /* spacing */
+        position: relative; /* for underline */
+    }
+
+    nav ul li a{
+        color: #000;
+        font-size: 14px;
+        font-weight: 500;
+        text-decoration: none;
+        padding: 5px 0;
+    }
+
+    /* 🔥 UNDERLINE HOVER EFFECT */
+    nav ul li a::after{
+        content: "";
+        position: absolute;
+        left: 0;
+        bottom: 0;
+        width: 0%;
+        height: 2px;
+        background: #ff523b;   /* your theme color */
+        transition: 0.3s;
+    }
+
+    nav ul li a:hover::after{
+        width: 100%;
     }
 }
 .back-home {
@@ -453,4 +496,237 @@ small{
     .video-modal video {
         width: 90%;
     }
+}
+/* 🔥 SAFE RESPONSIVE FIX (DO NOT REMOVE YOUR OLD CSS) */
+
+html, body{
+    width: 100%;
+    overflow-x: hidden;
+}
+
+/* Fix images */
+img{
+    max-width: 100%;
+    height: auto;
+}
+
+/* Fix columns */
+.col-2{
+    min-width: 0;   /* remove breaking */
+}
+
+/* Tablet */
+@media (max-width:1000px){
+
+    .col-4{
+        flex-basis: 48%;
+    }
+
+    .col-3{
+        flex-basis: 48%;
+    }
+
+    .testimonial-row,
+    .footer-row{
+        flex-wrap: wrap;
+    }
+}
+
+/* Mobile */
+@media (max-width:800px){
+
+    .row{
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .col-2,
+    .col-3,
+    .col-4{
+        flex-basis: 100%;
+    }
+
+    .col-2 h1{
+        font-size: 28px;
+        line-height: 36px;
+    }
+
+    .col-4 img{
+        width: 80%;
+    }
+
+    .footer-row{
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .testimonial-row{
+        flex-direction: column;
+    }
+}
+#chatBtn{
+position:fixed;
+bottom:20px;
+right:20px;
+width:60px;
+height:60px;
+background:#2e7d32;
+color:white;
+border-radius:50%;
+display:flex;
+justify-content:center;
+align-items:center;
+font-size:30px;
+cursor:pointer;
+z-index:9999;
+}
+
+#chatBox{
+display:none;
+position:fixed;
+bottom:90px;
+right:20px;
+width:320px;
+height:400px;
+background:white;
+border-radius:15px;
+padding:10px;
+box-shadow:0 0 15px rgba(0,0,0,.3);
+z-index:9999;
+}
+
+#messages{
+height:280px;
+overflow-y:auto;
+border:1px solid #ddd;
+margin-bottom:10px;
+padding:10px;
+}
+.chat-btn{
+position:fixed;
+bottom:25px;
+right:25px;
+width:70px;
+height:70px;
+border-radius:50%;
+background:linear-gradient(135deg,#ff512f,#dd2476);
+display:flex;
+justify-content:center;
+align-items:center;
+font-size:30px;
+color:white;
+cursor:pointer;
+box-shadow:0 10px 25px rgba(0,0,0,.25);
+z-index:9999;
+transition:.3s;
+}
+
+.chat-btn:hover{
+transform:scale(1.1);
+}
+
+.chatbox{
+display:none;
+position:fixed;
+bottom:90px;
+right:20px;
+width:380px;
+height:450px;
+background:rgba(255,255,255,.18);
+backdrop-filter:blur(20px);
+border-radius:20px;
+overflow:hidden;
+box-shadow:0 10px 30px rgba(0,0,0,.2);
+z-index:9999;
+}
+
+.chat-header{
+height:60px;
+display:flex;
+align-items:center;
+justify-content:center;
+background:linear-gradient(135deg,#ff512f,#dd2476);
+color:white;
+font-size:20px;
+font-weight:bold;
+}
+
+.chat-body{
+height:calc(100% - 70px);
+padding:15px;
+overflow-y:auto;
+display:flex;
+flex-direction:column;
+gap:12px;
+}
+
+.chat-body button{
+width:100%;
+padding:16px;
+border:none;
+border-radius:15px;
+background:white;
+color:#333;
+font-size:15px;
+font-weight:600;
+text-align:left;
+cursor:pointer;
+transition:.3s;
+box-shadow:0 5px 15px rgba(0,0,0,.08);
+}
+
+.chat-body button:hover{
+background:linear-gradient(135deg,#ff512f,#dd2476);
+color:white;
+transform:translateX(5px);
+}
+
+.bot-msg{
+background:white;
+padding:15px;
+border-radius:15px;
+color:#333;
+line-height:1.6;
+box-shadow:0 5px 15px rgba(0,0,0,.08);
+animation:fadeIn .3s ease;
+}
+
+#answerBox{
+margin-top:10px;
+}
+
+.chat-body::-webkit-scrollbar{
+width:6px;
+}
+
+.chat-body::-webkit-scrollbar-thumb{
+background:linear-gradient(#ff512f,#dd2476);
+border-radius:10px;
+}
+
+@keyframes fadeIn{
+from{
+opacity:0;
+transform:translateY(10px);
+}
+to{
+opacity:1;
+transform:translateY(0);
+}
+}
+
+@media(max-width:768px){
+
+.chatbox{
+width:95%;
+height:80vh;
+right:10px;
+bottom:90px;
+}
+
+.chat-btn{
+width:60px;
+height:60px;
+font-size:25px;
+}
 }

@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Forgot Password</title>
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:'Poppins',sans-serif;
+}
+
+body{
+height:100vh;
+display:flex;
+justify-content:center;
+align-items:center;
+background:linear-gradient(135deg,#6a11cb,#2575fc);
+overflow:hidden;
+}
+
+.card{
+width:430px;
+padding:35px;
+background:rgba(255,255,255,0.12);
+backdrop-filter:blur(20px);
+border-radius:25px;
+box-shadow:0 15px 35px rgba(0,0,0,.3);
+text-align:center;
+}
+
+.logo{
+font-size:55px;
+margin-bottom:10px;
+}
+
+.store{
+font-size:22px;
+font-weight:700;
+color:white;
+margin-bottom:5px;
+}
+
+.subtitle{
+color:#dbeafe;
+font-size:14px;
+margin-bottom:25px;
+}
+
+h2{
+color:white;
+font-size:42px;
+margin-bottom:25px;
+}
+
+input{
+width:100%;
+padding:14px;
+margin-bottom:15px;
+border:none;
+outline:none;
+border-radius:12px;
+background:rgba(255,255,255,.18);
+color:white;
+font-size:16px;
+}
+
+input::placeholder{
+color:#e5e7eb;
+}
+
+.email-row{
+display:flex;
+gap:10px;
+margin-bottom:15px;
+}
+
+.email-row input{
+margin-bottom:0;
+flex:1;
+}
+
+.send-btn{
+width:140px;
+border:none;
+border-radius:12px;
+background:linear-gradient(135deg,#4f46e5,#7c3aed);
+color:white;
+font-size:16px;
+font-weight:600;
+cursor:pointer;
+}
+
+.reset-btn{
+width:100%;
+padding:14px;
+border:none;
+border-radius:12px;
+background:linear-gradient(135deg,#ef4444,#dc2626);
+color:white;
+font-size:18px;
+font-weight:600;
+cursor:pointer;
+margin-top:5px;
+}
+
+.send-btn:hover,
+.reset-btn:hover{
+transform:translateY(-2px);
+}
+
+#msg{
+margin-top:15px;
+color:white;
+font-weight:600;
+}
+
+.back{
+margin-top:20px;
+}
+
+.back a{
+color:white;
+text-decoration:none;
+font-weight:600;
+}
+
+.back a:hover{
+color:#facc15;
+}
+</style>
+</head>
+<body>
+
+<div class="card">
+<div class="logo">🔐</div>
+    <div class="store">Soumyadip Store</div>
+    <div class="subtitle">Secure Account Recovery System</div>
+
+    <h2>Forgot Password</h2>
+
+   <div class="email-row">
+<input
+type="email"
+id="email"
+placeholder="Enter Email">
+
+<button
+class="send-btn"
+onclick="sendOtp()">
+Send OTP
+</button>
+</div>
+
+    <input
+        type="text"
+        id="otp"
+        placeholder="Enter OTP"
+    >
+
+    <input
+        type="password"
+        id="newPassword"
+        placeholder="Enter New Password"
+    >
+
+    <button
+        class="btn reset-btn"
+        onclick="resetPassword()"
+    >
+        Reset Password
+    </button>
+
+    <div id="msg"></div>
+
+    <div class="back">
+        <a href="/">⬅ Back To Login</a>
+    </div>
+
+</div>
+
+<script>
+
+async function sendOtp(){
+
+    const email =
+    document.getElementById("email").value;
+
+    if(!email){
+        document.getElementById("msg").innerHTML =
+        "Enter email first ❌";
+        return;
+    }
+
+    try{
+
+        const response = await fetch(
+            "/api/users/send-reset-otp",
+            {
+                method:"POST",
+                headers:{
+                    "Content-Type":"application/json"
+                },
+                body:JSON.stringify({
+                    email
+                })
+            }
+        );
+
+        const data = await response.json();
+
+        document.getElementById("msg").innerHTML =
+        data.msg;
+
+    }catch(err){
+
+        document.getElementById("msg").innerHTML =
+        "Failed to send OTP ❌";
+    }
+}
+
+async function resetPassword(){
+
+    const email =
+    document.getElementById("email").value;
+
+    const otp =
+    document.getElementById("otp").value;
+
+    const newPassword =
+    document.getElementById("newPassword").value;
+
+    if(!email || !otp || !newPassword){
+
+        document.getElementById("msg").innerHTML =
+        "Fill all fields ❌";
+
+        return;
+    }
+
+    try{
+
+        const response = await fetch(
+            "/api/users/verify-reset-otp",
+            {
+                method:"POST",
+                headers:{
+                    "Content-Type":"application/json"
+                },
+                body:JSON.stringify({
+                    email,
+                    otp,
+                    newPassword
+                })
+            }
+        );
+
+        const data = await response.json();
+
+        document.getElementById("msg").innerHTML =
+        data.msg;
+
+    }catch(err){
+
+        document.getElementById("msg").innerHTML =
+        "Reset Failed ❌";
+    }
+}
+
+</script>
+
+</body>
+</html>

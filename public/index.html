@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 <meta charset ="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Soumyadip Store | Ecommerce Website Design</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -26,11 +27,10 @@
         <li><a href="Products.html">Products</a></li>
         <li><a href="grocery.html">Grocery</a></li>
         <li><a href="menu.html">Menu</a></li>
-        <script src="script.js"></script>
     </ul>
 </nav>
 <img src="/images/cart.png" width="30px" height="30px">
-<img src="/images/menu.png" class="menu-icon">
+<img src="/images/menu.png" class="menu-icon" onclick="toggleMenu()">
 </div>
     <div class="row">
     <div class="col-2">
@@ -293,6 +293,7 @@
   <p class="copyright">Copyright 2020 - Easy Tutorials</p>
 </div>
 </div>
+<script src="script.js" defer></script>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
 import { getAuth, onAuthStateChanged } 
@@ -353,6 +354,82 @@ function closeVideo() {
     modal.style.display = "none";
     video.pause();
     video.currentTime = 0;
+}
+function toggleMenu(){
+    document.querySelector("nav ul").classList.toggle("active");
+}
+</script>
+<div class="chat-btn" onclick="openChat()">
+🤖
+</div>
+
+<div id="chatbox" class="chatbox">
+
+<div class="chat-header">
+🤖 Soumya AI Assistant
+</div>
+<div id="chat-body" class="chat-body">
+<button onclick="showAnswer('delivery')">🚚 Delivery Time</button>
+<button onclick="showAnswer('refund')">💰 Refund Policy</button>
+<button onclick="showAnswer('payment')">💳 Payment Methods</button>
+<button onclick="showAnswer('track')">📦 Track Order</button>
+<button onclick="showAnswer('cancel')">❌ Cancel Order</button>
+<button onclick="showAnswer('shipping')">🚛 Shipping Charges</button>
+<button onclick="showAnswer('discount')">🏷️ Discounts</button>
+<button onclick="showAnswer('coupon')">🎁 Coupon Codes</button>
+<button onclick="showAnswer('return')">🔄 Return Policy</button>
+<button onclick="showAnswer('contact')">☎️ Contact Us</button>
+<div id="answerBox"></div>
+</div>
+</div>
+<script>
+function openChat()
+{
+let box=document.getElementById("chatbox");
+
+if(box.style.display=="block")
+box.style.display="none";
+else
+box.style.display="block";
+}
+</script>
+<script>
+function showAnswer(type)
+{
+let answer="";
+
+if(type=="delivery")
+answer="Delivery takes 3-7 business days.";
+
+else if(type=="refund")
+answer="Refund is available within 7 days of delivery.";
+
+else if(type=="payment")
+answer="We accept UPI, Debit Card, Credit Card and Net Banking.";
+
+else if(type=="track")
+answer="You can track your order from the Orders page.";
+
+else if(type=="cancel")
+answer="Orders can be cancelled before shipping.";
+
+else if(type=="shipping")
+answer="Free shipping is available on selected products.";
+
+else if(type=="discount")
+answer="Check our Offers section for current discounts.";
+
+else if(type=="coupon")
+answer="Apply coupon codes at checkout.";
+
+else if(type=="return")
+answer="Returns are accepted within 7 days of delivery.";
+
+else if(type=="contact")
+answer="You can contact us through the Contact page.";
+
+document.getElementById("answerBox").innerHTML=
+"<div class='bot-msg'>"+answer+"</div>";
 }
 </script>
 </body>

@@ -70,7 +70,7 @@ button {
 
 <script>
 
-const BASE_URL = "http://localhost:3000";
+const BASE_URL = "";
 const token = localStorage.getItem("token");
 
 if (!token) {
@@ -122,7 +122,7 @@ loadUsers();
 // ❌ DELETE USER
 function deleteUser(id) {
 
-    fetch("http://localhost:3000/api/users/" + id, {
+    fetch("/api/users/" + id, {
         method: "DELETE",
         headers: {
             "Authorization": "Bearer " + localStorage.getItem("token")
@@ -140,7 +140,7 @@ function deleteUser(id) {
 // 👑 MAKE ADMIN
 function makeAdmin(id) {
 
-    fetch("http://localhost:3000/api/users/role/" + id, {
+    fetch("/api/users/role/" + id, {
         method: "PUT",
         headers: {
             "Content-Type": "application/json",
