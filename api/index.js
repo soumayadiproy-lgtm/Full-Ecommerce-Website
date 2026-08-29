@@ -1,7 +1,9 @@
 require("dotenv").config();
 const express = require("express");
+const path = require("path");
 const connectDB = require("../config/db");
 const cors = require("cors");
+
 const productRoutes = require("../routes/productRoutes");
 const orderRoutes = require("../routes/orderRoutes");
 const userRoutes = require("../routes/userRoutes");
@@ -16,7 +18,15 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// ✅ Test Route (Placed FIRST so health checks always work)
+// ✅ Serve Static Frontend Files from public directory
+app.use(express.static(path.join(__dirname, "../public")));
+
+// ✅ Serve Root index.html
+app.get("/", (req, res) => {
+    res.sendFile(path.join(__dirname, "../public/index.html"));
+});
+
+// ✅ Health Check Route
 app.get(["/api/test", "/test"], (req, res) => {
     res.json({
         status: "online",
@@ -53,6 +63,22 @@ app.use(["/api/payment", "/payment"], paymentRoutes);
 app.use("/api", userRoutes);
 app.use("/api", productRoutes);
 
+// ✅ Fallback HTML handler for routes without .html extension (e.g., /contact -> public/contact.html)
+app.get("*", (req, res, next) => {
+    if (req.path.startsWith("/api/")) return next();
+    
+    // Clean URL resolution
+    const cleanPath = req.path.toLowerCase().replace(/\/$/, "");
+    const possibleHtmlFile = path.join(__dirname, "../public", cleanPath + ".html");
+    
+    res.sendFile(possibleHtmlFile, (err) => {
+        if (err) {
+            // Default to index.html for SPA/frontend navigation
+            res.sendFile(path.join(__dirname, "../public/index.html"));
+        }
+    });
+});
+
 // ✅ Global Error Handler
 app.use((err, req, res, next) => {
     console.error("Server Error:", err);
@@ -60,4 +86,3 @@ app.use((err, req, res, next) => {
 });
 
 module.exports = app;
-
