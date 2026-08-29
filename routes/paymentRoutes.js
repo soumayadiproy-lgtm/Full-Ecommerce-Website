@@ -5,11 +5,17 @@ const Razorpay = require("razorpay");
 const User = require("../models/User");
 const { verifyToken } = require("../middleware/auth");
 
-// 🔥 USE REAL KEYS FROM ENVIRONMENT VARIABLES
-const razorpay = new Razorpay({
-    key_id: process.env.RAZORPAY_KEY_ID || "rzp_test_abc123xxxx",
-    key_secret: process.env.RAZORPAY_KEY_SECRET || "abcd1234xxxxxx"
-});
+// 🔥 USE REAL KEYS FROM ENVIRONMENT VARIABLES (LAZY INITIALIZATION)
+let razorpayInstance;
+function getRazorpay() {
+    if (!razorpayInstance) {
+        razorpayInstance = new Razorpay({
+            key_id: process.env.RAZORPAY_KEY_ID || "rzp_test_abc123xxxx",
+            key_secret: process.env.RAZORPAY_KEY_SECRET || "abcd1234xxxxxx"
+        });
+    }
+    return razorpayInstance;
+}
 
 // ✅ CREATE ORDER
 router.post("/create-order", verifyToken, async (req, res) => {
@@ -19,7 +25,7 @@ router.post("/create-order", verifyToken, async (req, res) => {
             currency: "INR",
             receipt: "order_" + Date.now()
         };
-        const order = await razorpay.orders.create(options);
+        const order = await getRazorpay().orders.create(options);
         res.json(order);
 
     } catch (err) {
