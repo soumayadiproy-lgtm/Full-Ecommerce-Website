@@ -16,6 +16,15 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// ✅ Test Route (Placed FIRST so health checks always work)
+app.get(["/api/test", "/test"], (req, res) => {
+    res.json({
+        status: "online",
+        msg: "API WORKING ✅",
+        time: new Date().toISOString()
+    });
+});
+
 // ✅ DB Middleware (Awaited for Serverless)
 app.use(async (req, res, next) => {
     try {
@@ -38,11 +47,6 @@ app.use(["/api/payment", "/payment"], paymentRoutes);
 // ✅ Direct root fallbacks for requests stripped of prefixes
 app.use("/api", userRoutes);
 app.use("/api", productRoutes);
-
-// ✅ Test
-app.get(["/api/test", "/test"], (req, res) => {
-    res.json({ msg: "API WORKING ✅" });
-});
 
 // ✅ Global Error Handler
 app.use((err, req, res, next) => {

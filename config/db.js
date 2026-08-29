@@ -11,22 +11,14 @@ const connectDB = async () => {
         return cached.conn;
     }
 
-    const uri = process.env.MONGODB_URI;
-
-    if (!uri) {
-        if (process.env.VERCEL) {
-            throw new Error("MONGODB_URI is missing in Vercel Environment Variables. Please set MONGODB_URI in Vercel Project Settings.");
-        }
-    }
-
-    const connectionString = uri || "mongodb://127.0.0.1:27017/ecommerce";
+    const uri = process.env.MONGODB_URI || "mongodb+srv://rsoumyadip651_db_user:zEb1TmxRoRFStIyG@cluster0.jgikzuy.mongodb.net/ecommerce?retryWrites=true&w=majority";
 
     if (!cached.promise) {
         const opts = {
-            serverSelectionTimeoutMS: 5000, // Timeout after 5s instead of 30s
+            serverSelectionTimeoutMS: 5000, // Timeout after 5s
         };
 
-        cached.promise = mongoose.connect(connectionString, opts).then((mongoose) => {
+        cached.promise = mongoose.connect(uri, opts).then((mongoose) => {
             console.log("MongoDB Connected ✅");
             return mongoose;
         });
