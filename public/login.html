@@ -186,7 +186,7 @@ async function login() {
         alert(data.msg || "Login success ✅");
         localStorage.setItem("user", JSON.stringify(data.user));
         localStorage.setItem("token", data.token);
-        window.location.href = "Products.html";
+        window.location.href = "products.html";
 
     } catch (err) {
         alert("❌ Network Error: " + err.message);

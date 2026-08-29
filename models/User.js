@@ -3,6 +3,11 @@ const mongoose = require("mongoose");
 const userSchema = new mongoose.Schema({
     email: String,
     password: String,
+    phone: String,
+    name: String,
+    address: String,
+    city: String,
+    pincode: String,
 
     // 🔥 ROLE SYSTEM
     role: {
@@ -17,7 +22,7 @@ const userSchema = new mongoose.Schema({
         default: false
     },
 
-    // 💎 MEMBERSHIP SYSTEM (FIXED)
+    // 💎 MEMBERSHIP SYSTEM
     membership: {
         type: String,
         enum: ["free", "premium", "premium_plus"],

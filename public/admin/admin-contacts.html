@@ -202,7 +202,7 @@ async function loadMessages() {
     const container = document.getElementById("data");
 
     try {
-        const res = await fetch(BASE_URL + "/contact/all", {
+        const res = await fetch(BASE_URL + "/api/contact/all", {
             headers: {
                 "Authorization": "Bearer " + token
             }
@@ -269,7 +269,7 @@ async function sendReply(id) {
 
     if (!reply) return alert("Write reply");
 
-    await fetch(BASE_URL + "/contact/reply", {
+    await fetch(BASE_URL + "/api/contact/reply", {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
@@ -283,7 +283,7 @@ async function sendReply(id) {
 
 // 🗑 DELETE
 async function deleteMsg(id) {
-    await fetch(BASE_URL + "/contact/delete/" + id, {
+    await fetch(BASE_URL + "/api/contact/delete/" + id, {
         method: "DELETE",
         headers: {
             "Authorization": "Bearer " + token
@@ -295,7 +295,7 @@ async function deleteMsg(id) {
 
 // ✅ RESOLVE
 async function markResolved(id) {
-    await fetch(BASE_URL + "/contact/resolve/" + id, {
+    await fetch(BASE_URL + "/api/contact/resolve/" + id, {
         method: "PUT",
         headers: {
             "Authorization": "Bearer " + token
