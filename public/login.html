@@ -130,11 +130,19 @@ async function sendOTP() {
             body: JSON.stringify({ phone: input.value })
         });
 
-        const data = await res.json();
-        alert(data.msg || data.error);
+        let data;
+        try {
+            data = await res.json();
+        } catch (e) {
+            const text = await res.text();
+            alert("Error (" + res.status + "): " + (text || "Failed to parse response"));
+            return;
+        }
+
+        alert(data.msg || data.message || data.error || "OTP sent");
 
     } catch (err) {
-        alert("❌ Backend not running");
+        alert("❌ Network Error: " + err.message);
     }
 }
 
@@ -143,9 +151,10 @@ async function login() {
     const value = input.value;
 
     try {
+        let res;
         if (value.includes("@")) {
             // EMAIL LOGIN
-            const res = await fetch(BASE_URL + "/api/users/login", {
+            res = await fetch(BASE_URL + "/api/users/login", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
@@ -153,19 +162,9 @@ async function login() {
                     password: passwordInput.value
                 })
             });
-
-            const data = await res.json();
-            alert(data.msg || data.error);
-
-            if (res.ok) {
-                localStorage.setItem("user", JSON.stringify(data.user));
-                localStorage.setItem("token", data.token);
-                window.location.href = "Products.html";
-            }
-
         } else {
             // OTP LOGIN
-            const res = await fetch(BASE_URL + "/api/users/verify-otp", {
+            res = await fetch(BASE_URL + "/api/users/verify-otp", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
@@ -173,19 +172,29 @@ async function login() {
                     otp: otpInput.value
                 })
             });
-
-            const data = await res.json();
-            alert(data.msg || data.error);
-
-            if (res.ok) {
-                localStorage.setItem("user", JSON.stringify(data.user));
-                localStorage.setItem("token", data.token);
-                window.location.href = "Products.html";
-            }
         }
 
+        let data;
+        try {
+            data = await res.json();
+        } catch (e) {
+            const text = await res.text();
+            alert("Server Error (" + res.status + "): " + (text || "Invalid server response"));
+            return;
+        }
+
+        if (!res.ok) {
+            alert(data.msg || data.error || "Login failed ❌");
+            return;
+        }
+
+        alert(data.msg || "Login success ✅");
+        localStorage.setItem("user", JSON.stringify(data.user));
+        localStorage.setItem("token", data.token);
+        window.location.href = "Products.html";
+
     } catch (err) {
-        alert("❌ Network Error (Start backend)");
+        alert("❌ Network Error: " + err.message);
     }
 }
 </script>

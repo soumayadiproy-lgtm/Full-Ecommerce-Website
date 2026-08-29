@@ -7,15 +7,26 @@ if (!cached) {
 }
 
 const connectDB = async () => {
-    if (cached.conn) {
-        console.log("MongoDB Using Cached Connection ✅");
+    if (cached.conn && mongoose.connection.readyState === 1) {
         return cached.conn;
     }
 
-    if (!cached.promise) {
-        const uri = process.env.MONGODB_URI || "mongodb://127.0.0.1:27017/ecommerce";
+    const uri = process.env.MONGODB_URI;
 
-        cached.promise = mongoose.connect(uri).then((mongoose) => {
+    if (!uri) {
+        if (process.env.VERCEL) {
+            throw new Error("MONGODB_URI is missing in Vercel Environment Variables. Please set MONGODB_URI in Vercel Project Settings.");
+        }
+    }
+
+    const connectionString = uri || "mongodb://127.0.0.1:27017/ecommerce";
+
+    if (!cached.promise) {
+        const opts = {
+            serverSelectionTimeoutMS: 5000, // Timeout after 5s instead of 30s
+        };
+
+        cached.promise = mongoose.connect(connectionString, opts).then((mongoose) => {
             console.log("MongoDB Connected ✅");
             return mongoose;
         });
@@ -25,7 +36,7 @@ const connectDB = async () => {
         cached.conn = await cached.promise;
     } catch (error) {
         cached.promise = null;
-        console.error("MongoDB Error ❌", error);
+        console.error("MongoDB Connection Error ❌", error.message);
         throw error;
     }
 
