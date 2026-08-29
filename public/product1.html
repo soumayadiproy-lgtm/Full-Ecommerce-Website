@@ -324,7 +324,7 @@ async function addReview() {
 
     try {
 
-        await fetch(BASE_URL + "/api/add-review/" + id, {
+        await fetch(BASE_URL + "/api/products/add-review/" + id, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"

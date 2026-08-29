@@ -130,16 +130,16 @@ async function sendOTP() {
             body: JSON.stringify({ phone: input.value })
         });
 
-        let data;
-        try {
-            data = await res.json();
-        } catch (e) {
-            const text = await res.text();
-            alert("Error (" + res.status + "): " + (text || "Failed to parse response"));
+        const text = await res.text();
+        let data = {};
+        try { data = JSON.parse(text); } catch(e) {}
+
+        if (!res.ok) {
+            alert(data.msg || data.error || ("Server Error (" + res.status + "): " + text.substring(0, 100)));
             return;
         }
 
-        alert(data.msg || data.message || data.error || "OTP sent");
+        alert(data.msg || data.message || "OTP sent ✅");
 
     } catch (err) {
         alert("❌ Network Error: " + err.message);
@@ -174,17 +174,12 @@ async function login() {
             });
         }
 
-        let data;
-        try {
-            data = await res.json();
-        } catch (e) {
-            const text = await res.text();
-            alert("Server Error (" + res.status + "): " + (text || "Invalid server response"));
-            return;
-        }
+        const text = await res.text();
+        let data = {};
+        try { data = JSON.parse(text); } catch(e) {}
 
         if (!res.ok) {
-            alert(data.msg || data.error || "Login failed ❌");
+            alert(data.msg || data.error || ("Login failed (" + res.status + "): " + (text.substring(0, 150) || "Error")));
             return;
         }
 

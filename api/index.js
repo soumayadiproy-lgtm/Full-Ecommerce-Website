@@ -35,9 +35,13 @@ app.use(["/api/cart", "/cart"], cartRoutes);
 app.use(["/api/contact", "/contact"], contactRoutes);
 app.use(["/api/payment", "/payment"], paymentRoutes);
 
+// ✅ Direct root fallbacks for requests stripped of prefixes
+app.use("/api", userRoutes);
+app.use("/api", productRoutes);
+
 // ✅ Test
 app.get(["/api/test", "/test"], (req, res) => {
-    res.json({ msg: "API WORKING" });
+    res.json({ msg: "API WORKING ✅" });
 });
 
 // ✅ Global Error Handler
