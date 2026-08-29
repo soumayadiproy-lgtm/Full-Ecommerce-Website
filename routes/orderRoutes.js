@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 
 const Order = require("../models/Order");
-const Cart = require("../models/cart");
+const Cart = require("../models/Cart");
 
 const { verifyToken, isAdmin } = require("../middleware/auth");
 
