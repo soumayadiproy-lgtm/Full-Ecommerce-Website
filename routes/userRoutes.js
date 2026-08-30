@@ -17,41 +17,46 @@ router.post("/register", async (req, res) => {
         const { email, password, phone } = req.body;
 
         if (!email || !password) {
-            return res.status(400).json({ msg: "All fields required ❌" });
+            return res.status(400).json({ msg: "Email and password are required ❌" });
         }
+
+        const normalizedEmail = email.trim().toLowerCase();
 
         let existingUser = null;
         try {
-            existingUser = await User.findOne({ email });
-        } catch (e) {
-            existingUser = memoryUsers.find(u => u.email === email);
+            existingUser = await User.findOne({ email: normalizedEmail });
+        } catch (e) {}
+
+        if (!existingUser) {
+            existingUser = memoryUsers.find(u => u.email && u.email.toLowerCase() === normalizedEmail);
         }
 
         if (existingUser) {
-            return res.status(400).json({ msg: "User already exists ❌" });
+            return res.status(400).json({ msg: "User already exists ❌ Please login!" });
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
+        const userData = {
+            email: normalizedEmail,
+            password: hashedPassword,
+            phone: phone || "",
+            role: "user"
+        };
 
+        let savedUser = null;
         try {
-            const newUser = new User({
-                email,
-                password: hashedPassword,
-                phone,
-                role: "user"
-            });
-            await newUser.save();
+            const newUser = new User(userData);
+            savedUser = await newUser.save();
         } catch (e) {
-            memoryUsers.push({
+            savedUser = {
                 _id: "mem_" + Date.now(),
-                email,
-                password: hashedPassword,
-                phone: phone || "",
-                role: "user"
-            });
+                ...userData
+            };
         }
 
-        return res.json({ msg: "Registered successfully ✅" });
+        memoryUsers.push(savedUser.toObject ? savedUser.toObject() : savedUser);
+
+        return res.json({ msg: "Registered successfully ✅ You can now login!" });
 
     } catch (err) {
         console.error("Register Error:", err);
@@ -66,30 +71,23 @@ router.post("/login", async (req, res) => {
         const { email, password } = req.body;
 
         if (!email || !password) {
-            return res.status(400).json({ msg: "All fields required ❌" });
+            return res.status(400).json({ msg: "Email and password are required ❌" });
         }
+
+        const normalizedEmail = email.trim().toLowerCase();
 
         let user = null;
         try {
-            user = await User.findOne({ email });
-        } catch (e) {
-            user = memoryUsers.find(u => u.email === email);
-        }
+            user = await User.findOne({ email: normalizedEmail });
+        } catch (e) {}
 
         if (!user) {
-            user = memoryUsers.find(u => u.email === email);
+            user = memoryUsers.find(u => u.email && u.email.toLowerCase() === normalizedEmail);
         }
 
-        // Dynamic user fallback if DB unavailable or registered in memory
+        // Strictly check if user exists
         if (!user) {
-            const hashedPassword = await bcrypt.hash(password, 10);
-            user = {
-                _id: "u_" + Date.now(),
-                email,
-                password: hashedPassword,
-                role: "user"
-            };
-            memoryUsers.push(user);
+            return res.status(400).json({ msg: "Account not found ❌ Please register first!" });
         }
 
         // 🚫 BLOCK CHECK
@@ -97,11 +95,15 @@ router.post("/login", async (req, res) => {
             return res.status(403).json({ msg: "Account blocked 🚫 Contact admin" });
         }
 
+        // Strictly verify password
         let isMatch = false;
-        try {
-            isMatch = await bcrypt.compare(password, user.password);
-        } catch (e) {
-            isMatch = true;
+        if (user.password) {
+            try {
+                isMatch = await bcrypt.compare(password, user.password);
+            } catch (e) {}
+            if (!isMatch && user.password === password) {
+                isMatch = true; // Fallback for plain-text password match
+            }
         }
 
         if (!isMatch) {
@@ -124,6 +126,7 @@ router.post("/login", async (req, res) => {
             user: {
                 _id: user._id,
                 email: user.email,
+                name: user.name || "",
                 role: user.role || "user"
             }
         });
