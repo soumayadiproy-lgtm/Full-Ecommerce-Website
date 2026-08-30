@@ -1,378 +1,646 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<title>My Account</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Account | Soumyadip Store</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
 body {
-    margin: 0;
-    font-family: 'Segoe UI', sans-serif;
-    background: linear-gradient(135deg, #667eea, #764ba2);
-    min-height: 100vh;   /* ✅ FIX */
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+    min-height: 100vh;
     display: flex;
+    flex-direction: column;
 }
+
+/* TOP NAV */
+.top-nav {
+    background: rgba(15,32,39,0.85);
+    backdrop-filter: blur(15px);
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    padding: 14px 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.top-nav .brand {
+    font-size: 22px;
+    font-weight: 700;
+    color: #ff4d4d;
+    text-decoration: none;
+}
+
+.top-nav .nav-links {
+    display: flex;
+    gap: 20px;
+}
+
+.top-nav .nav-links a {
+    color: #ccc;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    transition: color 0.3s;
+}
+
+.top-nav .nav-links a:hover {
+    color: #ff4d4d;
+}
+
+/* MAIN LAYOUT */
+.layout {
+    display: flex;
+    flex: 1;
+    padding: 30px;
+    gap: 25px;
+    max-width: 1100px;
+    margin: 0 auto;
+    width: 100%;
+}
+
 /* SIDEBAR */
 .sidebar {
     width: 220px;
-    background: rgba(0,0,0,0.3);
-    backdrop-filter: blur(10px);
-    color: white;
+    background: rgba(255,255,255,0.06);
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 20px;
     padding: 20px;
+    height: fit-content;
 }
 
-.sidebar h2 {
+.sidebar .user-avatar {
+    width: 70px;
+    height: 70px;
+    background: linear-gradient(135deg, #ff4d4d, #764ba2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    margin: 0 auto 12px;
+}
+
+.sidebar .user-email-preview {
+    color: #aaa;
+    font-size: 12px;
     text-align: center;
+    margin-bottom: 20px;
+    word-break: break-all;
 }
 
 .menu-item {
-    padding: 12px;
-    margin: 10px 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 14px;
+    border-radius: 12px;
     cursor: pointer;
-    border-radius: 8px;
+    color: #ccc;
+    font-size: 14px;
+    font-weight: 500;
+    transition: 0.3s;
+    margin-bottom: 6px;
 }
 
 .menu-item:hover {
-    background: rgba(255,255,255,0.2);
-}
-
-/* MAIN */
-.main {
-    flex: 1;
-    padding: 30px;
-    color: white;
-}
-
-.card {
     background: rgba(255,255,255,0.1);
-    backdrop-filter: blur(15px);
-    padding: 20px;
-    border-radius: 15px;
-    width: 400px;
+    color: #fff;
 }
 
-input {
-    width: 100%;
-    padding: 10px;
-    margin: 8px 0;
-    border-radius: 8px;
-    border: none;
-    background: rgba(255,255,255,0.2);
-    color: white;
+.menu-item.active {
+    background: linear-gradient(135deg, #ff4d4d, #ff6a00);
+    color: #fff;
+    font-weight: 600;
 }
 
-button {
-    width: 100%;
-    padding: 10px;
-    margin-top: 10px;
-    border: none;
-    border-radius: 8px;
-    background: #ff6a00;
-    color: white;
-    cursor: pointer;
+/* MAIN CONTENT */
+.content {
+    flex: 1;
 }
 
-.hidden {
+.section-panel {
     display: none;
 }
 
-.order-box {
-    background: rgba(255,255,255,0.15);
-    padding: 10px;
+.section-panel.active {
+    display: block;
+}
+
+/* CARD */
+.card {
+    background: rgba(255,255,255,0.07);
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 20px;
+    padding: 30px;
+}
+
+.card h3 {
+    font-size: 20px;
+    font-weight: 600;
+    color: #fff;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* FORM */
+.form-group {
+    margin-bottom: 16px;
+}
+
+.form-group label {
+    display: block;
+    font-size: 13px;
+    font-weight: 500;
+    color: #aaa;
+    margin-bottom: 6px;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 12px 16px;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 12px;
+    color: #fff;
+    font-size: 14px;
+    font-family: 'Poppins', sans-serif;
+    outline: none;
+    transition: 0.3s;
+}
+
+.form-group input:focus {
+    border-color: #ff4d4d;
+    background: rgba(255,255,255,0.12);
+    box-shadow: 0 0 10px rgba(255,77,77,0.2);
+}
+
+.form-group input:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.form-group input::placeholder {
+    color: rgba(255,255,255,0.4);
+}
+
+/* BUTTONS */
+.btn-primary {
+    width: 100%;
+    padding: 13px;
+    background: linear-gradient(45deg, #ff4d4d, #ff6a00);
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 600;
+    font-family: 'Poppins', sans-serif;
+    cursor: pointer;
+    transition: 0.3s;
+    margin-top: 6px;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 20px rgba(255,77,77,0.35);
+}
+
+.btn-secondary {
+    width: 100%;
+    padding: 13px;
+    background: rgba(255,255,255,0.08);
+    color: #fff;
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 600;
+    font-family: 'Poppins', sans-serif;
+    cursor: pointer;
+    transition: 0.3s;
     margin-top: 10px;
-    border-radius: 8px;
-}
-/* 🔥 RESPONSIVE FIX (CLEAN VERSION) */
-
-/* Tablet */
-@media (max-width:900px){
-    .card{
-        width: 100%;
-        max-width: 500px;
-        margin: auto;
-    }
-
-    .main{
-        padding: 20px;
-    }
 }
 
-/* Mobile */
-/* 🔥 FINAL RESPONSIVE FIX */
+.btn-secondary:hover {
+    background: rgba(255,255,255,0.15);
+}
 
-@media (max-width:768px){
+/* TOAST */
+.toast {
+    position: fixed;
+    bottom: 25px;
+    right: 25px;
+    background: #28a745;
+    color: #fff;
+    padding: 12px 22px;
+    border-radius: 30px;
+    font-weight: 600;
+    font-size: 14px;
+    display: none;
+    z-index: 9999;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+}
 
-    body{
-        flex-direction: column;   /* stack */
-    }
+/* ORDER CARDS */
+.order-card {
+    background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 16px;
+    padding: 18px;
+    margin-bottom: 16px;
+}
 
-    .sidebar{
-        width: 100%;
-        display: flex;
-        justify-content: space-around;
-        align-items: center;
-        padding: 10px;
-    }
+.order-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
 
-    .sidebar h2{
-        display: none;
-    }
+.order-id {
+    font-size: 13px;
+    color: #aaa;
+}
 
-    .menu-item{
-        margin: 0;
-        padding: 8px;
-        font-size: 14px;
-    }
+.status-badge {
+    padding: 4px 14px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+}
 
-    .main{
+.status-placed { background: rgba(255,193,7,0.2); color: #ffc107; }
+.status-shipped { background: rgba(33,150,243,0.2); color: #2196f3; }
+.status-delivered { background: rgba(76,175,80,0.2); color: #4caf50; }
+.status-cancelled { background: rgba(244,67,54,0.2); color: #f44336; }
+
+.order-items {
+    font-size: 13px;
+    color: #ccc;
+    margin-bottom: 10px;
+}
+
+.order-total {
+    font-size: 16px;
+    font-weight: 700;
+    color: #ff4d4d;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 50px;
+    color: #888;
+}
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+    .layout {
+        flex-direction: column;
         padding: 15px;
     }
-
-    .card{
+    .sidebar {
         width: 100%;
-        max-width: 100%;
-    }
-}
-/* Small mobile */
-@media (max-width:450px){
-
-    .sidebar{
-        flex-wrap: wrap;
-        justify-content: center;
+        display: flex;
         gap: 8px;
+        padding: 12px;
+        align-items: center;
+        overflow-x: auto;
     }
-
-    .menu-item{
-        font-size: 12px;
-        padding: 5px;
+    .sidebar .user-avatar,
+    .sidebar .user-email-preview {
+        display: none;
     }
-
-    input{
-        padding: 8px;
+    .menu-item {
+        white-space: nowrap;
         font-size: 13px;
-    }
-
-    button{
-        padding: 8px;
-        font-size: 13px;
+        padding: 9px 14px;
+        margin-bottom: 0;
     }
 }
 </style>
 </head>
-
 <body>
 
-<div class="sidebar">
-    <h2>My Account</h2>
+<!-- TOP NAVIGATION -->
+<nav class="top-nav">
+    <a href="index.html" class="brand">🛍️ Soumyadip Store</a>
+    <div class="nav-links">
+        <a href="products.html">Fashion</a>
+        <a href="grocery.html">Grocery 🥬</a>
+        <a href="cart.html">Cart 🛒</a>
+        <a href="orders.html">My Orders</a>
+    </div>
+</nav>
 
-    <div class="menu-item" onclick="showSection('profile')">👤 Profile</div>
-    <div class="menu-item" onclick="showSection('address')">📍 Address</div>
-    <div class="menu-item" onclick="showSection('orders')">📦 Orders</div>
-    <div class="menu-item" onclick="logout()">🚪 Logout</div>
-</div>
+<div class="layout">
 
-<div class="main">
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+        <div class="user-avatar">👤</div>
+        <div class="user-email-preview" id="sidebarEmail">Loading...</div>
 
-    <!-- PROFILE -->
-    <div id="profile" class="card">
-        <h3>Profile 👤</h3>
-        <input id="email" placeholder="Email" disabled>
-        <input id="name" placeholder="Name">
-        <input id="phone" placeholder="Phone">
-        <button onclick="updateProfile()">Update</button>
-        <button id="premiumBtn" onclick="upgrade()">Buy Premium Plus 💎</button>
+        <div class="menu-item active" id="tab-profile" onclick="showSection('profile', this)">👤 Profile</div>
+        <div class="menu-item" id="tab-address" onclick="showSection('address', this)">📍 Address</div>
+        <div class="menu-item" id="tab-orders" onclick="showSection('orders', this)">📦 Orders</div>
+        <div class="menu-item" onclick="logout()" style="color:#ff5252;">🚪 Logout</div>
     </div>
 
-    <!-- ADDRESS -->
-    <div id="address" class="card hidden">
-        <h3>Address 📍</h3>
-        <input id="addressInput" placeholder="Address">
-        <input id="city" placeholder="City">
-        <input id="pincode" placeholder="Pincode">
-        <button onclick="updateProfile()">Save Address</button>
-    </div>
+    <!-- CONTENT -->
+    <div class="content">
 
-    <!-- ORDERS -->
-    <div id="orders" class="card hidden">
-        <h3>My Orders 📦</h3>
-        <div id="orderList">Loading...</div>
-    </div>
+        <!-- PROFILE SECTION -->
+        <div id="profile" class="section-panel active">
+            <div class="card">
+                <h3>👤 Profile Information</h3>
 
-</div>
+                <div class="form-group">
+                    <label>Email Address</label>
+                    <input type="email" id="emailInput" placeholder="Your email" disabled>
+                </div>
 
-<script>
-const BASE_URL = "";
-const token = localStorage.getItem("token");
-// 🔐 LOGIN CHECK
-if (!token) {
-    alert("Login required ❌");
-    window.location.href = "/login.html";
-}
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" id="nameInput" placeholder="Enter your full name">
+                </div>
 
-// 🔥 SWITCH MENU
-function showSection(section) {
-    document.getElementById("profile").classList.add("hidden");
-    document.getElementById("address").classList.add("hidden");
-    document.getElementById("orders").classList.add("hidden");
+                <div class="form-group">
+                    <label>Phone Number</label>
+                    <input type="tel" id="phoneInput" placeholder="Enter your phone number">
+                </div>
 
-    document.getElementById(section).classList.remove("hidden");
-}
-
-// 🔥 LOAD PROFILE
-async function loadProfile() {
-    const res = await fetch(BASE_URL + "/api/users/profile", {
-        headers: {
-            "Authorization": "Bearer " + token
-        }
-    });
-
-    const user = await res.json();
-
-    document.getElementById("email").value = user.email || "";
-    document.getElementById("name").value = user.name || "";
-    document.getElementById("phone").value = user.phone || "";
-    document.getElementById("addressInput").value = user.address || "";
-    document.getElementById("city").value = user.city || "";
-    document.getElementById("pincode").value = user.pincode || "";
-
-    // 👑 FIXED POSITION
-    if (user.membership === "premium_plus") {
-        const btn = document.getElementById("premiumBtn");
-        btn.innerText = "You are Premium 👑";
-        btn.disabled = true;
-    }
-}
-// 🔥 LOAD ORDERS
-async function loadOrders() {
-   const res = await fetch(BASE_URL + "/api/orders", {
-        headers: {
-            "Authorization": "Bearer " + token
-        }
-    });
-
-    const data = await res.json();
-    const box = document.getElementById("orderList");
-
-    if (!data.length) {
-        box.innerHTML = "No orders yet 😅";
-        return;
-    }
-
-    box.innerHTML = data.map(o => `
-        <div class="order-box" style="
-            background: rgba(255,255,255,0.15);
-            padding: 20px;
-            margin-top: 15px;
-            border-radius: 15px;
-        ">
-            <h4>Order #${o._id}</h4>
-            <p>${new Date(o.createdAt).toLocaleString()}</p>
-
-            ${o.items.map(item => `
-                <p>🛍 ${item.name} - ₹${item.price}</p>
-            `).join("")}
-
-            <hr>
-
-            <b>Total: ₹${o.total}</b>
-
-            <div style="
-                margin-top:10px;
-                background: orange;
-                display:inline-block;
-                padding:5px 10px;
-                border-radius:20px;
-            ">
-                ${o.status || "Pending"}
+                <button class="btn-primary" onclick="updateProfile()">Update Profile ✅</button>
+                <button class="btn-secondary" id="premiumBtn" onclick="upgrade()">Buy Premium Plus 💎</button>
             </div>
         </div>
-    `).join("");
+
+        <!-- ADDRESS SECTION -->
+        <div id="address" class="section-panel">
+            <div class="card">
+                <h3>📍 Delivery Address</h3>
+
+                <div class="form-group">
+                    <label>Street Address</label>
+                    <input type="text" id="addressInput" placeholder="House no, Street, Area">
+                </div>
+
+                <div class="form-group">
+                    <label>City</label>
+                    <input type="text" id="cityInput" placeholder="Enter city">
+                </div>
+
+                <div class="form-group">
+                    <label>Pincode</label>
+                    <input type="text" id="pincodeInput" placeholder="Enter pincode">
+                </div>
+
+                <button class="btn-primary" onclick="updateProfile()">Save Address 📍</button>
+            </div>
+        </div>
+
+        <!-- ORDERS SECTION -->
+        <div id="orders" class="section-panel">
+            <div class="card">
+                <h3>📦 My Orders</h3>
+                <div id="orderList">
+                    <div class="empty-state">Loading orders... ⏳</div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const token = localStorage.getItem("token");
+
+// Redirect if not logged in
+if (!token) {
+    alert("Please login first ❌");
+    window.location.href = "login.html";
 }
-// 🔥 UPDATE PROFILE
+
+// Decode JWT to get email/role immediately (before DB loads)
+function decodeJWT(t) {
+    try {
+        return JSON.parse(atob(t.split(".")[1]));
+    } catch(e) { return {}; }
+}
+
+const jwtPayload = decodeJWT(token);
+
+// Pre-fill email from JWT immediately so it always shows
+if (jwtPayload.email) {
+    document.getElementById("emailInput").value = jwtPayload.email;
+    document.getElementById("sidebarEmail").innerText = jwtPayload.email;
+}
+
+// ============= SECTION SWITCHING =============
+function showSection(section, el) {
+    document.querySelectorAll(".section-panel").forEach(p => p.classList.remove("active"));
+    document.querySelectorAll(".menu-item").forEach(m => m.classList.remove("active"));
+    document.getElementById(section).classList.add("active");
+    if (el) el.classList.add("active");
+
+    if (section === "orders") loadOrders();
+}
+
+// ============= LOAD PROFILE =============
+async function loadProfile() {
+    try {
+        const res = await fetch("/api/users/profile", {
+            headers: { "Authorization": "Bearer " + token }
+        });
+
+        if (!res.ok) throw new Error("Fetch failed");
+        const user = await res.json();
+
+        // Populate fields (use JWT email as guaranteed fallback)
+        document.getElementById("emailInput").value = user.email || jwtPayload.email || "";
+        document.getElementById("nameInput").value = user.name || "";
+        document.getElementById("phoneInput").value = user.phone || "";
+        document.getElementById("addressInput").value = user.address || "";
+        document.getElementById("cityInput").value = user.city || "";
+        document.getElementById("pincodeInput").value = user.pincode || "";
+
+        // Update sidebar email
+        const email = user.email || jwtPayload.email || "";
+        document.getElementById("sidebarEmail").innerText = email;
+
+        // Premium badge
+        if (user.membership === "premium_plus") {
+            const btn = document.getElementById("premiumBtn");
+            btn.innerText = "You are Premium 👑";
+            btn.disabled = true;
+            btn.style.opacity = "0.7";
+        }
+
+    } catch (err) {
+        console.warn("Profile load fallback — using JWT data:", err);
+        // Still show email from JWT
+        document.getElementById("emailInput").value = jwtPayload.email || "";
+        document.getElementById("sidebarEmail").innerText = jwtPayload.email || "";
+    }
+}
+
+// ============= UPDATE PROFILE =============
 async function updateProfile() {
+    try {
+        const payload = {
+            name: document.getElementById("nameInput").value.trim(),
+            phone: document.getElementById("phoneInput").value.trim(),
+            address: document.getElementById("addressInput").value.trim(),
+            city: document.getElementById("cityInput").value.trim(),
+            pincode: document.getElementById("pincodeInput").value.trim()
+        };
 
-    const res = await fetch(BASE_URL + "/api/users/profile", {
-        method: "PUT",
-        headers: {
-            "Content-Type": "application/json",
-            "Authorization": "Bearer " + token
-        },
-        body: JSON.stringify({
-            name: document.getElementById("name").value,
-            phone: document.getElementById("phone").value,
-            address: document.getElementById("addressInput").value,
-            city: document.getElementById("city").value,
-            pincode: document.getElementById("pincode").value
-        })
-    });
+        const res = await fetch("/api/users/profile", {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + token
+            },
+            body: JSON.stringify(payload)
+        });
 
-    const data = await res.json();
-    alert(data.msg || "Updated ✅");
+        const data = await res.json();
+
+        if (res.ok) {
+            showToast(data.msg || "Profile updated ✅");
+        } else {
+            showToast(data.error || data.msg || "Update failed ❌", true);
+        }
+
+    } catch (err) {
+        showToast("Network error ❌", true);
+    }
 }
 
-// 🔥 LOGOUT
-function logout() {
-    localStorage.removeItem("token");
-    window.location.href = "/login.html";
-}
-// 💎 PREMIUM UPGRADE
-async function upgrade() {
+// ============= LOAD ORDERS =============
+async function loadOrders() {
+    const box = document.getElementById("orderList");
+    box.innerHTML = "<div class='empty-state'>Loading... ⏳</div>";
 
     try {
-        const orderRes = await fetch(BASE_URL + "/api/payment/create-order", {
+        const res = await fetch("/api/orders", {
+            headers: { "Authorization": "Bearer " + token }
+        });
+
+        const data = await res.json();
+
+        if (!data.length) {
+            box.innerHTML = "<div class='empty-state'>No orders yet 😅<br><a href='products.html' style='color:#ff4d4d;'>Start Shopping →</a></div>";
+            return;
+        }
+
+        function getStatusClass(s) {
+            if (!s) return "status-placed";
+            s = s.toLowerCase();
+            if (s.includes("deliver")) return "status-delivered";
+            if (s.includes("ship") || s.includes("transit")) return "status-shipped";
+            if (s.includes("cancel")) return "status-cancelled";
+            return "status-placed";
+        }
+
+        box.innerHTML = data.map(o => `
+            <div class="order-card">
+                <div class="order-header">
+                    <div>
+                        <div style="font-size:14px;font-weight:600;color:#fff;">Order #${String(o._id).slice(-8).toUpperCase()}</div>
+                        <div class="order-id">${new Date(o.createdAt).toLocaleDateString('en-IN', { year: 'numeric', month: 'short', day: 'numeric' })}</div>
+                    </div>
+                    <div class="status-badge ${getStatusClass(o.status)}">${o.status || "Placed"}</div>
+                </div>
+
+                <div class="order-items">
+                    ${(o.items || []).map(item => `
+                        <div style="display:flex;align-items:center;gap:8px;padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.06);">
+                            ${item.img ? `<img src="${item.img}" style="width:36px;height:36px;border-radius:8px;object-fit:cover;" onerror="this.style.display='none'">` : ""}
+                            <span>🛍 ${item.name} × ${item.quantity} — ₹${item.price}</span>
+                        </div>
+                    `).join("")}
+                </div>
+
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;">
+                    <div class="order-total">Total: ₹${o.total}</div>
+                    <div style="font-size:12px;color:#aaa;">via ${o.payment || "COD"}</div>
+                </div>
+            </div>
+        `).join("");
+
+    } catch (err) {
+        box.innerHTML = "<div class='empty-state'>Error loading orders ❌</div>";
+    }
+}
+
+// ============= LOGOUT =============
+function logout() {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    window.location.href = "login.html";
+}
+
+// ============= PREMIUM UPGRADE =============
+async function upgrade() {
+    try {
+        const orderRes = await fetch("/api/payment/create-order", {
             method: "POST",
-            headers: {
-                "Authorization": "Bearer " + token
-            }
+            headers: { "Authorization": "Bearer " + token }
         });
 
         const order = await orderRes.json();
-        console.log("ORDER:", order);
 
         const options = {
-           key: "rzp_test_abc123xxxx" ,
+            key: "rzp_test_abc123xxxx",
             amount: order.amount,
             currency: "INR",
-            name: "My Store",
-            description: "Premium Plus",
+            name: "Soumyadip Store",
+            description: "Premium Plus Membership",
             order_id: order.id,
-
-            handler: async function (response) {
-                const res = await fetch(BASE_URL + "/api/payment/verify-payment", {
+            handler: async function(response) {
+                const res = await fetch("/api/payment/verify-payment", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
                         "Authorization": "Bearer " + token
                     },
-                    body: JSON.stringify({
-                        paymentId: response.razorpay_payment_id
-                    })
+                    body: JSON.stringify({ paymentId: response.razorpay_payment_id })
                 });
-
                 const data = await res.json();
-                alert(data.message);
+                showToast(data.message || "Upgraded to Premium ✅");
                 loadProfile();
             }
         };
 
         const rzp = new Razorpay(options);
-
-        // ❗ ADD THIS
-        rzp.on("payment.failed", function (response) {
-            console.log("FAIL:", response.error);
-            alert("Payment Failed ❌");
-        });
-
+        rzp.on("payment.failed", () => showToast("Payment Failed ❌", true));
         rzp.open();
 
     } catch (err) {
-        console.log("ERROR:", err);
-        alert("Something went wrong ❌");
+        showToast("Payment error ❌", true);
     }
 }
+
+// ============= TOAST =============
+function showToast(msg, isError = false) {
+    const toast = document.getElementById("toast");
+    toast.innerText = msg;
+    toast.style.background = isError ? "#f44336" : "#28a745";
+    toast.style.display = "block";
+    setTimeout(() => toast.style.display = "none", 3000);
+}
+
 // INIT
 loadProfile();
-loadOrders();
-
 </script>
 
 </body>
