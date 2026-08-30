@@ -25,8 +25,8 @@ const connectDB = async () => {
 
     if (!cached.promise) {
         const opts = {
-            serverSelectionTimeoutMS: 10000,
-            socketTimeoutMS: 45000,
+            serverSelectionTimeoutMS: 3000,
+            socketTimeoutMS: 15000,
             bufferCommands: false,
         };
 

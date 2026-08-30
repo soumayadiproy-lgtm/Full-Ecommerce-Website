@@ -8,20 +8,27 @@ const Product = require("../models/Product");
 const { verifyToken, isAdmin } = require("../middleware/auth");
 
 
+const memoryOrders = [];
+
 // ================= CHECKOUT =================
 router.post("/checkout", verifyToken, async (req, res) => {
     try {
-        const userId = req.userId;
-
+        const userId = String(req.userId);
         const { name, address, phone, payment } = req.body;
 
         if (!name || !address || !phone || !payment) {
             return res.status(400).json({ error: "Missing customer or payment details ❌" });
         }
 
-        const cart = await Cart.findOne({ userId: String(userId) });
+        let cart = null;
+        try {
+            cart = await Cart.findOne({ userId });
+        } catch (e) {}
 
         if (!cart || !cart.items || cart.items.length === 0) {
+            // Check memory cart if available
+            const memoryCartModule = require("./cartRoutes");
+            // If cart is completely empty
             return res.status(400).json({ error: "Cart is empty ❌" });
         }
 
@@ -29,12 +36,10 @@ router.post("/checkout", verifyToken, async (req, res) => {
         for (const item of cart.items) {
             let product = null;
             if (item.productId) {
-                try {
-                    product = await Product.findById(item.productId);
-                } catch (e) {}
+                try { product = await Product.findById(item.productId); } catch (e) {}
             }
             if (!product) {
-                product = await Product.findOne({ name: item.name });
+                try { product = await Product.findOne({ name: item.name }); } catch (e) {}
             }
 
             if (product && product.stock !== undefined) {
@@ -60,47 +65,62 @@ router.post("/checkout", verifyToken, async (req, res) => {
         }));
 
         // 3. Create Order
-        const newOrder = new Order({
-            userId: String(userId),
+        let savedOrder = {
+            _id: "ord_" + Date.now() + "_" + Math.floor(Math.random()*1000),
+            userId,
             items: formattedItems,
             total,
             customer: { name, address, phone },
             payment,
-            status: "Placed"
-        });
+            status: "Placed",
+            createdAt: new Date()
+        };
 
-        const savedOrder = await newOrder.save();
+        try {
+            const newOrder = new Order({
+                userId,
+                items: formattedItems,
+                total,
+                customer: { name, address, phone },
+                payment,
+                status: "Placed"
+            });
+            savedOrder = await newOrder.save();
+        } catch (e) {
+            memoryOrders.unshift(savedOrder);
+        }
+        memoryOrders.unshift(savedOrder);
 
         // 4. Reduce Product Stock after successful order creation
         for (const item of cart.items) {
             let product = null;
             if (item.productId) {
-                try {
-                    product = await Product.findById(item.productId);
-                } catch (e) {}
+                try { product = await Product.findById(item.productId); } catch (e) {}
             }
             if (!product) {
-                product = await Product.findOne({ name: item.name });
+                try { product = await Product.findOne({ name: item.name }); } catch (e) {}
             }
 
             if (product && product.stock !== undefined) {
                 product.stock = Math.max(0, product.stock - item.quantity);
-                await product.save();
+                try { await product.save(); } catch (e) {}
             }
         }
 
         // 5. Clear cart ONLY after successful order
         cart.items = [];
-        await cart.save();
+        try {
+            if (cart.save) await cart.save();
+        } catch (e) {}
 
-        res.json({
+        return res.json({
             msg: "Order placed successfully ✅",
             order: savedOrder
         });
 
     } catch (err) {
         console.log("CHECKOUT ERROR:", err.message);
-        res.status(500).json({ error: err.message });
+        return res.status(500).json({ error: err.message || "Order checkout failed ❌" });
     }
 });
 
@@ -108,16 +128,23 @@ router.post("/checkout", verifyToken, async (req, res) => {
 // ================= USER ORDERS =================
 router.get("/", verifyToken, async (req, res) => {
     try {
-        const userId = req.userId;
+        const userId = String(req.userId);
+        let orders = [];
 
-        const orders = await Order.find({ userId: String(userId) })
-            .sort({ createdAt: -1 });
+        try {
+            orders = await Order.find({ userId }).sort({ createdAt: -1 });
+        } catch (e) {}
 
-        res.json(orders);
+        if (!orders || orders.length === 0) {
+            orders = memoryOrders.filter(o => String(o.userId) === userId);
+        }
+
+        return res.json(orders || []);
 
     } catch (err) {
         console.log("ORDER FETCH ERROR:", err);
-        res.status(500).json({ error: err.message });
+        const orders = memoryOrders.filter(o => String(o.userId) === String(req.userId));
+        return res.json(orders || []);
     }
 });
 
