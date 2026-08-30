@@ -21,11 +21,19 @@ router.post("/add", verifyToken, async (req, res) => {
         }
 
         if (!product && name) {
-            product = { name, price: Number(price) || 0, img: img || "" };
+            product = await Product.findOne({ name: name });
+            if (!product) {
+                product = { name, price: Number(price) || 0, img: img || "", stock: 50 };
+            }
         }
 
         if (!product) {
             return res.status(404).json({ message: "Product not found ❌" });
+        }
+
+        const availableStock = product.stock !== undefined ? product.stock : 50;
+        if (availableStock <= 0) {
+            return res.status(400).json({ message: "Product is out of stock ❌" });
         }
 
         let cart = await Cart.findOne({ userId: String(req.userId) });
@@ -37,12 +45,19 @@ router.post("/add", verifyToken, async (req, res) => {
             });
         }
 
-        const existing = cart.items.find(i => i.name === product.name);
+        const existing = cart.items.find(i => 
+            (i.productId && product._id && i.productId.toString() === product._id.toString()) || 
+            i.name === product.name
+        );
 
         if (existing) {
+            if (existing.quantity + 1 > availableStock) {
+                return res.status(400).json({ message: `Cannot add more than available stock (${availableStock}) ❌` });
+            }
             existing.quantity += 1;
         } else {
             cart.items.push({
+                productId: product._id || null,
                 name: product.name,
                 price: product.price,
                 img: product.img || "",
@@ -117,14 +132,26 @@ router.put("/update/:id", verifyToken, async (req, res) => {
             return res.status(404).json({ message: "Item not found ❌" });
         }
 
+        // Fetch original product to check stock
+        let product = null;
+        if (item.productId) {
+            product = await Product.findById(item.productId);
+        }
+        if (!product) {
+            product = await Product.findOne({ name: item.name });
+        }
+        const availableStock = product && product.stock !== undefined ? product.stock : 50;
+
         if (action === "inc") {
+            if (item.quantity + 1 > availableStock) {
+                return res.status(400).json({ message: `Cannot exceed available stock (${availableStock}) ❌` });
+            }
             item.quantity += 1;
         } else if (action === "dec") {
-            item.quantity -= 1;
-
-            if (item.quantity <= 0) {
-                cart.items = cart.items.filter(i => i._id.toString() !== req.params.id);
+            if (item.quantity - 1 < 1) {
+                return res.status(400).json({ message: "Quantity cannot be less than 1 ❌" });
             }
+            item.quantity -= 1;
         }
 
         await cart.save();

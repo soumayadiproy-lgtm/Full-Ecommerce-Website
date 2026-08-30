@@ -4,27 +4,49 @@ const router = express.Router();
 const Order = require("../models/Order");
 const Cart = require("../models/Cart");
 
+const Product = require("../models/Product");
 const { verifyToken, isAdmin } = require("../middleware/auth");
 
 
 // ================= CHECKOUT =================
 router.post("/checkout", verifyToken, async (req, res) => {
     try {
-        // ✅ FIX: use same pattern everywhere
         const userId = req.userId;
 
         const { name, address, phone, payment } = req.body;
 
         if (!name || !address || !phone || !payment) {
-            return res.status(400).json({ error: "Missing details ❌" });
+            return res.status(400).json({ error: "Missing customer or payment details ❌" });
         }
 
         const cart = await Cart.findOne({ userId: String(userId) });
 
-        if (!cart || cart.items.length === 0) {
+        if (!cart || !cart.items || cart.items.length === 0) {
             return res.status(400).json({ error: "Cart is empty ❌" });
         }
 
+        // 1. Validate Stock for all cart items first
+        for (const item of cart.items) {
+            let product = null;
+            if (item.productId) {
+                try {
+                    product = await Product.findById(item.productId);
+                } catch (e) {}
+            }
+            if (!product) {
+                product = await Product.findOne({ name: item.name });
+            }
+
+            if (product && product.stock !== undefined) {
+                if (product.stock < item.quantity) {
+                    return res.status(400).json({
+                        error: `Insufficient stock for "${item.name}". Available stock: ${product.stock} ❌`
+                    });
+                }
+            }
+        }
+
+        // 2. Calculate Total & Format Items
         let total = 0;
         cart.items.forEach(item => {
             total += item.price * item.quantity;
@@ -37,18 +59,37 @@ router.post("/checkout", verifyToken, async (req, res) => {
             quantity: item.quantity
         }));
 
+        // 3. Create Order
         const newOrder = new Order({
             userId: String(userId),
             items: formattedItems,
             total,
             customer: { name, address, phone },
             payment,
-            status: "Ordered"
+            status: "Placed"
         });
 
         const savedOrder = await newOrder.save();
 
-        // 🧹 clear cart
+        // 4. Reduce Product Stock after successful order creation
+        for (const item of cart.items) {
+            let product = null;
+            if (item.productId) {
+                try {
+                    product = await Product.findById(item.productId);
+                } catch (e) {}
+            }
+            if (!product) {
+                product = await Product.findOne({ name: item.name });
+            }
+
+            if (product && product.stock !== undefined) {
+                product.stock = Math.max(0, product.stock - item.quantity);
+                await product.save();
+            }
+        }
+
+        // 5. Clear cart ONLY after successful order
         cart.items = [];
         await cart.save();
 

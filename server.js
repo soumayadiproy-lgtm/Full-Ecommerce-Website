@@ -26,17 +26,24 @@ app.get("/", (req, res) => {
     res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
-// ✅ Database connection middleware to prevent Mongoose buffering timeouts
+// ✅ Database connection middleware to ensure MongoDB connection is active before routes run
 app.use(async (req, res, next) => {
-    if (req.path.startsWith("/api")) {
-        try {
-            await connectDB();
-        } catch (err) {
-            console.error("⚠️ DB Connection Middleware notice:", err.message);
-            return res.status(500).json({ error: "Database connection failed. Please try again." });
-        }
+    // Skip connecting to DB for static file assets (e.g. .css, .js, .png, .jpg, .ico, .html)
+    const isStaticFile = req.path.match(/\.(html|css|js|png|jpg|jpeg|gif|ico|svg|json)$/i);
+    if (isStaticFile && !req.path.startsWith("/api")) {
+        return next();
     }
-    next();
+
+    try {
+        await connectDB();
+        next();
+    } catch (err) {
+        console.error("❌ DB Connection Error in Middleware:", err.message);
+        return res.status(500).json({
+            error: "Database connection failed. Please ensure MongoDB Atlas IP Whitelist allows 0.0.0.0/0.",
+            details: err.message
+        });
+    }
 });
 
 // ✅ Health check

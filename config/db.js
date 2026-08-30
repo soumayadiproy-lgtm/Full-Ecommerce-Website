@@ -1,5 +1,8 @@
 const mongoose = require("mongoose");
 
+// Disable Mongoose buffering to prevent 10,000ms timeout hangs when DB is connecting or disconnected
+mongoose.set("bufferCommands", false);
+
 let cached = global.mongoose;
 
 if (!cached) {
@@ -24,6 +27,7 @@ const connectDB = async () => {
         const opts = {
             serverSelectionTimeoutMS: 10000,
             socketTimeoutMS: 45000,
+            bufferCommands: false,
         };
 
         cached.promise = mongoose.connect(primaryUri, opts)
@@ -32,8 +36,8 @@ const connectDB = async () => {
                 return mongooseInstance;
             })
             .catch(async (err) => {
-                // If Atlas fails, attempt local fallback if not explicitly using custom env URI
-                if (!process.env.MONGODB_URI) {
+                // If Atlas fails, attempt local fallback when running locally
+                if (!process.env.VERCEL && process.env.NODE_ENV !== "production") {
                     const localUri = "mongodb://127.0.0.1:27017/ecommerce";
                     console.warn("⚠️ MongoDB Atlas connection failed. Attempting local MongoDB connection...");
                     try {
@@ -41,7 +45,6 @@ const connectDB = async () => {
                         console.log("Connected to Local MongoDB ✅");
                         return localConn;
                     } catch (localErr) {
-                        // Local also failed, rethrow primary error
                         throw err;
                     }
                 }
@@ -54,16 +57,6 @@ const connectDB = async () => {
     } catch (error) {
         cached.promise = null;
         console.error("❌ MongoDB Connection Error:", error.message);
-
-        if (error.message.includes("SSL") || error.message.includes("TLSV1") || error.message.includes("whitelisted") || error.name === "MongoNetworkError") {
-            console.error("------------------------------------------------------------------");
-            console.error("📌 TROUBLESHOOTING MONGODB ATLAS CONNECTION:");
-            console.error("1. IP Whitelist: Ensure your IP (or 0.0.0.0/0 for all) is added in:");
-            console.error("   MongoDB Atlas -> Network Access -> Add IP Address");
-            console.error("2. Cluster State: Ensure your cluster in MongoDB Atlas is active (not paused).");
-            console.error("3. Credentials: Check db user & password in .env or config/db.js");
-            console.error("------------------------------------------------------------------");
-        }
         throw error;
     }
 
