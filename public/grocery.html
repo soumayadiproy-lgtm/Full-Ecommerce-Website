@@ -469,14 +469,18 @@ function renderProducts() {
     filtered.forEach(item => {
         const stock = item.stock !== undefined ? item.stock : 50;
         const isOutOfStock = stock <= 0;
+        const detailUrl = `product1.html?id=${item._id}`;
 
         html += `
         <div class="product-card">
             <span class="badge">${isOutOfStock ? "Out of Stock" : "Fresh"}</span>
-            <img src="${item.img || 'https://via.placeholder.com/200'}" class="product-img" alt="${item.name}">
+            <img src="${item.img || 'https://via.placeholder.com/200'}" class="product-img" alt="${item.name}"
+                style="cursor:pointer;"
+                onclick="window.location.href='${detailUrl}'"
+                title="View details">
             <div class="card-details">
                 <div>
-                    <h3 class="product-name">${item.name}</h3>
+                    <h3 class="product-name" style="cursor:pointer;" onclick="window.location.href='${detailUrl}'">${item.name}</h3>
                     <div class="stock-info ${isOutOfStock ? 'stock-out' : 'stock-in'}">
                         ${isOutOfStock ? "Out of Stock ❌" : `In Stock: ${stock}`}
                     </div>

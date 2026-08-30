@@ -18,6 +18,7 @@ const productSchema = new mongoose.Schema({
         {
             text: String,
             rating: Number,
+            author: { type: String, default: "Anonymous" },
             user: {
                 type: mongoose.Schema.Types.ObjectId,
                 ref: "User"

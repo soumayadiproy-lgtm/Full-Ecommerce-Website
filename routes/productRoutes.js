@@ -294,6 +294,7 @@ router.post("/add-review/:id", async (req, res) => {
         product.reviews.push({
             text,
             rating: Number(rating) || 5,
+            author: req.body.author || "Anonymous",
             user: userId,
             date: new Date()
         });
