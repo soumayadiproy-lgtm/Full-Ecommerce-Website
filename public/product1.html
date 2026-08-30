@@ -985,11 +985,19 @@ function renderProduct(p) {
     document.getElementById("productName").innerText = p.name;
 
     // Image
-    const imgSrc = p.img || "https://via.placeholder.com/400x400?text=No+Image";
-    document.getElementById("mainImg").src = imgSrc;
-    document.getElementById("thumb1").src = imgSrc;
-    document.getElementById("thumb2").src = imgSrc;
-    document.getElementById("thumb3").src = imgSrc;
+    const fallbackPlaceholder = p.category === "grocery" ? "https://images.unsplash.com/photo-1542838132-92c53300491e?w=400" : "https://images.unsplash.com/photo-1523381210434-271e8be1f52b?w=400";
+    const imgSrc = p.img || fallbackPlaceholder;
+    const mainImg = document.getElementById("mainImg");
+    mainImg.onerror = function() { this.onerror = null; this.src = fallbackPlaceholder; };
+    mainImg.src = imgSrc;
+    
+    ["thumb1", "thumb2", "thumb3"].forEach(id => {
+        const t = document.getElementById(id);
+        if (t) {
+            t.onerror = function() { this.onerror = null; this.src = fallbackPlaceholder; };
+            t.src = imgSrc;
+        }
+    });
 
     // Price
     document.getElementById("productPrice").innerText = "₹" + p.price;

@@ -10,12 +10,12 @@ const { verifyToken, isAdmin } = require("../middleware/auth");
 const fallbackProducts = [
     // ======= 👗 FASHION & GENERAL (100 items) =======
     // --- Clothes (40) ---
-    { _id: "f1",   name: "Red Printed T-Shirt", price: 300, type: "clothes", category: "general", stock: 50, img: "/images/product-1.jpg" },
-    { _id: "f2",   name: "Black Tracksuit", price: 500, type: "clothes", category: "general", stock: 50, img: "/images/product-3.jpg" },
+    { _id: "f1",   name: "Red Printed T-Shirt", price: 300, type: "clothes", category: "general", stock: 50, img: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=400" },
+    { _id: "f2",   name: "Black Tracksuit", price: 500, type: "clothes", category: "general", stock: 50, img: "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=400" },
     { _id: "f3",   name: "Yellow Party Dress", price: 3000, type: "clothes", category: "general", stock: 20, img: "https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?w=400" },
     { _id: "f4",   name: "White Shorts Girls", price: 2500, type: "clothes", category: "general", stock: 30, img: "https://images.unsplash.com/photo-1591195853828-11db59a44f43?w=400" },
-    { _id: "f8",   name: "Men Casual Dress", price: 1000, type: "clothes", category: "general", stock: 35, img: "/images/product-4.jpg" },
-    { _id: "f10",  name: "Men Tracksuit", price: 700, type: "clothes", category: "general", stock: 30, img: "/images/product-12.jpg" },
+    { _id: "f8",   name: "Men Casual Dress", price: 1000, type: "clothes", category: "general", stock: 35, img: "https://images.unsplash.com/photo-1620012253295-c15cc3e65df4?w=400" },
+    { _id: "f10",  name: "Men Tracksuit", price: 700, type: "clothes", category: "general", stock: 30, img: "https://images.unsplash.com/photo-1556905055-8f358a7a47b2?w=400" },
     { _id: "f25",  name: "Floral Summer Dress", price: 1200, type: "clothes", category: "general", stock: 45, img: "https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?w=400" },
     { _id: "f26",  name: "Blue Denim Jacket", price: 2200, type: "clothes", category: "general", stock: 30, img: "https://images.unsplash.com/photo-1544441893-675973e31985?w=400" },
     { _id: "f27",  name: "Cotton Graphic Hoodie", price: 1400, type: "clothes", category: "general", stock: 40, img: "https://images.unsplash.com/photo-1556905055-8f358a7a47b2?w=400" },
@@ -50,8 +50,8 @@ const fallbackProducts = [
     { _id: "f99",  name: "Men Sports Cap", price: 550, type: "clothes", category: "general", stock: 50, img: "https://images.unsplash.com/photo-1521369909029-2afed882baee?w=400" },
     { _id: "f100", name: "Women Silk Scarf", price: 750, type: "clothes", category: "general", stock: 40, img: "https://images.unsplash.com/photo-1601924994987-69e26d50dc26?w=400" },
     // --- Shoes (20) ---
-    { _id: "f5",   name: "Grey Running Shoe", price: 2000, type: "shoes", category: "general", stock: 40, img: "/images/product-5.jpg" },
-    { _id: "f7",   name: "Blue Sneakers", price: 500, type: "shoes", category: "general", stock: 50, img: "/images/shoe-sneakers-footwear-54334.jpg" },
+    { _id: "f5",   name: "Grey Running Shoe", price: 2000, type: "shoes", category: "general", stock: 40, img: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400" },
+    { _id: "f7",   name: "Blue Sneakers", price: 500, type: "shoes", category: "general", stock: 50, img: "https://images.unsplash.com/photo-1463100099107-aa0980c362e6?w=400" },
     { _id: "f9",   name: "Girls Party Shoes", price: 1500, type: "shoes", category: "general", stock: 25, img: "https://images.unsplash.com/photo-1543163521-1bf539c55dd2?w=400" },
     { _id: "f29",  name: "Leather Formal Shoes", price: 3200, type: "shoes", category: "general", stock: 25, img: "https://images.unsplash.com/photo-1614252235316-8c857d38b5f4?w=400" },
     { _id: "f30",  name: "Athletic Sport Trainers", price: 2400, type: "shoes", category: "general", stock: 30, img: "https://images.unsplash.com/photo-1584735935682-2f2b69dff9d2?w=400" },
@@ -71,7 +71,7 @@ const fallbackProducts = [
     { _id: "f104", name: "Women Mules", price: 1800, type: "shoes", category: "general", stock: 25, img: "https://images.unsplash.com/photo-1543163521-1bf539c55dd2?w=400" },
     { _id: "f105", name: "Kids Sneakers", price: 1200, type: "shoes", category: "general", stock: 35, img: "https://images.unsplash.com/photo-1584735935682-2f2b69dff9d2?w=400" },
     // --- Accessories & Electronics (40) ---
-    { _id: "f6",   name: "Black Printed Handbag", price: 3000, type: "electronics", category: "general", stock: 15, img: "/images/Women_Handbag_apkamart_11_58d2de39-f8b4-43c2-b459-a9c07c006abf.webp" },
+    { _id: "f6",   name: "Black Printed Handbag", price: 3000, type: "electronics", category: "general", stock: 15, img: "https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=400" },
     { _id: "f31",  name: "Smart Fitness Watch", price: 2999, type: "electronics", category: "general", stock: 20, img: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400" },
     { _id: "f32",  name: "Wireless Headphones", price: 4500, type: "electronics", category: "general", stock: 15, img: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400" },
     { _id: "f33",  name: "Leather Backpack", price: 1999, type: "electronics", category: "general", stock: 25, img: "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=400" },

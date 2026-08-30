@@ -474,7 +474,8 @@ function renderProducts() {
         html += `
         <div class="product-card">
             <span class="badge">${isOutOfStock ? "Out of Stock" : "Fresh"}</span>
-            <img src="${item.img || 'https://via.placeholder.com/200'}" class="product-img" alt="${item.name}"
+            <img src="${item.img || 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=400'}" class="product-img" alt="${item.name}"
+                onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1542838132-92c53300491e?w=400';"
                 style="cursor:pointer;"
                 onclick="window.location.href='${detailUrl}'"
                 title="View details">
