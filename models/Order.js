@@ -1,6 +1,9 @@
 const mongoose = require("mongoose");
 
 const orderSchema = new mongoose.Schema({
+    _id: {
+        type: mongoose.Schema.Types.Mixed
+    },
     userId: {
         type: String,
         required: true

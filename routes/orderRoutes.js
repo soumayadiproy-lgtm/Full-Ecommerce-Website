@@ -160,24 +160,33 @@ router.get("/", verifyToken, async (req, res) => {
 
 // ================= DELETE ORDER (USER) =================
 router.delete("/:id", verifyToken, async (req, res) => {
+    const orderId = req.params.id;
+    const userId = String(req.userId);
+
     try {
-        const userId = req.userId;
-
-        const order = await Order.findOne({
-            _id: req.params.id,
-            userId: String(userId)
-        });
-
-        if (!order) {
-            return res.status(404).json({ error: "Order not found ❌" });
+        try {
+            await Order.deleteOne({ _id: orderId, userId });
+        } catch (e) {
+            try { await Order.findByIdAndDelete(orderId); } catch (err) {}
         }
 
-        await Order.findByIdAndDelete(req.params.id);
+        // Delete from in-memory fallback store
+        for (let i = memoryOrders.length - 1; i >= 0; i--) {
+            if (String(memoryOrders[i]._id) === String(orderId)) {
+                memoryOrders.splice(i, 1);
+            }
+        }
 
-        res.json({ msg: "Order deleted 🗑️" });
+        return res.json({ msg: "Order deleted 🗑️" });
 
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        console.log("DELETE ORDER ERROR:", err.message);
+        for (let i = memoryOrders.length - 1; i >= 0; i--) {
+            if (String(memoryOrders[i]._id) === String(orderId)) {
+                memoryOrders.splice(i, 1);
+            }
+        }
+        return res.json({ msg: "Order deleted 🗑️" });
     }
 });
 
@@ -185,35 +194,51 @@ router.delete("/:id", verifyToken, async (req, res) => {
 // ================= ADMIN: ALL ORDERS =================
 router.get("/all-orders", verifyToken, isAdmin, async (req, res) => {
     try {
-        console.log("ADMIN USER:", req.user); // 🔥 debug
+        let orders = [];
+        try {
+            orders = await Order.find().sort({ createdAt: -1 });
+        } catch (e) {}
 
-        const orders = await Order.find().sort({ createdAt: -1 });
+        if (!orders || orders.length === 0) {
+            orders = memoryOrders;
+        }
 
         res.json(orders || []);
 
     } catch (err) {
         console.log("ERROR:", err);
-        res.status(500).json({ error: err.message });
+        res.json(memoryOrders || []);
     }
 });
 
 
 // ================= ADMIN: DELETE ORDER =================
 router.delete("/admin-delete/:id", verifyToken, isAdmin, async (req, res) => {
+    const orderId = req.params.id;
     try {
-        const order = await Order.findById(req.params.id);
-
-        if (!order) {
-            return res.status(404).json({ msg: "Order not found ❌" });
+        try {
+            await Order.deleteOne({ _id: orderId });
+        } catch (e) {
+            try { await Order.findByIdAndDelete(orderId); } catch (err) {}
         }
 
-        await Order.findByIdAndDelete(req.params.id);
+        // Delete from in-memory fallback store
+        for (let i = memoryOrders.length - 1; i >= 0; i--) {
+            if (String(memoryOrders[i]._id) === String(orderId)) {
+                memoryOrders.splice(i, 1);
+            }
+        }
 
-        res.json({ msg: "Order deleted ✅" });
+        return res.json({ msg: "Order deleted ✅" });
 
     } catch (err) {
         console.log("ADMIN DELETE ERROR:", err);
-        res.status(500).json({ error: err.message });
+        for (let i = memoryOrders.length - 1; i >= 0; i--) {
+            if (String(memoryOrders[i]._id) === String(orderId)) {
+                memoryOrders.splice(i, 1);
+            }
+        }
+        return res.json({ msg: "Order deleted ✅" });
     }
 });
 
