@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <title>Contact - Soumyadip Store</title>
 
@@ -20,9 +21,17 @@
         }
 
         @keyframes bgMove {
-            0% {background-position: 0% 50%;}
-            50% {background-position: 100% 50%;}
-            100% {background-position: 0% 50%;}
+            0% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+
+            100% {
+                background-position: 0% 50%;
+            }
         }
 
         /* 💎 Glass container */
@@ -31,9 +40,9 @@
             display: flex;
             border-radius: 20px;
             overflow: hidden;
-            background: rgba(255,255,255,0.1);
+            background: rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(15px);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
         }
 
         /* LEFT SIDE */
@@ -67,7 +76,8 @@
             margin-bottom: 20px;
         }
 
-        input, textarea {
+        input,
+        textarea {
             width: 90%;
             padding: 12px;
             margin: 10px 0;
@@ -81,7 +91,8 @@
             border-radius: 15px;
         }
 
-        input:focus, textarea:focus {
+        input:focus,
+        textarea:focus {
             box-shadow: 0 0 5px #ff4d4d;
         }
 
@@ -111,52 +122,53 @@
 
 <body>
 
-<div class="container">
+    <div class="container">
 
-    <!-- LEFT -->
-    <div class="left">
-        <h2>Contact Soumyadip Store</h2>
-        <p>We are here to help you anytime 💬</p>
+        <!-- LEFT -->
+        <div class="left">
+            <h2>Contact Soumyadip Store</h2>
+            <p>We are here to help you anytime 💬</p>
 
-        <p>
-        📧 Email: support@rsoumyadip651@gmail.com <br>
-        📞 Phone: +91 9832232442 <br>
-        📍 India
-        </p>
+            <p>
+                📧 Email: support@soumyadiproy037@gmail.com <br>
+                📞 Phone: +91 98xxxxxxxx <br>
+                📍 India
+            </p>
+        </div>
+
+        <!-- RIGHT -->
+        <div class="right">
+            <h3>Send Message</h3>
+
+            <form>
+                <input type="text" placeholder="Your Name" required>
+                <input type="email" placeholder="Your Email" required>
+                <textarea rows="4" placeholder="Your Message"></textarea>
+                <button type="submit">Send</button>
+            </form>
+
+            <a href="index.html" class="back">⬅ Back to Home</a>
+        </div>
+
     </div>
+    <script>
+        async function sendMessage() {
 
-    <!-- RIGHT -->
-    <div class="right">
-        <h3>Send Message</h3>
+            const name = document.getElementById("name").value;
+            const email = document.getElementById("email").value;
+            const message = document.getElementById("message").value;
 
-        <form>
-            <input type="text" placeholder="Your Name" required>
-            <input type="email" placeholder="Your Email" required>
-            <textarea rows="4" placeholder="Your Message"></textarea>
-            <button type="submit">Send</button>
-        </form>
+            await fetch("/api/contact", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ name, email, message })
+            });
 
-        <a href="index.html" class="back">⬅ Back to Home</a>
-    </div>
-
-</div>
-<script>
-async function sendMessage() {
-
-    const name = document.getElementById("name").value;
-    const email = document.getElementById("email").value;
-    const message = document.getElementById("message").value;
-
-    await fetch("/api/contact", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ name, email, message })
-    });
-
-    alert("Message sent ✅");
-}
-</script>
+            alert("Message sent ✅");
+        }
+    </script>
 </body>
+
 </html>
