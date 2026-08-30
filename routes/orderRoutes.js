@@ -14,26 +14,35 @@ const memoryOrders = [];
 router.post("/checkout", verifyToken, async (req, res) => {
     try {
         const userId = String(req.userId);
-        const { name, address, phone, payment } = req.body;
+        const { name, address, phone, payment, cartItems } = req.body;
 
         if (!name || !address || !phone || !payment) {
             return res.status(400).json({ error: "Missing customer or payment details ❌" });
         }
 
+        let cartItemsList = [];
+
+        // 1. Try MongoDB cart
         let cart = null;
         try {
             cart = await Cart.findOne({ userId });
         } catch (e) {}
 
-        if (!cart || !cart.items || cart.items.length === 0) {
-            // Check memory cart if available
-            const memoryCartModule = require("./cartRoutes");
-            // If cart is completely empty
+        if (cart && cart.items && cart.items.length > 0) {
+            cartItemsList = cart.items;
+        }
+
+        // 2. Fallback: use cartItems sent directly in request body (from localStorage)
+        if (cartItemsList.length === 0 && Array.isArray(cartItems) && cartItems.length > 0) {
+            cartItemsList = cartItems;
+        }
+
+        if (cartItemsList.length === 0) {
             return res.status(400).json({ error: "Cart is empty ❌" });
         }
 
-        // 1. Validate Stock for all cart items first
-        for (const item of cart.items) {
+        // 3. Validate Stock for all cart items
+        for (const item of cartItemsList) {
             let product = null;
             if (item.productId) {
                 try { product = await Product.findById(item.productId); } catch (e) {}
@@ -45,26 +54,26 @@ router.post("/checkout", verifyToken, async (req, res) => {
             if (product && product.stock !== undefined) {
                 if (product.stock < item.quantity) {
                     return res.status(400).json({
-                        error: `Insufficient stock for "${item.name}". Available stock: ${product.stock} ❌`
+                        error: `Insufficient stock for "${item.name}". Available: ${product.stock} ❌`
                     });
                 }
             }
         }
 
-        // 2. Calculate Total & Format Items
+        // 4. Calculate Total & Format Items
         let total = 0;
-        cart.items.forEach(item => {
-            total += item.price * item.quantity;
+        cartItemsList.forEach(item => {
+            total += item.price * (item.quantity || 1);
         });
 
-        const formattedItems = cart.items.map(item => ({
+        const formattedItems = cartItemsList.map(item => ({
             name: item.name,
             price: item.price,
             img: item.img,
-            quantity: item.quantity
+            quantity: item.quantity || 1
         }));
 
-        // 3. Create Order
+        // 5. Create Order
         let savedOrder = {
             _id: "ord_" + Date.now() + "_" + Math.floor(Math.random()*1000),
             userId,
@@ -91,8 +100,8 @@ router.post("/checkout", verifyToken, async (req, res) => {
         }
         memoryOrders.unshift(savedOrder);
 
-        // 4. Reduce Product Stock after successful order creation
-        for (const item of cart.items) {
+        // 6. Reduce Product Stock
+        for (const item of cartItemsList) {
             let product = null;
             if (item.productId) {
                 try { product = await Product.findById(item.productId); } catch (e) {}
@@ -102,16 +111,16 @@ router.post("/checkout", verifyToken, async (req, res) => {
             }
 
             if (product && product.stock !== undefined) {
-                product.stock = Math.max(0, product.stock - item.quantity);
+                product.stock = Math.max(0, product.stock - (item.quantity || 1));
                 try { await product.save(); } catch (e) {}
             }
         }
 
-        // 5. Clear cart ONLY after successful order
-        cart.items = [];
-        try {
-            if (cart.save) await cart.save();
-        } catch (e) {}
+        // 7. Clear cart after successful order
+        if (cart && cart.items) {
+            cart.items = [];
+            try { if (cart.save) await cart.save(); } catch (e) {}
+        }
 
         return res.json({
             msg: "Order placed successfully ✅",
