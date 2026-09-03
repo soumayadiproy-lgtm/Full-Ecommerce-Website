@@ -300,16 +300,9 @@ router.post("/login", async (req, res) => {
             user = memoryUsers.find(u => u.email && u.email.toLowerCase() === normalizedEmail);
         }
 
-        // Resilient serverless fallback: If DB is unreachable and cold start memory is fresh, load/create account on demand
+        // ❌ Reject login if account does not exist
         if (!user) {
-            const hashedPassword = await bcrypt.hash(password, 10);
-            user = {
-                _id: "u_" + Date.now() + "_" + Math.floor(Math.random()*1000),
-                email: normalizedEmail,
-                password: hashedPassword,
-                role: "user"
-            };
-            memoryUsers.push(user);
+            return res.status(400).json({ msg: "Account not found ❌ Please check your email or register." });
         }
 
         // 🚫 BLOCK CHECK
