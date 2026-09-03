@@ -36,9 +36,13 @@ var ADMIN_TOKEN = localStorage.getItem("adminToken") || localStorage.getItem("to
             return;
         }
 
-        // ✅ Valid — expose globally
+        // ✅ Valid — expose globally & ensure sync between adminToken and token
+        localStorage.setItem("adminToken", ADMIN_TOKEN);
+        localStorage.setItem("token", ADMIN_TOKEN);
+        localStorage.setItem("adminRole", "admin");
+        if (payload.email) localStorage.setItem("adminEmail", payload.email);
         window.ADMIN_TOKEN = ADMIN_TOKEN;
-        window.ADMIN_EMAIL = payload.email || "";
+        window.ADMIN_EMAIL = payload.email || localStorage.getItem("adminEmail") || "";
 
     } catch (e) {
         localStorage.removeItem("adminToken");

@@ -61,8 +61,11 @@ function verifyOTP() {
         alert("✅ Login successful");
 
         // 🔥 ROLE BASED REDIRECT
-        if (data.user.role === "admin") {
-            window.location.href = "admin.html"; // admin panel
+        if (data.user && (data.user.role === "admin" || data.user.isAdmin === true)) {
+            localStorage.setItem("adminToken", data.token);
+            localStorage.setItem("adminRole", "admin");
+            localStorage.setItem("adminEmail", data.user.email || "");
+            window.location.href = "/admin/dashboard.html"; // admin dashboard
         } else {
             window.location.href = "index.html"; // user home
         }

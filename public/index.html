@@ -27,6 +27,7 @@
         <li><a href="products.html">Products</a></li>
         <li><a href="grocery.html">Grocery</a></li>
         <li><a href="menu.html">Menu</a></li>
+        <li><a href="admin/dashboard.html" id="adminNavIndex" style="display:none; color:#ff4d4d; font-weight:bold;">Admin 👑</a></li>
     </ul>
 </nav>
 <img src="/images/cart.png" width="30px" height="30px">
@@ -529,4 +530,27 @@ async function sendMessage(overrideText) {
     input.focus();
   }
 }
+
+// Check admin role for navbar link
+(function checkAdminIndex() {
+  const adminToken = localStorage.getItem("adminToken");
+  const token = localStorage.getItem("token") || adminToken;
+  let isAdmin = localStorage.getItem("adminRole") === "admin";
+  if (!isAdmin && token) {
+    try {
+      const p = JSON.parse(atob(token.split(".")[1]));
+      if (p && p.role === "admin") isAdmin = true;
+    } catch(e) {}
+  }
+  if (!isAdmin) {
+    try {
+      const user = JSON.parse(localStorage.getItem("user") || "{}");
+      if (user && (user.role === "admin" || user.isAdmin === true)) isAdmin = true;
+    } catch(e) {}
+  }
+  if (isAdmin) {
+    const el = document.getElementById("adminNavIndex");
+    if (el) el.style.display = "inline";
+  }
+})();
 </script>

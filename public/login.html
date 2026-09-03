@@ -183,9 +183,22 @@ async function login() {
             return;
         }
 
-        alert(data.msg || "Login success ✅");
+        const isAdmin = data.user && (data.user.role === "admin" || data.user.isAdmin === true);
+
+        // ✅ Save general user info
         localStorage.setItem("user", JSON.stringify(data.user));
         localStorage.setItem("token", data.token);
+
+        // ✅ If admin, synchronize admin session tokens
+        if (isAdmin) {
+            localStorage.setItem("adminToken", data.token);
+            localStorage.setItem("adminRole", "admin");
+            localStorage.setItem("adminEmail", data.user.email || value);
+            alert("👑 Admin login success! Welcome Administrator.");
+        } else {
+            alert(data.msg || "Login success ✅");
+        }
+
         window.location.href = "products.html";
 
     } catch (err) {
