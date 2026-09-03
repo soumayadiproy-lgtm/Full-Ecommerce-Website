@@ -10,6 +10,7 @@ const userRoutes = require("./routes/userRoutes");
 const cartRoutes = require("./routes/cartRoutes");
 const contactRoutes = require("./routes/contactRoutes");
 const paymentRoutes = require("./routes/paymentRoutes");
+const aiRoutes = require("./routes/aiRoutes");
 
 const app = express();
 
@@ -54,6 +55,7 @@ app.use(["/api/users", "/users"], userRoutes);
 app.use(["/api/cart", "/cart"], cartRoutes);
 app.use(["/api/contact", "/contact"], contactRoutes);
 app.use(["/api/payment", "/payment"], paymentRoutes);
+app.use("/api", aiRoutes);
 
 // ✅ Alias direct /api/* auth & user routes (e.g. /api/login, /api/register, /api/send-otp)
 app.use("/api", userRoutes);
