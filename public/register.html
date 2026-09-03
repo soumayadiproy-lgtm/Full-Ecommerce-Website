@@ -184,6 +184,21 @@ function register() {
         return data;
     })
     .then(data => {
+        // Save to local registry so account persists across serverless instances
+        try {
+            const raw = localStorage.getItem("registeredAccounts") || "[]";
+            const accounts = JSON.parse(raw);
+            const norm = email.trim().toLowerCase();
+            const existingIdx = accounts.findIndex(a => a.email === norm);
+            if (existingIdx >= 0) {
+                accounts[existingIdx] = { email: norm, password, registeredAt: Date.now() };
+            } else {
+                accounts.push({ email: norm, password, registeredAt: Date.now() });
+            }
+            localStorage.setItem("registeredAccounts", JSON.stringify(accounts));
+            localStorage.setItem("lastRegisteredEmail", norm);
+        } catch (e) {}
+
         alert(data.msg);
 
         // ✅ redirect to login

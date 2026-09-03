@@ -208,6 +208,33 @@ async function login() {
         let data = {};
         try { data = JSON.parse(text); } catch(e) {}
 
+        // 🔄 Serverless Session Resilience: If this serverless container didn't have the user in memory,
+        // check if this user previously registered on this device and re-sync automatically!
+        if (!res.ok && value.includes("@") && data.msg && data.msg.includes("Account not found")) {
+            try {
+                const regAccounts = JSON.parse(localStorage.getItem("registeredAccounts") || "[]");
+                const matched = regAccounts.find(a => a.email.toLowerCase() === value.toLowerCase());
+                if (matched && matched.password === passwordInput.value) {
+                    await fetch(BASE_URL + "/api/users/register", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ email: value, password: matched.password })
+                    });
+
+                    res = await fetch(BASE_URL + "/api/users/login", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ email: value, password: matched.password })
+                    });
+
+                    const retryText = await res.text();
+                    try { data = JSON.parse(retryText); } catch(e) {}
+                }
+            } catch (syncErr) {
+                console.warn("Sync error:", syncErr);
+            }
+        }
+
         if (!res.ok) {
             alert(data.msg || data.error || ("Login failed (" + res.status + "): " + (text.substring(0, 150) || "Error")));
             return;

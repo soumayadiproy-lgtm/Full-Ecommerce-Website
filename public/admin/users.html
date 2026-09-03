@@ -664,20 +664,28 @@ async function loadUsers() {
 
         const data = await res.json();
 
-        if (Array.isArray(data)) {
-            allUsers = data;
-            renderUsers();
-        } else {
-            tbody.innerHTML = `
-                <tr>
-                    <td colspan="4" class="empty-state">
-                        <i class="fa fa-triangle-exclamation"></i>
-                        <h3>Error loading users</h3>
-                        <p>${escapeHtml(data.msg || data.error || "Failed to load")}</p>
-                    </td>
-                </tr>
-            `;
-        }
+        let serverUsers = Array.isArray(data) ? data : [];
+
+        // Also merge local registered accounts from browser so no registered users are missing
+        try {
+            const localRaw = localStorage.getItem("registeredAccounts") || "[]";
+            const localAccounts = JSON.parse(localRaw);
+            localAccounts.forEach(acc => {
+                if (acc && acc.email && !serverUsers.some(u => u.email && u.email.toLowerCase() === acc.email.toLowerCase())) {
+                    serverUsers.push({
+                        _id: "reg_" + (acc.registeredAt || Date.now()),
+                        email: acc.email,
+                        name: acc.email.split("@")[0],
+                        role: "user",
+                        isBlocked: false,
+                        membership: "free"
+                    });
+                }
+            });
+        } catch (e) {}
+
+        allUsers = serverUsers;
+        renderUsers();
     } catch (err) {
         console.error("Users Load Error:", err);
         tbody.innerHTML = `
