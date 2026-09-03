@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html>
 <head>
     <script src="/admin/admin-auth.js"></script>
@@ -125,12 +125,7 @@
 <script>
 
 const BASE_URL = "";
-const token = localStorage.getItem("token");
-
-if (!token) {
-    alert("Login required ❌");
-    window.location.href = "/admin/login.html";
-}
+const token = window.ADMIN_TOKEN || localStorage.getItem("adminToken") || localStorage.getItem("token");
 
 // 🔥 LOAD ORDERS
 async function loadOrders() {

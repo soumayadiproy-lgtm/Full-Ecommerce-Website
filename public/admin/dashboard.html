@@ -1,193 +1,194 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard | Soumyadip Store</title>
     <script src="/admin/admin-auth.js"></script>
-
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
-        body {
-            margin: 0;
-            font-family: 'Inter', sans-serif;
-            display: flex;
-            background: linear-gradient(120deg, #141e30, #243b55);
-            color: white;
-        }
-
-        /* 🔥 SIDEBAR */
-        .sidebar {
-            width: 230px;
-            height: 100vh;
-            padding: 25px;
-            background: rgba(255,255,255,0.05);
-            backdrop-filter: blur(20px);
-        }
-
-        .sidebar h2 {
-            margin-bottom: 30px;
-        }
-
-        .sidebar a {
-            display: block;
-            margin: 10px 0;
-            padding: 12px;
-            border-radius: 10px;
-            text-decoration: none;
-            color: white;
-            transition: 0.3s;
-        }
-
-        .sidebar a:hover {
-            background: rgba(255,255,255,0.1);
-        }
-
-        .logout {
-            margin-top: 30px;
-            cursor: pointer;
-            color: #ff4d4d;
-        }
-
-        /* 🔥 MAIN */
-        .main {
-            flex: 1;
-            padding: 40px;
-        }
-
-        h1 {
-            margin-bottom: 30px;
-        }
-
-        /* 🔥 CARDS */
-        .cards {
-            display: flex;
-            gap: 20px;
-            align-items: center;
-        }
-
-        .card {
-            flex: 1;
-            padding: 25px;
-            border-radius: 15px;
-            background: rgba(255,255,255,0.08);
-            backdrop-filter: blur(25px);
-            box-shadow: 0 0 20px rgba(0,0,0,0.5);
-            font-size: 18px;
-            text-align: center;
-            transition: 0.3s;
-        }
-
-        .card:hover {
-            transform: translateY(-5px);
-        }
-
-        .user-box {
-            font-size: 18px;
-            padding: 25px;
-        }
+        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+        body{font-family:'Inter',sans-serif;display:flex;min-height:100vh;background:#0f1117;color:#e2e8f0}
+        .sidebar{width:240px;height:100vh;position:sticky;top:0;background:#1a1d27;border-right:1px solid rgba(255,255,255,.06);display:flex;flex-direction:column;padding:24px 16px;gap:4px;flex-shrink:0}
+        .sidebar-logo{display:flex;align-items:center;gap:10px;padding:10px 12px 24px;border-bottom:1px solid rgba(255,255,255,.06);margin-bottom:12px}
+        .logo-icon{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#6366f1,#db2777);display:flex;align-items:center;justify-content:center;font-size:18px}
+        .sidebar-logo span{font-weight:700;font-size:15px;color:#fff}
+        .nav-link{display:flex;align-items:center;gap:11px;padding:11px 13px;border-radius:10px;text-decoration:none;color:#94a3b8;font-size:14px;font-weight:500;transition:all .2s;cursor:pointer}
+        .nav-link:hover,.nav-link.active{background:rgba(99,102,241,.12);color:#a5b4fc}
+        .nav-link.active{color:#818cf8;font-weight:600}
+        .nav-link i{width:18px;text-align:center;font-size:14px}
+        .nav-divider{height:1px;background:rgba(255,255,255,.06);margin:10px 0}
+        .logout-btn{margin-top:auto;display:flex;align-items:center;gap:11px;padding:11px 13px;border-radius:10px;color:#f87171;font-size:14px;font-weight:500;cursor:pointer;transition:background .2s}
+        .logout-btn:hover{background:rgba(239,68,68,.1)}
+        .logout-btn i{width:18px;text-align:center}
+        .main{flex:1;padding:32px 36px;overflow-y:auto}
+        .page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:32px}
+        .page-title{font-size:24px;font-weight:800;color:#fff}
+        .page-sub{font-size:13px;color:#64748b;margin-top:3px}
+        .admin-info{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);padding:8px 14px;border-radius:12px;font-size:13px;color:#94a3b8}
+        .admin-avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#db2777);display:flex;align-items:center;justify-content:center;font-size:14px}
+        .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:18px;margin-bottom:32px}
+        .stat-card{background:#1a1d27;border:1px solid rgba(255,255,255,.06);border-radius:16px;padding:24px;display:flex;align-items:center;gap:16px;transition:transform .2s,border-color .2s;animation:fadeUp .4s ease both}
+        .stat-card:hover{transform:translateY(-3px);border-color:rgba(99,102,241,.3)}
+        .stat-icon{width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+        .stat-icon.blue{background:rgba(99,102,241,.15)}
+        .stat-icon.pink{background:rgba(219,39,119,.15)}
+        .stat-icon.green{background:rgba(34,197,94,.15)}
+        .stat-icon.orange{background:rgba(249,115,22,.15)}
+        .stat-value{font-size:28px;font-weight:800;color:#fff;line-height:1}
+        .stat-label{font-size:12px;color:#64748b;margin-top:4px;font-weight:500}
+        .section-title{font-size:16px;font-weight:700;color:#e2e8f0;margin-bottom:16px}
+        .table-card{background:#1a1d27;border:1px solid rgba(255,255,255,.06);border-radius:16px;overflow:hidden;margin-bottom:28px}
+        .table-card table{width:100%;border-collapse:collapse}
+        .table-card th{background:rgba(255,255,255,.03);padding:12px 16px;font-size:11px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:.05em;text-align:left}
+        .table-card td{padding:14px 16px;font-size:13px;border-top:1px solid rgba(255,255,255,.04);color:#cbd5e1}
+        .table-card tr:hover td{background:rgba(255,255,255,.02)}
+        .badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600}
+        .badge-green{background:rgba(34,197,94,.15);color:#4ade80}
+        .badge-yellow{background:rgba(234,179,8,.15);color:#fbbf24}
+        .badge-red{background:rgba(239,68,68,.15);color:#f87171}
+        .badge-blue{background:rgba(99,102,241,.15);color:#a5b4fc}
+        .actions-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px}
+        .action-card{background:#1a1d27;border:1px solid rgba(255,255,255,.06);border-radius:14px;padding:20px;text-align:center;cursor:pointer;transition:all .2s;text-decoration:none;display:block}
+        .action-card:hover{background:rgba(99,102,241,.1);border-color:rgba(99,102,241,.3);transform:translateY(-2px)}
+        .action-card .icon{font-size:28px;margin-bottom:8px}
+        .action-card .label{font-size:13px;font-weight:600;color:#cbd5e1}
+        @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+        .loading-text{color:#64748b;font-size:13px}
     </style>
 </head>
-
 <body>
 
-<!-- 🔥 SIDEBAR -->
-<div class="sidebar">
-    <h2>Admin Panel 👑</h2>
+<nav class="sidebar">
+    <div class="sidebar-logo">
+        <div class="logo-icon">👑</div>
+        <span>Admin Panel</span>
+    </div>
+    <a class="nav-link active" href="/admin/dashboard.html"><i class="fa fa-chart-line"></i> Dashboard</a>
+    <a class="nav-link" href="/admin/add-product.html"><i class="fa fa-plus"></i> Add Product</a>
+    <a class="nav-link" href="/admin/manage-products.html"><i class="fa fa-box"></i> Manage Products</a>
+    <a class="nav-link" href="/admin/users.html"><i class="fa fa-users"></i> Users</a>
+    <a class="nav-link" href="/admin/orders.html"><i class="fa fa-shopping-bag"></i> Orders</a>
+    <a class="nav-link" href="/admin/admin-contacts.html"><i class="fa fa-headset"></i> Support</a>
+    <div class="nav-divider"></div>
+    <a class="nav-link" href="/index.html" style="color:#64748b"><i class="fa fa-store"></i> View Store</a>
+    <div class="logout-btn" onclick="adminLogout()">
+        <i class="fa fa-right-from-bracket"></i> Logout
+    </div>
+</nav>
 
-    <a href="/admin/dashboard.html">📊 Dashboard</a>
-    <a href="/admin/add-product.html">➕ Add Product</a>
-    <a href="/admin/manage-products.html">📦 Manage Products</a>
-    <a href="/admin/users.html">👤 Users</a>
-    <a href="/admin/admin-contacts.html">👤 Customer Support</a>
-    <a href="/admin/orders.html">📦 Orders</a>
-
-    <div class="logout" onclick="adminLogout()">🚪 Logout</div>
-</div>
-
-<!-- 🔥 MAIN -->
 <div class="main">
-    <h1>Dashboard</h1>
+    <div class="page-header">
+        <div>
+            <div class="page-title">Dashboard</div>
+            <div class="page-sub" id="dateDisplay"></div>
+        </div>
+        <div class="admin-info">
+            <div class="admin-avatar">👤</div>
+            <span id="adminEmailDisplay">Admin</span>
+        </div>
+    </div>
 
-    <div class="cards">
-        <div class="card" id="productCount">📦 Products: 0</div>
-        <div class="card" id="orderCount">🛒 Orders: 0</div>
-        <div class="card">👤 Users: <span id="userCount">0</span></div>
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon blue">📦</div>
+            <div><div class="stat-value" id="productCount">…</div><div class="stat-label">Total Products</div></div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon pink">🛒</div>
+            <div><div class="stat-value" id="orderCount">…</div><div class="stat-label">Total Orders</div></div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon green">👤</div>
+            <div><div class="stat-value" id="userCount">…</div><div class="stat-label">Registered Users</div></div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon orange">💬</div>
+            <div><div class="stat-value" id="contactCount">…</div><div class="stat-label">Support Messages</div></div>
+        </div>
+    </div>
+
+    <div class="section-title">📋 Recent Orders</div>
+    <div class="table-card">
+        <table>
+            <thead><tr><th>Order ID</th><th>Customer</th><th>Items</th><th>Total</th><th>Status</th></tr></thead>
+            <tbody id="ordersTable"><tr><td colspan="5" class="loading-text">Loading orders…</td></tr></tbody>
+        </table>
+    </div>
+
+    <div class="section-title">⚡ Quick Actions</div>
+    <div class="actions-grid">
+        <a class="action-card" href="/admin/add-product.html"><div class="icon">➕</div><div class="label">Add Product</div></a>
+        <a class="action-card" href="/admin/manage-products.html"><div class="icon">📦</div><div class="label">Manage Products</div></a>
+        <a class="action-card" href="/admin/users.html"><div class="icon">👥</div><div class="label">Manage Users</div></a>
+        <a class="action-card" href="/admin/orders.html"><div class="icon">🛒</div><div class="label">View Orders</div></a>
+        <a class="action-card" href="/admin/admin-contacts.html"><div class="icon">☎️</div><div class="label">Support</div></a>
     </div>
 </div>
 
 <script>
-const BASE_URL = "";
-const token = window.ADMIN_TOKEN || localStorage.getItem("token");
+const token = window.ADMIN_TOKEN || localStorage.getItem("adminToken") || localStorage.getItem("token");
 
-// 🔥 LOAD USER COUNT
-async function loadUserCount() {
-    try {
-        const res = await fetch(BASE_URL + "/api/users");
-        const data = await res.json();
+// Show admin email
+document.getElementById("adminEmailDisplay").textContent = window.ADMIN_EMAIL || localStorage.getItem("adminEmail") || "Admin";
+document.getElementById("dateDisplay").textContent = new Date().toLocaleDateString("en-IN",{weekday:"long",year:"numeric",month:"long",day:"numeric"});
 
-        document.getElementById("userCount").innerText = data.length;
-    } catch (err) {
-        console.log(err);
+function renderOrders(orders) {
+    const tbody = document.getElementById("ordersTable");
+    if (!orders || !orders.length) {
+        tbody.innerHTML = `<tr><td colspan="5" class="loading-text">No orders yet</td></tr>`;
+        return;
     }
+    tbody.innerHTML = orders.slice(0,8).map(o => {
+        const status = o.status || "pending";
+        const bc = status==="delivered"?"badge-green":status==="shipped"?"badge-blue":status==="cancelled"?"badge-red":"badge-yellow";
+        const total = o.totalAmount || o.total || (o.items ? o.items.reduce((s,i) => s+(i.price*(i.qty||1)),0) : 0);
+        return `<tr>
+            <td style="font-size:11px;color:#64748b">${String(o._id).slice(-8).toUpperCase()}</td>
+            <td>${o.userId?.email || o.email || "Customer"}</td>
+            <td>${o.items ? o.items.length : 1} item${(o.items?.length||1)!==1?"s":""}</td>
+            <td>₹${Number(total).toLocaleString("en-IN")}</td>
+            <td><span class="badge ${bc}">${status}</span></td>
+        </tr>`;
+    }).join("");
 }
 
-// 🔥 LOAD PRODUCTS
-async function loadProducts() {
+async function loadStats() {
     try {
-        const res = await fetch(BASE_URL + "/api/products");
-        const data = await res.json();
+        const r = await fetch("/api/products");
+        const d = await r.json();
+        document.getElementById("productCount").textContent = Array.isArray(d) ? d.length : "0";
+    } catch { document.getElementById("productCount").textContent = "0"; }
 
-        document.getElementById("productCount").innerText =
-            "📦 Products: " + data.length;
-    } catch (err) {
-        console.log(err);
-    }
-}
-
-// 🔥 LOAD ORDERS
-async function loadOrders() {
     try {
-        const res = await fetch(BASE_URL + "/api/orders/all-orders", {
-            headers: {
-                "Authorization": "Bearer " + token
-            }
-        });
+        const r = await fetch("/api/users");
+        const d = await r.json();
+        document.getElementById("userCount").textContent = Array.isArray(d) ? d.length : "0";
+    } catch { document.getElementById("userCount").textContent = "0"; }
 
-        console.log("ORDER STATUS:", res.status);
-
-        // ❌ If not admin / unauthorized
-        if (res.status === 401 || res.status === 403) {
-            document.getElementById("orderCount").innerText =
-                "🛒 Orders: Access Denied ❌";
-            return;
+    try {
+        const r = await fetch("/api/orders/all-orders", { headers: { "Authorization": "Bearer " + token } });
+        if (r.ok) {
+            const d = await r.json();
+            document.getElementById("orderCount").textContent = Array.isArray(d) ? d.length : "0";
+            renderOrders(Array.isArray(d) ? d : []);
+        } else {
+            document.getElementById("orderCount").textContent = "0";
+            document.getElementById("ordersTable").innerHTML = `<tr><td colspan="5" class="loading-text">No orders data</td></tr>`;
         }
+    } catch { document.getElementById("orderCount").textContent = "0"; }
 
-        const data = await res.json();
-        console.log("ORDER DATA:", data);
-
-        // ❌ If backend didn't return array
-        if (!Array.isArray(data)) {
-            document.getElementById("orderCount").innerText =
-                "🛒 Orders: Error ❌";
-            return;
-        }
-
-        // ✅ SUCCESS
-        document.getElementById("orderCount").innerText =
-            "🛒 Orders: " + data.length;
-
-    } catch (err) {
-        console.log("ORDER ERROR:", err);
-        document.getElementById("orderCount").innerText =
-            "🛒 Orders: Failed ❌";
-    }
+    try {
+        const r = await fetch("/api/contact", { headers: { "Authorization": "Bearer " + token } });
+        if (r.ok) {
+            const d = await r.json();
+            document.getElementById("contactCount").textContent = Array.isArray(d) ? d.length : "0";
+        } else { document.getElementById("contactCount").textContent = "0"; }
+    } catch { document.getElementById("contactCount").textContent = "0"; }
 }
 
-// 🔥 INIT
-loadUserCount();
-loadProducts();
-loadOrders();
-
-// 🔥 LOGOUT is handled by admin-auth.js → adminLogout()
+loadStats();
 </script>
-
 </body>
 </html>

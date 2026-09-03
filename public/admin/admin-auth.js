@@ -1,23 +1,24 @@
 /**
- * admin-auth.js
- * Include in ALL admin pages as: <script src="/admin/admin-auth.js"></script>
- * Must be placed BEFORE any page-specific scripts.
+ * admin-auth.js — Shared guard for all admin pages.
+ * Include as: <script src="/admin/admin-auth.js"></script>
+ * Works in <head> OR end of <body>.
  */
-(function adminAuthGuard() {
-    const token = localStorage.getItem("adminToken") || localStorage.getItem("token");
 
-    // ── No token ──────────────────────────────────────────────
-    if (!token) {
+// ── Read token ────────────────────────────────────────────────
+var ADMIN_TOKEN = localStorage.getItem("adminToken") || localStorage.getItem("token");
+
+// ── Validate immediately ──────────────────────────────────────
+(function checkAdminAuth() {
+    if (!ADMIN_TOKEN) {
         window.location.replace("/admin/login.html");
         return;
     }
 
-    // ── Decode JWT (client-side check — server still validates) ──
     try {
-        const parts = token.split(".");
+        var parts = ADMIN_TOKEN.split(".");
         if (parts.length !== 3) throw new Error("bad token");
 
-        const payload = JSON.parse(atob(parts[1]));
+        var payload = JSON.parse(atob(parts[1]));
 
         // Expired?
         if (payload.exp && payload.exp * 1000 < Date.now()) {
@@ -35,27 +36,18 @@
             return;
         }
 
-        // ── Inject admin info into sidebar if available ──
-        window.addEventListener("DOMContentLoaded", () => {
-            const emailEl = document.getElementById("adminEmailDisplay");
-            if (emailEl) emailEl.textContent = payload.email || "Admin";
+        // ✅ Valid — expose globally
+        window.ADMIN_TOKEN = ADMIN_TOKEN;
+        window.ADMIN_EMAIL = payload.email || "";
 
-            const nameEl = document.getElementById("adminNameDisplay");
-            if (nameEl) nameEl.textContent = payload.name || payload.email?.split("@")[0] || "Admin";
-        });
-
-        // ── Expose token globally for API calls ──
-        window.ADMIN_TOKEN = token;
-
-    } catch (err) {
-        console.warn("Admin auth guard error:", err.message);
+    } catch (e) {
         localStorage.removeItem("adminToken");
         localStorage.removeItem("token");
         window.location.replace("/admin/login.html");
     }
 })();
 
-// ── Admin logout helper ───────────────────────────────────────
+// ── Logout helper (callable from any admin page) ──────────────
 function adminLogout() {
     localStorage.removeItem("adminToken");
     localStorage.removeItem("token");

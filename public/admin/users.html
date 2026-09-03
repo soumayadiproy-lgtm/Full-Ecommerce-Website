@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html>
 <head>
     <script src="/admin/admin-auth.js"></script>
@@ -72,12 +72,7 @@ button {
 <script>
 
 const BASE_URL = "";
-const token = localStorage.getItem("token");
-
-if (!token) {
-    alert("Login required ❌");
-    window.location.href = "/admin/login.html";
-}
+const token = window.ADMIN_TOKEN || localStorage.getItem("adminToken") || localStorage.getItem("token");
 
 // 🔥 LOAD USERS
 async function loadUsers() {
@@ -202,10 +197,7 @@ function goDashboard(){ window.location.href="/admin/dashboard.html"; }
 function goAddProduct(){ window.location.href="/admin/add-product.html"; }
 function goManage(){ window.location.href="/admin/manage-products.html"; }
 
-function logout(){
-    localStorage.removeItem("token");
-    window.location.href = "/admin/login.html";
-}
+
 
 </script>
 
