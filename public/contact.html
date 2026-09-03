@@ -1,176 +1,654 @@
 <!DOCTYPE html>
-<html>
-
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Contact - Soumyadip Store</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <title>Contact Us | Soumyadip Store</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
     <style>
-        body {
+        *, *::before, *::after {
+            box-sizing: border-box;
             margin: 0;
-            font-family: Arial, sans-serif;
+            padding: 0;
+        }
 
-            /* 🔥 Premium gradient */
-            background: linear-gradient(135deg, #667eea, #764ba2, #ff6a00);
-            background-size: 400% 400%;
-            animation: bgMove 10s infinite;
-
-            height: 100vh;
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #311042 100%);
+            min-height: 100vh;
             display: flex;
+            flex-direction: column;
             justify-content: center;
+            align-items: center;
+            padding: 24px 16px;
+            color: #e2e8f0;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Ambient Glow Orbs */
+        body::before, body::after {
+            content: '';
+            position: fixed;
+            width: 320px;
+            height: 320px;
+            border-radius: 50%;
+            filter: blur(90px);
+            z-index: 0;
+            pointer-events: none;
+            opacity: 0.5;
+        }
+
+        body::before {
+            background: #ff4d4d;
+            top: -60px;
+            left: -60px;
+        }
+
+        body::after {
+            background: #8b5cf6;
+            bottom: -60px;
+            right: -60px;
+        }
+
+        /* TOP NAVIGATION */
+        .top-nav {
+            width: 100%;
+            max-width: 960px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            z-index: 10;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: #cbd5e1;
+            text-decoration: none;
+            font-size: 13.5px;
+            font-weight: 500;
+            padding: 8px 16px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 30px;
+            backdrop-filter: blur(10px);
+            transition: all 0.25s ease;
+        }
+
+        .back-link:hover {
+            background: rgba(255, 77, 77, 0.2);
+            border-color: #ff4d4d;
+            color: #fff;
+            transform: translateX(-3px);
+        }
+
+        .brand-badge {
+            font-size: 14px;
+            font-weight: 700;
+            color: #ff4d4d;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* MAIN GLASS CONTAINER */
+        .contact-card {
+            width: 100%;
+            max-width: 960px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(25px);
+            border-radius: 24px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
+            display: flex;
+            overflow: hidden;
+            z-index: 10;
+            position: relative;
+        }
+
+        /* LEFT COLUMN (INFO) */
+        .info-col {
+            width: 42%;
+            padding: 44px 36px;
+            background: linear-gradient(135deg, rgba(255, 77, 77, 0.2) 0%, rgba(139, 92, 246, 0.2) 100%);
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .info-header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            color: #fff;
+            line-height: 1.25;
+            margin-bottom: 12px;
+        }
+
+        .info-header p {
+            font-size: 14px;
+            color: #94a3b8;
+            line-height: 1.6;
+        }
+
+        .contact-items {
+            margin: 32px 0;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+        }
+
+        .item-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ff6a00;
+            font-size: 17px;
+            flex-shrink: 0;
+            transition: transform 0.2s, background 0.2s;
+        }
+
+        .contact-item:hover .item-icon {
+            transform: scale(1.08);
+            background: rgba(255, 77, 77, 0.25);
+            color: #ff4d4d;
+        }
+
+        .item-text h4 {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: #94a3b8;
+            margin-bottom: 3px;
+        }
+
+        .item-text p, .item-text a {
+            font-size: 14px;
+            color: #e2e8f0;
+            font-weight: 500;
+            text-decoration: none;
+            word-break: break-word;
+            transition: color 0.2s;
+        }
+
+        .item-text a:hover {
+            color: #ff4d4d;
+        }
+
+        .hours-badge {
+            background: rgba(34, 197, 94, 0.15);
+            border: 1px solid rgba(34, 197, 94, 0.3);
+            color: #4ade80;
+            padding: 8px 14px;
+            border-radius: 12px;
+            font-size: 12.5px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: #4ade80;
+            border-radius: 50%;
+            box-shadow: 0 0 10px #4ade80;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.6; transform: scale(0.9); }
+            50% { opacity: 1; transform: scale(1.15); }
+            100% { opacity: 0.6; transform: scale(0.9); }
+        }
+
+        /* RIGHT COLUMN (FORM) */
+        .form-col {
+            width: 58%;
+            padding: 44px 40px;
+            background: rgba(15, 23, 42, 0.7);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .form-header {
+            margin-bottom: 24px;
+        }
+
+        .form-header h2 {
+            font-size: 22px;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 6px;
+        }
+
+        .form-header p {
+            font-size: 13.5px;
+            color: #94a3b8;
+        }
+
+        .input-field {
+            margin-bottom: 18px;
+        }
+
+        .input-field label {
+            display: block;
+            font-size: 12.5px;
+            font-weight: 600;
+            color: #cbd5e1;
+            margin-bottom: 7px;
+        }
+
+        .input-wrapper {
+            position: relative;
+            display: flex;
             align-items: center;
         }
 
-        @keyframes bgMove {
-            0% {
-                background-position: 0% 50%;
-            }
-
-            50% {
-                background-position: 100% 50%;
-            }
-
-            100% {
-                background-position: 0% 50%;
-            }
-        }
-
-        /* 💎 Glass container */
-        .container {
-            width: 850px;
-            display: flex;
-            border-radius: 20px;
-            overflow: hidden;
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(15px);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
-        }
-
-        /* LEFT SIDE */
-        .left {
-            width: 45%;
-            padding: 40px;
-            color: white;
-        }
-
-        .left h2 {
-            margin: 0;
-            font-size: 28px;
-        }
-
-        .left p {
-            margin-top: 15px;
+        .input-icon {
+            position: absolute;
+            left: 16px;
+            color: #64748b;
             font-size: 14px;
+            pointer-events: none;
+            transition: color 0.2s;
         }
 
-        /* RIGHT SIDE */
-        .right {
-            width: 55%;
-            background: white;
-            padding: 40px;
-            border-top-left-radius: 40px;
-            border-bottom-left-radius: 40px;
-            text-align: center;
-        }
-
-        h3 {
-            margin-bottom: 20px;
-        }
-
-        input,
-        textarea {
-            width: 90%;
-            padding: 12px;
-            margin: 10px 0;
-            border-radius: 25px;
-            border: none;
-            background: #f1f1f1;
+        .input-field input, .input-field textarea {
+            width: 100%;
+            padding: 13px 16px 13px 44px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 14px;
+            color: #fff;
+            font-size: 14px;
+            font-family: inherit;
             outline: none;
+            transition: all 0.25s ease;
         }
 
-        textarea {
-            border-radius: 15px;
+        .input-field textarea {
+            padding: 14px 16px;
+            border-radius: 14px;
+            resize: vertical;
+            min-height: 110px;
         }
 
-        input:focus,
-        textarea:focus {
-            box-shadow: 0 0 5px #ff4d4d;
+        .input-field input:focus, .input-field textarea:focus {
+            border-color: #ff4d4d;
+            background: rgba(255, 77, 77, 0.06);
+            box-shadow: 0 0 0 4px rgba(255, 77, 77, 0.15);
         }
 
-        button {
-            width: 95%;
-            padding: 12px;
+        .input-field input:focus + .input-icon {
+            color: #ff4d4d;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 14px;
             border: none;
-            border-radius: 25px;
-            background: linear-gradient(45deg, #ff4d4d, #ff6a00);
-            color: white;
-            font-weight: bold;
+            border-radius: 14px;
+            background: linear-gradient(135deg, #ff4d4d, #ff6a00);
+            color: #fff;
+            font-weight: 700;
+            font-size: 15px;
+            font-family: inherit;
             cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            box-shadow: 0 10px 25px rgba(255, 77, 77, 0.4);
+            transition: all 0.25s ease;
+            margin-top: 6px;
         }
 
-        button:hover {
-            opacity: 0.9;
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 14px 30px rgba(255, 77, 77, 0.55);
         }
 
-        .back {
-            display: block;
-            margin-top: 15px;
-            text-decoration: none;
-            color: gray;
+        .submit-btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* ALERT NOTIFICATION */
+        .msg-banner {
+            padding: 12px 16px;
+            border-radius: 12px;
+            font-size: 13.5px;
+            font-weight: 500;
+            margin-bottom: 18px;
+            display: none;
+            align-items: center;
+            gap: 10px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .msg-success {
+            background: rgba(34, 197, 94, 0.15);
+            border: 1px solid rgba(34, 197, 94, 0.35);
+            color: #4ade80;
+        }
+
+        .msg-error {
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid rgba(239, 68, 68, 0.35);
+            color: #f87171;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ================================================================ */
+        /* 📱 MOBILE & TABLET RESPONSIVE PERFECTION                          */
+        /* ================================================================ */
+
+        /* 📲 Tablets & Small Laptops (768px to 960px) */
+        @media (max-width: 960px) {
+            .contact-card {
+                max-width: 720px;
+            }
+
+            .info-col {
+                width: 45%;
+                padding: 36px 28px;
+            }
+
+            .form-col {
+                width: 55%;
+                padding: 36px 28px;
+            }
+
+            .info-header h1 {
+                font-size: 24px;
+            }
+        }
+
+        /* 📱 Mobile Phones (max-width: 767px) */
+        @media (max-width: 767px) {
+            body {
+                padding: 16px 12px;
+                justify-content: flex-start;
+                min-height: 100vh;
+            }
+
+            .top-nav {
+                margin-bottom: 14px;
+            }
+
+            .contact-card {
+                flex-direction: column;
+                border-radius: 20px;
+                box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+            }
+
+            .info-col {
+                width: 100%;
+                padding: 28px 20px;
+                border-right: none;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            }
+
+            .info-header h1 {
+                font-size: 22px;
+                margin-bottom: 8px;
+            }
+
+            .info-header p {
+                font-size: 13px;
+            }
+
+            .contact-items {
+                margin: 20px 0;
+                gap: 16px;
+            }
+
+            .item-icon {
+                width: 38px;
+                height: 38px;
+                font-size: 15px;
+            }
+
+            .item-text h4 {
+                font-size: 11px;
+            }
+
+            .item-text p, .item-text a {
+                font-size: 13px;
+            }
+
+            .form-col {
+                width: 100%;
+                padding: 28px 20px;
+            }
+
+            .form-header h2 {
+                font-size: 19px;
+            }
+
+            .form-header p {
+                font-size: 12.5px;
+            }
+
+            .input-field {
+                margin-bottom: 15px;
+            }
+
+            .input-field input {
+                padding: 12px 14px 12px 40px;
+                font-size: 13.5px;
+            }
+
+            .input-field textarea {
+                padding: 12px 14px;
+                font-size: 13.5px;
+                min-height: 100px;
+            }
+
+            .submit-btn {
+                padding: 13px;
+                font-size: 14.5px;
+                border-radius: 12px;
+            }
+        }
+
+        /* 📱 Small Compact Phones (< 380px) */
+        @media (max-width: 380px) {
+            body {
+                padding: 12px 8px;
+            }
+
+            .info-col, .form-col {
+                padding: 22px 16px;
+            }
+
+            .info-header h1 {
+                font-size: 20px;
+            }
         }
     </style>
 </head>
 
 <body>
 
-    <div class="container">
+    <!-- TOP NAV -->
+    <div class="top-nav">
+        <a href="/index.html" class="back-link">
+            <i class="fa fa-arrow-left"></i>
+            <span>Back to Store</span>
+        </a>
+        <div class="brand-badge">
+            <i class="fa fa-gem"></i> Soumyadip Fashion
+        </div>
+    </div>
 
-        <!-- LEFT -->
-        <div class="left">
-            <h2>Contact Soumyadip Store</h2>
-            <p>We are here to help you anytime 💬</p>
+    <!-- MAIN CONTACT CARD -->
+    <div class="contact-card">
 
-            <p>
-                📧 Email: support@soumyadiproy037@gmail.com <br>
-                📞 Phone: +91 98xxxxxxxx <br>
-                📍 India
-            </p>
+        <!-- LEFT INFO -->
+        <div class="info-col">
+            <div class="info-header">
+                <h1>Let's Connect 👋</h1>
+                <p>Have questions about orders, products, or deliveries? Reach out and we'll help you immediately.</p>
+            </div>
+
+            <div class="contact-items">
+                <div class="contact-item">
+                    <div class="item-icon"><i class="fa fa-envelope"></i></div>
+                    <div class="item-text">
+                        <h4>Email Us</h4>
+                        <a href="mailto:support@soumyadiproy037@gmail.com">support@soumyadiproy037@gmail.com</a>
+                    </div>
+                </div>
+
+                <div class="contact-item">
+                    <div class="item-icon"><i class="fa fa-phone"></i></div>
+                    <div class="item-text">
+                        <h4>Call / WhatsApp</h4>
+                        <a href="tel:+919800000000">+91 98000 00000</a>
+                    </div>
+                </div>
+
+                <div class="contact-item">
+                    <div class="item-icon"><i class="fa fa-location-dot"></i></div>
+                    <div class="item-text">
+                        <h4>Headquarters</h4>
+                        <p>Kolkata, West Bengal, India</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="hours-badge">
+                <div class="status-dot"></div>
+                <span>Customer Support: 24/7 Active</span>
+            </div>
         </div>
 
-        <!-- RIGHT -->
-        <div class="right">
-            <h3>Send Message</h3>
+        <!-- RIGHT FORM -->
+        <div class="form-col">
+            <div class="form-header">
+                <h2>Send Us a Message 💬</h2>
+                <p>Fill out the details below and our support team will reply within 24 hours.</p>
+            </div>
 
-            <form>
-                <input type="text" placeholder="Your Name" required>
-                <input type="email" placeholder="Your Email" required>
-                <textarea rows="4" placeholder="Your Message"></textarea>
-                <button type="submit">Send</button>
+            <div class="msg-banner msg-success" id="successBanner">
+                <i class="fa fa-circle-check"></i>
+                <span id="successMsg">Message sent successfully ✅</span>
+            </div>
+
+            <div class="msg-banner msg-error" id="errorBanner">
+                <i class="fa fa-circle-exclamation"></i>
+                <span id="errorMsg">Failed to send message ❌</span>
+            </div>
+
+            <form id="contactForm" onsubmit="handleContactSubmit(event)">
+                <div class="input-field">
+                    <label for="nameInput">Full Name</label>
+                    <div class="input-wrapper">
+                        <input type="text" id="nameInput" placeholder="e.g. Soumyadip Roy" required autocomplete="name">
+                        <i class="fa fa-user input-icon"></i>
+                    </div>
+                </div>
+
+                <div class="input-field">
+                    <label for="emailInput">Email Address</label>
+                    <div class="input-wrapper">
+                        <input type="email" id="emailInput" placeholder="name@example.com" required autocomplete="email">
+                        <i class="fa fa-envelope input-icon"></i>
+                    </div>
+                </div>
+
+                <div class="input-field">
+                    <label for="messageInput">Your Message</label>
+                    <textarea id="messageInput" placeholder="Write your question, feedback, or order inquiry here..." required rows="4"></textarea>
+                </div>
+
+                <button type="submit" class="submit-btn" id="submitBtn">
+                    <i class="fa fa-paper-plane"></i>
+                    <span id="btnText">Send Message</span>
+                </button>
             </form>
-
-            <a href="index.html" class="back">⬅ Back to Home</a>
         </div>
 
     </div>
+
     <script>
-        async function sendMessage() {
+        async function handleContactSubmit(e) {
+            e.preventDefault();
 
-            const name = document.getElementById("name").value;
-            const email = document.getElementById("email").value;
-            const message = document.getElementById("message").value;
+            const name = document.getElementById("nameInput").value.trim();
+            const email = document.getElementById("emailInput").value.trim();
+            const message = document.getElementById("messageInput").value.trim();
 
-            await fetch("/api/contact", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({ name, email, message })
-            });
+            const submitBtn = document.getElementById("submitBtn");
+            const btnText = document.getElementById("btnText");
+            const successBanner = document.getElementById("successBanner");
+            const errorBanner = document.getElementById("errorBanner");
 
-            alert("Message sent ✅");
+            successBanner.style.display = "none";
+            errorBanner.style.display = "none";
+
+            if (!name || !email || !message) {
+                errorBanner.style.display = "flex";
+                document.getElementById("errorMsg").textContent = "Please fill in all required fields ⚠️";
+                return;
+            }
+
+            submitBtn.disabled = true;
+            btnText.textContent = "Sending...";
+
+            try {
+                const res = await fetch("/api/contact", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ name, email, message })
+                });
+
+                const data = await res.json();
+
+                if (res.ok) {
+                    successBanner.style.display = "flex";
+                    document.getElementById("successMsg").textContent = data.msg || "Message sent successfully! We will get back to you soon ✅";
+                    document.getElementById("contactForm").reset();
+                } else {
+                    errorBanner.style.display = "flex";
+                    document.getElementById("errorMsg").textContent = data.error || data.msg || "Could not send message ❌";
+                }
+
+            } catch (err) {
+                console.error("Contact Form Error:", err);
+                errorBanner.style.display = "flex";
+                document.getElementById("errorMsg").textContent = "Network error. Please try again in a moment ❌";
+            } finally {
+                submitBtn.disabled = false;
+                btnText.textContent = "Send Message";
+            }
         }
     </script>
-</body>
 
+</body>
 </html>
