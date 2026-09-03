@@ -68,23 +68,26 @@
         }
 
         .nav-brand {
-            display: flex;
+            display: inline-flex;
             align-items: center;
+            background: #ffffff;
+            padding: 6px 14px;
+            border-radius: 12px;
             text-decoration: none;
+            box-shadow: 0 4px 18px rgba(255, 77, 77, 0.25);
+            transition: all 0.25s ease;
+        }
+
+        .nav-brand:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 24px rgba(255, 77, 77, 0.45);
         }
 
         .custom-nav-logo {
-            height: 44px;
+            height: 32px;
             width: auto;
-            border-radius: 10px;
             object-fit: contain;
             display: block;
-            box-shadow: 0 4px 15px rgba(255, 77, 77, 0.2);
-            transition: transform 0.2s ease;
-        }
-
-        .custom-nav-logo:hover {
-            transform: scale(1.04);
         }
 
         .nav-links {
@@ -628,7 +631,7 @@
     <!-- NAVBAR -->
     <header class="navbar">
         <a href="/index.html" class="nav-brand" title="Soumyadip Store">
-            <img src="/images/logo-custom.png" alt="Soumyadip Store" class="custom-nav-logo">
+            <img src="/images/logo-transparent.png" alt="Soumyadip Store" class="custom-nav-logo">
         </a>
 
         <div class="nav-links">
