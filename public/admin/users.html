@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <script src="/admin/admin-auth.js"></script>
 <title>Users</title>
 
 <style>
@@ -60,7 +61,7 @@ button {
     <div class="menu" onclick="goAddProduct()">Add Product</div>
     <div class="menu" onclick="goManage()">Manage Products</div>
     <div class="menu">Users 👤</div>
-    <div class="menu" onclick="logout()">Logout</div>
+    <div class="menu" onclick="adminLogout()">Logout</div>
 </div>
 
 <div class="main">
@@ -75,7 +76,7 @@ const token = localStorage.getItem("token");
 
 if (!token) {
     alert("Login required ❌");
-    window.location.href = "/login.html";
+    window.location.href = "/admin/login.html";
 }
 
 // 🔥 LOAD USERS
@@ -203,7 +204,7 @@ function goManage(){ window.location.href="/admin/manage-products.html"; }
 
 function logout(){
     localStorage.removeItem("token");
-    window.location.href="/login.html";
+    window.location.href = "/admin/login.html";
 }
 
 </script>

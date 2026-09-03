@@ -2,6 +2,7 @@
 
 <html>
 <head>
+    <script src="/admin/admin-auth.js"></script>
 <title>Admin - Queries</title>
 
 <style>
@@ -182,7 +183,7 @@ const user = parseJwt(token);
 
 if (!token || user.role !== "admin") {
     alert("Access denied ❌ Admin only");
-    window.location.href = "/login.html";
+    window.location.href = "/admin/login.html";
 }
 
 // 🔎 FILTER

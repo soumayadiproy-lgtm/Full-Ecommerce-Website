@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Admin Dashboard</title>
+    <title>Admin Dashboard | Soumyadip Store</title>
+    <script src="/admin/admin-auth.js"></script>
 
     <style>
         body {
@@ -98,7 +99,7 @@
     <a href="/admin/admin-contacts.html">👤 Customer Support</a>
     <a href="/admin/orders.html">📦 Orders</a>
 
-    <div class="logout" onclick="logout()">🚪 Logout</div>
+    <div class="logout" onclick="adminLogout()">🚪 Logout</div>
 </div>
 
 <!-- 🔥 MAIN -->
@@ -114,13 +115,7 @@
 
 <script>
 const BASE_URL = "";
-const token = localStorage.getItem("token");
-
-// 🔐 LOGIN CHECK
-if (!token) {
-    alert("Login first ❌");
-    window.location.href = "/login.html";
-}
+const token = window.ADMIN_TOKEN || localStorage.getItem("token");
 
 // 🔥 LOAD USER COUNT
 async function loadUserCount() {
@@ -191,11 +186,7 @@ loadUserCount();
 loadProducts();
 loadOrders();
 
-// 🔥 LOGOUT
-function logout() {
-    localStorage.removeItem("token");
-    window.location.href = "/login.html";
-}
+// 🔥 LOGOUT is handled by admin-auth.js → adminLogout()
 </script>
 
 </body>

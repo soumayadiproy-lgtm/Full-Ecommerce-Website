@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <script src="/admin/admin-auth.js"></script>
     <title>Manage Products</title>
 
     <style>
@@ -92,7 +93,7 @@
     <div class="menu" onclick="goDashboard()">Dashboard</div>
     <div class="menu" onclick="goAddProduct()">Add Product</div>
     <div class="menu">Manage Products</div>
-    <div class="menu" onclick="logout()">Logout</div>
+    <div class="menu" onclick="adminLogout()">Logout</div>
 </div>
 
 <div class="main">
@@ -139,7 +140,7 @@ let currentId = "";
 // 🔐 PROTECT PAGE
 if (!token) {
     alert("Login required ❌");
-    window.location.href = "/login.html";
+    window.location.href = "/admin/login.html";
 }
 
 // 🔥 LOAD PRODUCTS (FIXED)
@@ -240,7 +241,7 @@ function goAddProduct(){ window.location.href="/admin/add-product.html"; }
 
 function logout(){
     localStorage.removeItem("token");
-    window.location.href="/login.html";
+    window.location.href = "/admin/login.html";
 }
 
 </script>

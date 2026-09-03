@@ -60,6 +60,125 @@ router.post("/register", async (req, res) => {
 });
 
 
+// ================= ADMIN LOGIN =================
+router.post("/admin/login", async (req, res) => {
+    try {
+        const { email, password } = req.body;
+
+        if (!email || !password) {
+            return res.status(400).json({ msg: "Email and password are required ❌" });
+        }
+
+        const normalizedEmail = email.trim().toLowerCase();
+
+        let user = null;
+        try {
+            user = await User.findOne({ email: normalizedEmail });
+        } catch (e) {}
+
+        if (!user) {
+            user = memoryUsers.find(u => u.email && u.email.toLowerCase() === normalizedEmail);
+        }
+
+        if (!user) {
+            return res.status(403).json({ msg: "Admin account not found ❌" });
+        }
+
+        // 🔐 ADMIN ROLE CHECK — must be admin
+        if (user.role !== "admin") {
+            return res.status(403).json({ msg: "Access denied. Admin privileges required 🚫" });
+        }
+
+        // 🚫 BLOCK CHECK
+        if (user.isBlocked) {
+            return res.status(403).json({ msg: "Admin account is blocked 🚫" });
+        }
+
+        // ✅ Verify password
+        let isMatch = false;
+        if (user.password) {
+            try {
+                isMatch = await bcrypt.compare(password, user.password);
+            } catch (e) {}
+            if (!isMatch && user.password === password) isMatch = true;
+        }
+
+        if (!isMatch) {
+            return res.status(400).json({ msg: "Invalid admin password ❌" });
+        }
+
+        const token = jwt.sign(
+            { id: user._id, email: user.email, role: "admin" },
+            SECRET,
+            { expiresIn: "8h" }
+        );
+
+        return res.json({
+            msg: "Admin login success ✅",
+            token,
+            user: {
+                _id: user._id,
+                email: user.email,
+                name: user.name || "",
+                role: "admin"
+            }
+        });
+
+    } catch (err) {
+        console.error("Admin Login Error:", err);
+        return res.status(500).json({ error: err.message || "Admin login failed ❌" });
+    }
+});
+
+// ================= ADMIN SETUP (Create first admin) =================
+// ⚠️ Use this ONCE to create your admin account, then remove or secure it
+router.post("/admin/setup", async (req, res) => {
+    try {
+        const { email, password, setupKey } = req.body;
+
+        // 🔐 Require a setup key from env (or fallback)
+        const SETUP_KEY = process.env.ADMIN_SETUP_KEY || "soumyadip-admin-2026";
+        if (setupKey !== SETUP_KEY) {
+            return res.status(403).json({ msg: "Invalid setup key ❌" });
+        }
+
+        if (!email || !password) {
+            return res.status(400).json({ msg: "Email and password are required ❌" });
+        }
+
+        const normalizedEmail = email.trim().toLowerCase();
+
+        // Check if already exists
+        let existing = null;
+        try { existing = await User.findOne({ email: normalizedEmail }); } catch (e) {}
+        if (existing) {
+            // Upgrade to admin if exists
+            existing.role = "admin";
+            try { await existing.save(); } catch (e) {}
+            return res.json({ msg: "User upgraded to admin ✅", email: normalizedEmail });
+        }
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const adminUser = new User({
+            email: normalizedEmail,
+            password: hashedPassword,
+            role: "admin"
+        });
+
+        try { await adminUser.save(); } catch (e) {
+            return res.status(500).json({ msg: "Failed to create admin ❌", error: e.message });
+        }
+
+        return res.json({ msg: "Admin account created successfully 👑", email: normalizedEmail });
+
+    } catch (err) {
+        console.error("Admin Setup Error:", err);
+        return res.status(500).json({ error: err.message });
+    }
+});
+
+
+
 // ================= LOGIN =================
 router.post("/login", async (req, res) => {
     try {

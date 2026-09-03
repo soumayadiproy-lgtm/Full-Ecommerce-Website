@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <script src="/admin/admin-auth.js"></script>
     <title>Add Product - Admin</title>
 
     <style>
@@ -89,7 +90,7 @@
 
     <div class="menu" onclick="goDashboard()">📊 Dashboard</div>
     <div class="menu">➕ Add Product</div>
-    <div class="menu" onclick="logout()">🚪 Logout</div>
+    <div class="menu" onclick="adminLogout()">🚪 Logout</div>
 </div>
 
 <div class="main">
@@ -126,7 +127,7 @@ const token = localStorage.getItem("token");
 // 🔒 PROTECT PAGE
 if (!token) {
     alert("Login first ❌");
-    window.location.href = "/login.html";
+    window.location.href = "/admin/login.html";
 }
 
 // 🔥 ADD PRODUCT
@@ -179,7 +180,7 @@ function goDashboard(){
 
 function logout(){
     localStorage.removeItem("token");
-    window.location.href = "/login.html";
+    window.location.href = "/admin/login.html";
 }
 
 </script>

@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <script src="/admin/admin-auth.js"></script>
     <title>Admin Orders</title>
 
     <!-- 🔥 PREMIUM STYLE -->
@@ -128,7 +129,7 @@ const token = localStorage.getItem("token");
 
 if (!token) {
     alert("Login required ❌");
-    window.location.href = "/login.html";
+    window.location.href = "/admin/login.html";
 }
 
 // 🔥 LOAD ORDERS
