@@ -5,6 +5,7 @@ const User = require("../models/User");
 const Otp = require("../models/Otp");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const connectDB = require("../config/db");
 const { verifyToken, isAdmin } = require("../middleware/auth");
 
 const SECRET = process.env.JWT_SECRET || "secretkey";
@@ -14,13 +15,17 @@ const memoryUsers = [];
 // ================= REGISTER =================
 router.post("/register", async (req, res) => {
     try {
-        const { email, password, phone } = req.body;
+        const { email, password, phone, name } = req.body;
 
         if (!email || !password) {
             return res.status(400).json({ msg: "Email and password are required ❌" });
         }
 
         const normalizedEmail = email.trim().toLowerCase();
+
+        try {
+            await connectDB();
+        } catch (e) {}
 
         let existingUser = null;
         try {
@@ -36,20 +41,36 @@ router.post("/register", async (req, res) => {
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
-        const userData = {
-            _id: "u_" + Date.now() + "_" + Math.floor(Math.random()*1000),
+
+        const newUser = new User({
             email: normalizedEmail,
             password: hashedPassword,
             phone: phone || "",
-            role: "user"
-        };
+            name: name || normalizedEmail.split("@")[0],
+            role: "user",
+            isBlocked: false,
+            membership: "free"
+        });
 
+        let savedUser = null;
         try {
-            const newUser = new User(userData);
-            await newUser.save();
-        } catch (e) {}
+            savedUser = await newUser.save();
+            console.log("✅ New user registered and saved to MongoDB:", normalizedEmail, "ID:", savedUser._id);
+        } catch (dbErr) {
+            console.error("❌ MongoDB User save error:", dbErr.message);
+        }
 
-        memoryUsers.push(userData);
+        const userId = savedUser ? savedUser._id : ("u_" + Date.now());
+        memoryUsers.push({
+            _id: userId,
+            email: normalizedEmail,
+            password: hashedPassword,
+            phone: phone || "",
+            name: name || normalizedEmail.split("@")[0],
+            role: "user",
+            isBlocked: false,
+            membership: "free"
+        });
 
         return res.json({ msg: "Registered successfully ✅ You can now login!" });
 
@@ -510,13 +531,66 @@ router.put("/profile", verifyToken, async (req, res) => {
     }
 });
 // ================= GET ALL USERS (ADMIN) =================
-// ================= GET ALL USERS =================
 router.get("/", async (req, res) => {
     try {
-        const users = await User.find().select("-password");
-        res.json(users);
+        try {
+            await connectDB();
+        } catch (e) {}
+
+        let dbUsers = [];
+        try {
+            dbUsers = await User.find().select("-password").sort({ createdAt: -1 });
+        } catch (dbErr) {
+            console.warn("DB user fetch error:", dbErr.message);
+        }
+
+        // Merge DB users and memoryUsers so all registered users are returned
+        const userMap = new Map();
+
+        if (Array.isArray(dbUsers)) {
+            dbUsers.forEach(u => {
+                if (u && u.email) {
+                    userMap.set(u.email.toLowerCase(), {
+                        _id: u._id,
+                        email: u.email,
+                        name: u.name || "",
+                        phone: u.phone || "",
+                        role: u.role || "user",
+                        isBlocked: !!u.isBlocked,
+                        membership: u.membership || "free",
+                        createdAt: u.createdAt || new Date()
+                    });
+                }
+            });
+        }
+
+        memoryUsers.forEach(u => {
+            if (u && u.email && !userMap.has(u.email.toLowerCase())) {
+                userMap.set(u.email.toLowerCase(), {
+                    _id: u._id,
+                    email: u.email,
+                    name: u.name || "",
+                    phone: u.phone || "",
+                    role: u.role || "user",
+                    isBlocked: !!u.isBlocked,
+                    membership: u.membership || "free",
+                    createdAt: new Date()
+                });
+            }
+        });
+
+        const allUsers = Array.from(userMap.values());
+        return res.json(allUsers);
+
     } catch (err) {
-        res.status(500).json({ msg: "Error ❌" });
+        console.error("Error in GET /api/users:", err);
+        return res.json(memoryUsers.map(u => ({
+            _id: u._id,
+            email: u.email,
+            name: u.name || "",
+            role: u.role || "user",
+            isBlocked: !!u.isBlocked
+        })));
     }
 });
 

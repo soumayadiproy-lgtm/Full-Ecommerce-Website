@@ -1,206 +1,878 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <script src="/admin/admin-auth.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Users</title>
+    <script src="/admin/admin-auth.js"></script>
+    <title>Users Management - Admin Panel</title>
 
-<style>
-body {
-    margin: 0;
-    font-family: 'Inter', sans-serif;
-    display: flex;
-    background: linear-gradient(135deg, #141e30, #243b55);
-    color: white;
-}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
-.sidebar {
-    width: 230px;
-    height: 100vh;
-    padding: 25px;
-    background: rgba(255,255,255,0.05);
-    backdrop-filter: blur(20px);
-}
+    <style>
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
 
-.menu {
-    padding: 12px;
-    margin: 10px 0;
-    cursor: pointer;
-}
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            display: flex;
+            min-height: 100vh;
+            background: #0f1117;
+            color: #e2e8f0;
+        }
 
-.main {
-    flex: 1;
-    padding: 30px;
-}
+        /* SIDEBAR */
+        .sidebar {
+            width: 240px;
+            height: 100vh;
+            position: sticky;
+            top: 0;
+            background: #1a1d27;
+            border-right: 1px solid rgba(255,255,255,.06);
+            display: flex;
+            flex-direction: column;
+            padding: 24px 16px;
+            gap: 4px;
+            flex-shrink: 0;
+        }
 
-.user-box {
-    background: rgba(255,255,255,0.08);
-    padding: 15px;
-    margin: 10px 0;
-    border-radius: 12px;
-}
+        .sidebar-logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px 24px;
+            border-bottom: 1px solid rgba(255,255,255,.06);
+            margin-bottom: 12px;
+        }
 
-button {
-    margin-top: 8px;
-    margin-right: 5px;
-    padding: 6px 10px;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-}
+        .logo-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #6366f1, #db2777);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
 
-.delete { background: #ff4d4d; color: white; }
-.admin { background: #007bff; color: white; }
-</style>
+        .sidebar-logo span {
+            font-weight: 700;
+            font-size: 15px;
+            color: #fff;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 11px;
+            padding: 11px 13px;
+            border-radius: 10px;
+            text-decoration: none;
+            color: #94a3b8;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all .2s;
+            cursor: pointer;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            background: rgba(99,102,241,.12);
+            color: #a5b4fc;
+        }
+
+        .nav-link.active {
+            color: #818cf8;
+            font-weight: 600;
+        }
+
+        .nav-link i {
+            width: 18px;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        .nav-divider {
+            height: 1px;
+            background: rgba(255,255,255,.06);
+            margin: 10px 0;
+        }
+
+        .logout-btn {
+            margin-top: auto;
+            display: flex;
+            align-items: center;
+            gap: 11px;
+            padding: 11px 13px;
+            border-radius: 10px;
+            color: #f87171;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: background .2s;
+        }
+
+        .logout-btn:hover {
+            background: rgba(239,68,68,.1);
+        }
+
+        /* MOBILE TOPBAR */
+        .mobile-topbar {
+            display: none;
+            position: sticky;
+            top: 0;
+            background: #1a1d27;
+            border-bottom: 1px solid rgba(255,255,255,.06);
+            padding: 12px 18px;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 998;
+        }
+
+        .menu-toggle-btn {
+            background: rgba(255,255,255,.08);
+            border: 1px solid rgba(255,255,255,.1);
+            color: #fff;
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+        }
+
+        .mobile-brand {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 700;
+            font-size: 15px;
+            color: #fff;
+        }
+
+        .logo-icon-sm {
+            width: 28px;
+            height: 28px;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #6366f1, #db2777);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+
+        .sidebar-backdrop {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(4px);
+            z-index: 999;
+        }
+
+        /* MAIN CONTENT */
+        .main {
+            flex: 1;
+            padding: 32px 36px;
+            overflow-y: auto;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            gap: 16px;
+        }
+
+        .page-title {
+            font-size: 24px;
+            font-weight: 800;
+            color: #fff;
+            letter-spacing: -.02em;
+        }
+
+        .page-sub {
+            font-size: 13px;
+            color: #64748b;
+            margin-top: 3px;
+        }
+
+        /* FILTER & SEARCH BAR */
+        .filter-bar {
+            background: #1a1d27;
+            border: 1px solid rgba(255,255,255,.06);
+            border-radius: 16px;
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .search-box {
+            position: relative;
+            flex: 1;
+            min-width: 240px;
+            max-width: 360px;
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #64748b;
+            font-size: 13px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 10px 14px 10px 38px;
+            background: rgba(255,255,255,.05);
+            border: 1px solid rgba(255,255,255,.1);
+            border-radius: 10px;
+            color: #fff;
+            font-size: 13px;
+            font-family: inherit;
+            outline: none;
+            transition: all .2s;
+        }
+
+        .search-box input:focus {
+            border-color: #6366f1;
+            background: rgba(99,102,241,.06);
+        }
+
+        .filter-pills {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            background: rgba(255,255,255,.05);
+            border: 1px solid rgba(255,255,255,.08);
+            color: #94a3b8;
+            padding: 7px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all .2s;
+        }
+
+        .filter-btn:hover, .filter-btn.active {
+            background: #6366f1;
+            color: #fff;
+            border-color: #6366f1;
+        }
+
+        .user-count-badge {
+            background: rgba(99,102,241,.15);
+            border: 1px solid rgba(99,102,241,.3);
+            color: #a5b4fc;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        /* TABLE CARD */
+        .table-card {
+            background: #1a1d27;
+            border: 1px solid rgba(255,255,255,.06);
+            border-radius: 16px;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            box-shadow: 0 10px 30px rgba(0,0,0,.2);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 720px;
+        }
+
+        th {
+            background: rgba(255,255,255,.03);
+            padding: 14px 18px;
+            font-size: 11px;
+            font-weight: 700;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: .05em;
+            text-align: left;
+            border-bottom: 1px solid rgba(255,255,255,.06);
+        }
+
+        td {
+            padding: 14px 18px;
+            font-size: 13px;
+            border-top: 1px solid rgba(255,255,255,.04);
+            color: #cbd5e1;
+            vertical-align: middle;
+        }
+
+        tr:hover td {
+            background: rgba(255,255,255,.02);
+        }
+
+        .user-cell {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #6366f1, #db2777);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 14px;
+            color: #fff;
+            flex-shrink: 0;
+            text-transform: uppercase;
+        }
+
+        .user-email-text {
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 2px;
+        }
+
+        .user-id-text {
+            font-size: 11px;
+            color: #64748b;
+            font-family: monospace;
+        }
+
+        /* BADGES */
+        .role-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .role-admin {
+            background: rgba(234, 179, 8, 0.15);
+            border: 1px solid rgba(234, 179, 8, 0.35);
+            color: #facc15;
+        }
+
+        .role-user {
+            background: rgba(99, 102, 241, 0.15);
+            border: 1px solid rgba(99, 102, 241, 0.35);
+            color: #a5b4fc;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .status-active {
+            background: rgba(34, 197, 94, 0.15);
+            border: 1px solid rgba(34, 197, 94, 0.35);
+            color: #4ade80;
+        }
+
+        .status-blocked {
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid rgba(239, 68, 68, 0.35);
+            color: #f87171;
+        }
+
+        /* ACTIONS */
+        .action-btns {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .btn-action {
+            border: none;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all .2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .btn-role {
+            background: rgba(99, 102, 241, 0.15);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            color: #a5b4fc;
+        }
+
+        .btn-role:hover {
+            background: rgba(99, 102, 241, 0.3);
+            color: #fff;
+        }
+
+        .btn-block {
+            background: rgba(245, 158, 11, 0.15);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+            color: #fbbf24;
+        }
+
+        .btn-block:hover {
+            background: rgba(245, 158, 11, 0.3);
+            color: #fff;
+        }
+
+        .btn-unblock {
+            background: rgba(34, 197, 94, 0.15);
+            border: 1px solid rgba(34, 197, 94, 0.3);
+            color: #4ade80;
+        }
+
+        .btn-unblock:hover {
+            background: rgba(34, 197, 94, 0.3);
+            color: #fff;
+        }
+
+        .btn-del {
+            background: rgba(239, 68, 68, 0.12);
+            border: 1px solid rgba(239, 68, 68, 0.25);
+            color: #f87171;
+        }
+
+        .btn-del:hover {
+            background: rgba(239, 68, 68, 0.3);
+            color: #fff;
+        }
+
+        /* EMPTY & LOADING */
+        .empty-state {
+            padding: 60px 20px;
+            text-align: center;
+            color: #64748b;
+        }
+
+        .empty-state i {
+            font-size: 42px;
+            margin-bottom: 14px;
+            opacity: 0.5;
+        }
+
+        .empty-state h3 {
+            font-size: 16px;
+            color: #94a3b8;
+            margin-bottom: 6px;
+        }
+
+        .empty-state p {
+            font-size: 13px;
+        }
+
+        /* TOAST */
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: #1e293b;
+            border: 1px solid rgba(255,255,255,.15);
+            color: #fff;
+            padding: 12px 20px;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 600;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            display: none;
+            z-index: 10000;
+            animation: toastIn 0.3s ease;
+        }
+
+        @keyframes toastIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* 📱 RESPONSIVE MEDIA QUERIES */
+        @media (max-width: 900px) {
+            body { flex-direction: column; }
+            .mobile-topbar { display: flex; }
+            .sidebar {
+                position: fixed;
+                top: 0;
+                left: 0;
+                height: 100vh;
+                z-index: 1000;
+                transform: translateX(-100%);
+                transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                box-shadow: 10px 0 30px rgba(0,0,0,0.5);
+            }
+            .sidebar.open { transform: translateX(0); }
+            .sidebar-backdrop.active { display: block; }
+            .main { padding: 20px 16px; }
+            .page-header { flex-direction: column; align-items: flex-start; gap: 12px; }
+            .filter-bar { flex-direction: column; align-items: stretch; gap: 12px; }
+            .search-box { max-width: 100%; min-width: 100%; }
+        }
+    </style>
 </head>
 
 <body>
 
-<div class="sidebar">
-    <h2>Admin 👑</h2>
-    <div class="menu" onclick="goDashboard()">Dashboard</div>
-    <div class="menu" onclick="goAddProduct()">Add Product</div>
-    <div class="menu" onclick="goManage()">Manage Products</div>
-    <div class="menu">Users 👤</div>
-    <div class="menu" onclick="adminLogout()">Logout</div>
+<!-- MOBILE TOPBAR -->
+<header class="mobile-topbar">
+    <button class="menu-toggle-btn" onclick="toggleAdminSidebar()" aria-label="Toggle Menu">
+        <i class="fa fa-bars"></i>
+    </button>
+    <div class="mobile-brand">
+        <div class="logo-icon-sm">👑</div>
+        <span>Admin Panel</span>
+    </div>
+    <a href="/Products.html" style="color:#94a3b8; text-decoration:none; font-size:16px;">
+        <i class="fa fa-store"></i>
+    </a>
+</header>
+<div class="sidebar-backdrop" id="sidebarBackdrop" onclick="toggleAdminSidebar()"></div>
+
+<!-- SIDEBAR -->
+<nav class="sidebar">
+    <div class="sidebar-logo">
+        <div class="logo-icon">👑</div>
+        <span>Admin Panel</span>
+    </div>
+    <a class="nav-link" href="/admin/dashboard.html"><i class="fa fa-chart-line"></i> Dashboard</a>
+    <a class="nav-link" href="/admin/add-product.html"><i class="fa fa-plus"></i> Add Product</a>
+    <a class="nav-link" href="/admin/manage-products.html"><i class="fa fa-box"></i> Manage Products</a>
+    <a class="nav-link active" href="/admin/users.html"><i class="fa fa-users"></i> Users</a>
+    <a class="nav-link" href="/admin/orders.html"><i class="fa fa-shopping-bag"></i> Orders</a>
+    <a class="nav-link" href="/admin/admin-contacts.html"><i class="fa fa-headset"></i> Support</a>
+    <div class="nav-divider"></div>
+    <a class="nav-link" href="/Products.html" style="color:#64748b"><i class="fa fa-store"></i> View Store</a>
+    <div class="logout-btn" onclick="adminLogout()">
+        <i class="fa fa-right-from-bracket"></i> Logout
+    </div>
+</nav>
+
+<!-- MAIN CONTENT -->
+<div class="main">
+    <div class="page-header">
+        <div>
+            <h1 class="page-title">Users Management 👥</h1>
+            <p class="page-sub">View registered accounts, assign roles, manage user block status, and monitor activity.</p>
+        </div>
+        <div>
+            <button class="btn-action btn-role" onclick="loadUsers()" style="padding: 10px 16px;">
+                <i class="fa fa-rotate"></i> Refresh
+            </button>
+        </div>
+    </div>
+
+    <!-- FILTER & SEARCH BAR -->
+    <div class="filter-bar">
+        <div class="search-box">
+            <i class="fa fa-search"></i>
+            <input type="text" id="searchInput" placeholder="Search by email or name..." oninput="handleSearch()">
+        </div>
+
+        <div class="filter-pills">
+            <button class="filter-btn active" onclick="setFilter('all', this)">All</button>
+            <button class="filter-btn" onclick="setFilter('admin', this)">Admins 👑</button>
+            <button class="filter-btn" onclick="setFilter('user', this)">Users 👤</button>
+            <button class="filter-btn" onclick="setFilter('blocked', this)">Blocked 🚫</button>
+        </div>
+
+        <div class="user-count-badge" id="userCountBadge">
+            0 Users
+        </div>
+    </div>
+
+    <!-- USERS TABLE -->
+    <div class="table-card">
+        <table>
+            <thead>
+                <tr>
+                    <th>User</th>
+                    <th>Role</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="userTableBody">
+                <tr>
+                    <td colspan="4" class="empty-state">
+                        <i class="fa fa-spinner fa-spin"></i>
+                        <h3>Loading users...</h3>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
 </div>
 
-<div class="main">
-    <h1>All Users 👤</h1>
-    <div id="users">Loading...</div>
-</div>
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
 
 <script>
-
 const BASE_URL = "";
 const token = window.ADMIN_TOKEN || localStorage.getItem("adminToken") || localStorage.getItem("token");
 
-// 🔥 LOAD USERS
+let allUsers = [];
+let activeFilter = "all";
+let searchTerm = "";
+
+// 1. LOAD USERS
 async function loadUsers() {
+    const tbody = document.getElementById("userTableBody");
+    tbody.innerHTML = `
+        <tr>
+            <td colspan="4" class="empty-state">
+                <i class="fa fa-spinner fa-spin"></i>
+                <h3>Loading users...</h3>
+            </td>
+        </tr>
+    `;
+
     try {
         const res = await fetch(BASE_URL + "/api/users", {
-            headers: { "Authorization": "Bearer " + token }
+            headers: {
+                "Authorization": "Bearer " + token
+            }
         });
 
         const data = await res.json();
-        const box = document.getElementById("users");
 
-        if (!data.length) {
-            box.innerHTML = "No users ❌";
-            return;
+        if (Array.isArray(data)) {
+            allUsers = data;
+            renderUsers();
+        } else {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="4" class="empty-state">
+                        <i class="fa fa-triangle-exclamation"></i>
+                        <h3>Error loading users</h3>
+                        <p>${escapeHtml(data.msg || data.error || "Failed to load")}</p>
+                    </td>
+                </tr>
+            `;
         }
-
-        box.innerHTML = data.map(u => `
-            <div class="user-box">
-                <b>Email:</b> ${u.email} <br>
-                <b>ID:</b> ${u._id} <br>
-                <b>Role:</b> ${u.role || "user"} <br>
-<b>Status:</b> ${u.isBlocked ? "🚫 Blocked" : "✅ Active"} <br>
-                <button class="delete" onclick="deleteUser('${u._id}')">Delete</button>
-                <button class="admin" onclick="makeAdmin('${u._id}')">Make Admin</button>
-                   <!-- 🚫 BLOCK SYSTEM -->
-        ${
-            u.isBlocked
-            ? `<button style="background:green;color:white" onclick="unblockUser('${u._id}')">Unblock</button>`
-            : `<button style="background:orange;color:white" onclick="blockUser('${u._id}')">Block</button>`
-        }
-            </div>
-        `).join("");
-
     } catch (err) {
-        console.log(err);
-        document.getElementById("users").innerHTML = "Error ❌";
+        console.error("Users Load Error:", err);
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="4" class="empty-state">
+                    <i class="fa fa-triangle-exclamation"></i>
+                    <h3>Network Error</h3>
+                    <p>Could not connect to server</p>
+                </td>
+            </tr>
+        `;
     }
 }
 
+// 2. RENDER USERS
+function renderUsers() {
+    const tbody = document.getElementById("userTableBody");
+    const countBadge = document.getElementById("userCountBadge");
+
+    let filtered = allUsers.filter(u => {
+        // Search
+        const q = searchTerm.toLowerCase();
+        const matchesSearch = !q || (u.email && u.email.toLowerCase().includes(q)) || (u.name && u.name.toLowerCase().includes(q)) || (String(u._id).includes(q));
+        if (!matchesSearch) return false;
+
+        // Filter
+        if (activeFilter === "admin") return u.role === "admin";
+        if (activeFilter === "user") return u.role !== "admin";
+        if (activeFilter === "blocked") return !!u.isBlocked;
+        return true;
+    });
+
+    countBadge.textContent = `${filtered.length} User${filtered.length === 1 ? '' : 's'}`;
+
+    if (filtered.length === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="4" class="empty-state">
+                    <i class="fa fa-users-slash"></i>
+                    <h3>No users found</h3>
+                    <p>${searchTerm ? "No users match your search query." : "No registered users in this category yet."}</p>
+                </td>
+            </tr>
+        `;
+        return;
+    }
+
+    tbody.innerHTML = filtered.map(u => {
+        const initial = (u.email ? u.email.charAt(0) : "U").toUpperCase();
+        const isAdmin = u.role === "admin";
+        const isBlocked = !!u.isBlocked;
+
+        return `
+            <tr>
+                <td>
+                    <div class="user-cell">
+                        <div class="user-avatar">${initial}</div>
+                        <div>
+                            <div class="user-email-text">${escapeHtml(u.email || "No Email")}</div>
+                            <div class="user-id-text">ID: ${escapeHtml(String(u._id || ""))}</div>
+                        </div>
+                    </div>
+                </td>
+                <td>
+                    <span class="role-badge ${isAdmin ? 'role-admin' : 'role-user'}">
+                        <i class="fa ${isAdmin ? 'fa-crown' : 'fa-user'}"></i> ${isAdmin ? 'Admin' : 'User'}
+                    </span>
+                </td>
+                <td>
+                    <span class="status-badge ${isBlocked ? 'status-blocked' : 'status-active'}">
+                        <i class="fa ${isBlocked ? 'fa-ban' : 'fa-circle-check'}"></i> ${isBlocked ? 'Blocked' : 'Active'}
+                    </span>
+                </td>
+                <td>
+                    <div class="action-btns">
+                        <button class="btn-action btn-role" onclick="toggleRole('${u._id}', '${u.role}')" title="${isAdmin ? 'Demote to User' : 'Promote to Admin'}">
+                            <i class="fa ${isAdmin ? 'fa-user-minus' : 'fa-crown'}"></i> ${isAdmin ? 'Demote' : 'Make Admin'}
+                        </button>
+                        <button class="btn-action ${isBlocked ? 'btn-unblock' : 'btn-block'}" onclick="toggleBlock('${u._id}', ${isBlocked})">
+                            <i class="fa ${isBlocked ? 'fa-lock-open' : 'fa-ban'}"></i> ${isBlocked ? 'Unblock' : 'Block'}
+                        </button>
+                        <button class="btn-action btn-del" onclick="deleteUser('${u._id}', '${escapeHtml(u.email)}')">
+                            <i class="fa fa-trash"></i> Delete
+                        </button>
+                    </div>
+                </td>
+            </tr>
+        `;
+    }).join("");
+}
+
+// 3. SEARCH & FILTER
+function handleSearch() {
+    searchTerm = document.getElementById("searchInput").value.trim();
+    renderUsers();
+}
+
+function setFilter(filter, btn) {
+    activeFilter = filter;
+    document.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    renderUsers();
+}
+
+// 4. TOGGLE ROLE
+async function toggleRole(id, currentRole) {
+    const newRole = currentRole === "admin" ? "user" : "admin";
+    try {
+        const res = await fetch(`${BASE_URL}/api/users/role/${id}`, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + token
+            },
+            body: JSON.stringify({ role: newRole })
+        });
+
+        const data = await res.json();
+        showToast(`Role updated to ${newRole} ✅`);
+        await loadUsers();
+    } catch (err) {
+        alert("Failed to update user role ❌");
+    }
+}
+
+// 5. TOGGLE BLOCK
+async function toggleBlock(id, isCurrentlyBlocked) {
+    const endpoint = isCurrentlyBlocked ? `/api/users/unblock/${id}` : `/api/users/block/${id}`;
+    try {
+        const res = await fetch(`${BASE_URL}${endpoint}`, {
+            method: "PUT",
+            headers: {
+                "Authorization": "Bearer " + token
+            }
+        });
+
+        const data = await res.json();
+        showToast(isCurrentlyBlocked ? "User unblocked ✅" : "User blocked 🚫");
+        await loadUsers();
+    } catch (err) {
+        alert("Failed to update block status ❌");
+    }
+}
+
+// 6. DELETE USER
+async function deleteUser(id, email) {
+    if (!confirm(`Are you sure you want to delete user "${email}"? 🗑️`)) return;
+
+    try {
+        const res = await fetch(`${BASE_URL}/api/users/${id}`, {
+            method: "DELETE",
+            headers: {
+                "Authorization": "Bearer " + token
+            }
+        });
+
+        const data = await res.json();
+        showToast("User deleted successfully ✅");
+        await loadUsers();
+    } catch (err) {
+        alert("Failed to delete user ❌");
+    }
+}
+
+// 7. TOAST NOTIFICATION
+function showToast(msg) {
+    const toast = document.getElementById("toast");
+    toast.textContent = msg;
+    toast.style.display = "block";
+    setTimeout(() => { toast.style.display = "none"; }, 3000);
+}
+
+// 8. ESCAPE HTML HELPER
+function escapeHtml(str) {
+    if (!str) return "";
+    return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+// 9. MOBILE SIDEBAR TOGGLE
+function toggleAdminSidebar() {
+    const sidebar = document.querySelector(".sidebar");
+    const backdrop = document.getElementById("sidebarBackdrop");
+    if (sidebar && backdrop) {
+        sidebar.classList.toggle("open");
+        backdrop.classList.toggle("active");
+    }
+}
+
+// Initial load
 loadUsers();
-
-
-// ❌ DELETE USER
-function deleteUser(id) {
-
-    fetch("/api/users/" + id, {
-        method: "DELETE",
-        headers: {
-            "Authorization": "Bearer " + localStorage.getItem("token")
-        }
-    })
-    .then(res => res.json())
-    .then(data => {
-        console.log(data);
-        alert(data.msg);
-        loadUsers();
-    });
-}
-
-
-// 👑 MAKE ADMIN
-function makeAdmin(id) {
-
-    fetch("/api/users/role/" + id, {
-        method: "PUT",
-        headers: {
-            "Content-Type": "application/json",
-            "Authorization": "Bearer " + localStorage.getItem("token")
-        }
-    })
-    .then(res => res.json())
-    .then(() => {
-        alert("Now admin 👑");
-        loadUsers();
-    });
-}
-function blockUser(id) {
-    fetch(BASE_URL + "/api/users/block/" + id, {
-        method: "PUT",
-        headers: {
-            "Authorization": "Bearer " + token
-        }
-    })
-    .then(res => {
-        console.log("STATUS:", res.status);
-        return res.json();
-    })
-    .then(data => {
-        console.log("BLOCK:", data);
-        alert(data.msg || "Blocked");
-        loadUsers();
-    })
-    .catch(err => {
-        console.log(err);
-        alert("Block failed ❌");
-    });
-}
-
-function unblockUser(id) {
-    fetch(BASE_URL + "/api/users/unblock/" + id, {
-        method: "PUT",
-        headers: {
-            "Authorization": "Bearer " + token
-        }
-    })
-    .then(res => {
-        console.log("STATUS:", res.status);
-        return res.json();
-    })
-    .then(data => {
-        console.log("UNBLOCK:", data);
-        alert(data.msg || "Unblocked");
-        loadUsers();
-    })
-    .catch(err => {
-        console.log(err);
-        alert("Unblock failed ❌");
-    });
-}
-// NAV
-function goDashboard(){ window.location.href="/admin/dashboard.html"; }
-function goAddProduct(){ window.location.href="/admin/add-product.html"; }
-function goManage(){ window.location.href="/admin/manage-products.html"; }
-
-
-
 </script>
 
 </body>
