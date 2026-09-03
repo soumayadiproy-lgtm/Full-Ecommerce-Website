@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Soumyadip Store</title>
 
     <style>
@@ -22,13 +24,16 @@
             100% {background-position: 0% 50%;}
         }
 
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
         .box {
-            width: 320px;
+            width: min(360px, calc(100vw - 32px));
             background: #e6e6e6;
-            padding: 30px;
-            border-radius: 12px;
+            padding: 32px 24px;
+            border-radius: 16px;
             text-align: center;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            margin: auto;
         }
 
         .logo span {
@@ -40,25 +45,35 @@
         .brand {
             font-size: 18px;
             color: #ff4d4d;
+            margin-bottom: 8px;
         }
 
         input {
-            width: 90%;
-            padding: 10px;
+            width: 100%;
+            padding: 12px 14px;
             margin: 8px 0;
-            border-radius: 5px;
+            border-radius: 8px;
             border: 1px solid #ccc;
+            font-size: 14px;
+            outline: none;
+        }
+
+        input:focus {
+            border-color: #ff4d4d;
         }
 
         button {
-            width: 95%;
-            padding: 10px;
+            width: 100%;
+            padding: 12px;
             background: #ff4d4d;
             color: white;
             border: none;
-            border-radius: 5px;
+            border-radius: 8px;
             margin-top: 10px;
             cursor: pointer;
+            font-size: 15px;
+            font-weight: 600;
+            transition: background 0.2s;
         }
 
         button:hover {

@@ -533,14 +533,190 @@
             animation: toastIn 0.3s ease;
         }
 
-        @keyframes toastIn {
-            from { opacity: 0; transform: translateY(15px); }
-            to { opacity: 1; transform: translateY(0); }
+        /* MOBILE TOPBAR & BACKDROP */
+        .mobile-topbar {
+            display: none;
+            position: sticky;
+            top: 0;
+            background: #1a1d27;
+            border-bottom: 1px solid rgba(255,255,255,.06);
+            padding: 12px 18px;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 998;
+        }
+
+        .menu-toggle-btn {
+            background: rgba(255,255,255,.08);
+            border: 1px solid rgba(255,255,255,.1);
+            color: #fff;
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+        }
+
+        .mobile-brand {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 700;
+            font-size: 15px;
+            color: #fff;
+        }
+
+        .logo-icon-sm {
+            width: 28px;
+            height: 28px;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #6366f1, #db2777);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+
+        .mobile-store-btn {
+            background: rgba(255,255,255,.08);
+            border: 1px solid rgba(255,255,255,.1);
+            color: #94a3b8;
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            font-size: 15px;
+        }
+
+        .sidebar-backdrop {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(4px);
+            z-index: 999;
+        }
+
+        /* 📱 RESPONSIVE ADMIN (Tablets & Phones) */
+        @media (max-width: 900px) {
+            body {
+                flex-direction: column;
+            }
+
+            .mobile-topbar {
+                display: flex;
+            }
+
+            .sidebar {
+                position: fixed;
+                top: 0;
+                left: 0;
+                height: 100vh;
+                z-index: 1000;
+                transform: translateX(-100%);
+                transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                box-shadow: 10px 0 30px rgba(0,0,0,0.5);
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+            }
+
+            .sidebar-backdrop.active {
+                display: block;
+            }
+
+            .main {
+                padding: 20px 16px;
+            }
+
+            .page-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+            }
+
+            .header-actions {
+                width: 100%;
+            }
+
+            .btn-primary {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .filter-bar {
+                flex-direction: column;
+                align-items: stretch;
+                padding: 14px;
+                gap: 12px;
+            }
+
+            .search-box {
+                max-width: 100%;
+                min-width: 100%;
+            }
+
+            .category-filters {
+                overflow-x: auto;
+                padding-bottom: 4px;
+                -webkit-overflow-scrolling: touch;
+                scrollbar-width: none;
+            }
+
+            .category-filters::-webkit-scrollbar {
+                display: none;
+            }
+
+            .cat-btn {
+                white-space: nowrap;
+                flex-shrink: 0;
+            }
+
+            .table-card {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            table {
+                min-width: 600px;
+            }
+
+            th, td {
+                padding: 10px 12px;
+            }
+
+            .modal-content {
+                padding: 20px 16px;
+                max-height: 92vh;
+                overflow-y: auto;
+            }
         }
     </style>
 </head>
 
 <body>
+
+<!-- MOBILE TOPBAR -->
+<header class="mobile-topbar">
+    <button class="menu-toggle-btn" onclick="toggleAdminSidebar()" id="sidebarToggleBtn" aria-label="Toggle Menu">
+        <i class="fa fa-bars"></i>
+    </button>
+    <div class="mobile-brand">
+        <div class="logo-icon-sm">👑</div>
+        <span>Admin Panel</span>
+    </div>
+    <a href="/Products.html" class="mobile-store-btn" title="View Store">
+        <i class="fa fa-store"></i>
+    </a>
+</header>
+<div class="sidebar-backdrop" id="sidebarBackdrop" onclick="toggleAdminSidebar()"></div>
 
 <!-- SIDEBAR -->
 <nav class="sidebar">
@@ -917,6 +1093,16 @@ window.onclick = function(e) {
     const modal = document.getElementById("editModal");
     if (e.target === modal) closeEditModal();
 };
+
+// 9. MOBILE SIDEBAR TOGGLE
+function toggleAdminSidebar() {
+    const sidebar = document.querySelector(".sidebar");
+    const backdrop = document.getElementById("sidebarBackdrop");
+    if (sidebar && backdrop) {
+        sidebar.classList.toggle("open");
+        backdrop.classList.toggle("active");
+    }
+}
 
 // INITIAL LOAD
 loadProducts();

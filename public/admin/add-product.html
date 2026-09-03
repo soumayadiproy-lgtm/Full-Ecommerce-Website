@@ -1,16 +1,20 @@
-﻿<!DOCTYPE html>
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="/admin/admin-auth.js"></script>
     <title>Add Product - Admin</title>
 
     <style>
+        *, *::before, *::after { box-sizing: border-box; }
         body {
             margin: 0;
             font-family: 'Inter', sans-serif;
             background: linear-gradient(135deg, #141e30, #243b55);
             display: flex;
             color: white;
+            min-height: 100vh;
         }
         .sidebar {
             width: 230px;
@@ -18,6 +22,7 @@
             padding: 25px;
             background: rgba(255,255,255,0.05);
             backdrop-filter: blur(20px);
+            flex-shrink: 0;
         }
 
         .menu {
@@ -25,6 +30,7 @@
             margin: 10px 0;
             border-radius: 10px;
             cursor: pointer;
+            transition: background 0.2s;
         }
 
         .menu:hover {
@@ -33,18 +39,20 @@
 
         .main {
             flex: 1;
-            padding: 40px;
+            padding: 40px 20px;
             display: flex;
             justify-content: center;
             align-items: center;
         }
 
         .card {
-            width: 420px;
-            padding: 35px;
+            width: 440px;
+            max-width: 100%;
+            padding: 35px 25px;
             border-radius: 20px;
             background: rgba(255,255,255,0.08);
             backdrop-filter: blur(25px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
         }
 
         h2 {
@@ -58,11 +66,17 @@
 
         input {
             width: 100%;
-            padding: 12px;
+            padding: 12px 14px;
             border-radius: 10px;
-            border: none;
-            background: rgba(255,255,255,0.2);
+            border: 1px solid rgba(255,255,255,0.15);
+            background: rgba(255,255,255,0.12);
             color: white;
+            font-size: 14px;
+            outline: none;
+        }
+
+        input:focus {
+            border-color: #00ffe7;
         }
 
         button {
@@ -73,12 +87,33 @@
             background: linear-gradient(45deg, #00ffe7, #0072ff);
             color: white;
             cursor: pointer;
+            font-size: 15px;
+            font-weight: 600;
+            margin-top: 10px;
+            transition: transform 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
         }
 
         .back {
-            margin-top: 10px;
+            margin-top: 15px;
             text-align: center;
             cursor: pointer;
+            color: #94a3b8;
+            font-size: 14px;
+        }
+
+        .back:hover {
+            color: #fff;
+        }
+
+        @media (max-width: 768px) {
+            body { flex-direction: column; }
+            .sidebar { width: 100%; height: auto; padding: 15px 20px; }
+            .main { padding: 25px 15px; }
+            .card { padding: 25px 18px; }
         }
     </style>
 </head>
@@ -89,7 +124,8 @@
     <h2>Admin 👑</h2>
 
     <div class="menu" onclick="goDashboard()">📊 Dashboard</div>
-    <div class="menu">➕ Add Product</div>
+    <div class="menu" style="background: rgba(255,255,255,0.15);">➕ Add Product</div>
+    <div class="menu" onclick="window.location.href='/admin/manage-products.html'">📦 Manage Products</div>
     <div class="menu" onclick="adminLogout()">🚪 Logout</div>
 </div>
 
@@ -102,7 +138,7 @@
         </div>
 
         <div class="input-group">
-            <input id="price" placeholder="Price">
+            <input id="price" type="number" placeholder="Price (₹)">
         </div>
 
         <div class="input-group">
@@ -110,76 +146,69 @@
         </div>
 
         <div class="input-group">
-            <input id="type" placeholder="Category">
+            <input id="type" placeholder="Category (clothes, shoes, etc.)">
         </div>
 
         <button onclick="addProduct()">Add Product 🚀</button>
 
-        <div class="back" onclick="goDashboard()">⬅ Back</div>
+        <div class="back" onclick="goDashboard()">⬅ Back to Dashboard</div>
     </div>
 </div>
 
 <script>
-
 const BASE_URL = "";
-const token = localStorage.getItem("token");
+const token = window.ADMIN_TOKEN || localStorage.getItem("adminToken") || localStorage.getItem("token");
 
 // 🔒 PROTECT PAGE
 if (!token) {
-    alert("Login first ❌");
-    window.location.href = "/admin/login.html";
+    window.location.replace("/admin/login.html");
 }
 
 // 🔥 ADD PRODUCT
-function addProduct() {
-
+async function addProduct() {
     const data = {
-        name: document.getElementById("name").value,
-        price: document.getElementById("price").value,
-        img: document.getElementById("img").value,
-        type: document.getElementById("type").value
+        name: document.getElementById("name").value.trim(),
+        price: Number(document.getElementById("price").value),
+        img: document.getElementById("img").value.trim(),
+        type: document.getElementById("type").value.trim()
     };
 
     // ✅ VALIDATION
     if (!data.name || !data.price || !data.img || !data.type) {
-        alert("All fields required ❌");
+        alert("All fields are required ❌");
         return;
     }
 
-    fetch(BASE_URL + "/api/products/add-product", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            "Authorization": "Bearer " + token
-        },
-        body: JSON.stringify(data)
-    })
-    .then(res => res.json())
-    .then(result => {
+    try {
+        const res = await fetch(BASE_URL + "/api/products/add-product", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + token
+            },
+            body: JSON.stringify(data)
+        });
 
-        alert(result.msg || "Added ✅");
+        const result = await res.json();
 
-        // 🔥 CLEAR FORM
-        document.getElementById("name").value = "";
-        document.getElementById("price").value = "";
-        document.getElementById("img").value = "";
-        document.getElementById("type").value = "";
-
-    })
-    .catch(err => {
-        console.log(err);
-        alert("Error ❌");
-    });
+        if (res.ok) {
+            alert(result.msg || "Product added successfully ✅");
+            document.getElementById("name").value = "";
+            document.getElementById("price").value = "";
+            document.getElementById("img").value = "";
+            document.getElementById("type").value = "";
+        } else {
+            alert(result.msg || result.error || "Failed to add product ❌");
+        }
+    } catch (err) {
+        console.error(err);
+        alert("Server error while adding product ❌");
+    }
 }
 
-
-// 🔥 NAV FIX
-function goDashboard(){
+function goDashboard() {
     window.location.href = "/admin/dashboard.html";
 }
-
-
-
 </script>
 
 </body>

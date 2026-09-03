@@ -426,43 +426,253 @@
             z-index: 9999;
         }
 
-        /* RESPONSIVE DESIGN */
+        /* ================================================================ */
+        /* 📱 COMPREHENSIVE RESPONSIVE STYLES (Phone, Tablet, Laptop)       */
+        /* ================================================================ */
+
+        /* 💻 Tablets & Small Laptops (769px to 1024px) */
+        @media (max-width: 1024px) {
+            .navbar {
+                padding: 14px 20px;
+                gap: 15px;
+            }
+
+            .search-bar {
+                width: 35%;
+                max-width: 320px;
+            }
+
+            .nav-links {
+                gap: 12px;
+            }
+
+            .nav-links a {
+                font-size: 13.5px;
+            }
+
+            .hero {
+                margin: 18px 20px;
+                padding: 40px 28px;
+            }
+
+            .hero h1 {
+                font-size: 32px;
+            }
+
+            .products-grid {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 18px;
+            }
+
+            .products-section {
+                padding: 10px 20px 40px;
+            }
+
+            .category-container {
+                padding: 10px 20px 15px;
+            }
+        }
+
+        /* 📱 Mobile Phones & Phablets (max-width: 768px) */
         @media (max-width: 768px) {
             .navbar {
                 flex-direction: column;
+                align-items: stretch;
                 gap: 12px;
-                padding: 15px;
+                padding: 14px 16px;
+            }
+
+            .brand {
+                font-size: 22px;
+                text-align: center;
+                justify-content: center;
             }
 
             .search-bar {
                 width: 100%;
+                max-width: 100%;
             }
 
+            .search-bar input {
+                padding: 11px 16px;
+                font-size: 14px;
+            }
+
+            .nav-links {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                overflow-x: auto;
+                width: 100%;
+                padding-bottom: 6px;
+                -webkit-overflow-scrolling: touch;
+                scrollbar-width: none;
+            }
+
+            .nav-links::-webkit-scrollbar {
+                display: none;
+            }
+
+            .nav-links a {
+                white-space: nowrap;
+                padding: 6px 12px;
+                background: rgba(255,255,255,0.06);
+                border-radius: 16px;
+                font-size: 12.5px;
+                flex-shrink: 0;
+            }
+
+            .cart-badge {
+                padding: 6px 14px;
+                font-size: 12.5px;
+                border-radius: 16px;
+                flex-shrink: 0;
+            }
+
+            .admin-badge-btn {
+                padding: 6px 14px;
+                font-size: 12px;
+                border-radius: 16px;
+                flex-shrink: 0;
+            }
+
+            /* Admin Toolbar on Mobile */
+            .admin-toolbar-banner {
+                margin: 10px 15px 0;
+                padding: 12px 14px;
+                flex-direction: column;
+                align-items: stretch;
+                gap: 10px;
+            }
+
+            .admin-toolbar-info {
+                justify-content: space-between;
+                font-size: 13px;
+                flex-wrap: wrap;
+            }
+
+            .admin-toolbar-links {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 8px;
+            }
+
+            .admin-toolbar-links a {
+                justify-content: center;
+                padding: 8px 10px;
+                font-size: 12px;
+                text-align: center;
+            }
+
+            /* Hero on Mobile */
             .hero {
-                margin: 15px;
-                padding: 30px 20px;
+                margin: 12px 15px;
+                padding: 26px 18px;
+                border-radius: 18px;
             }
 
             .hero h1 {
-                font-size: 28px;
+                font-size: 24px;
+                line-height: 1.25;
             }
 
-            .category-container,
+            .hero p {
+                font-size: 13px;
+            }
+
+            /* Category Pills on Mobile */
+            .category-container {
+                padding: 8px 15px 12px;
+            }
+
+            .category-wrapper {
+                padding-bottom: 6px;
+            }
+
+            .cat-pill {
+                padding: 8px 16px;
+                font-size: 12px;
+            }
+
+            /* Products Grid on Mobile (2 Columns) */
             .products-section {
-                padding: 10px 15px 30px;
+                padding: 8px 15px 35px;
             }
 
             .products-grid {
-                grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-                gap: 15px;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 12px;
+            }
+
+            .product-card {
+                border-radius: 14px;
+            }
+
+            .badge {
+                top: 8px;
+                left: 8px;
+                font-size: 9px;
+                padding: 3px 7px;
+                border-radius: 8px;
             }
 
             .product-img {
-                height: 150px;
+                height: 140px;
+            }
+
+            .card-details {
+                padding: 10px;
+            }
+
+            .product-name {
+                font-size: 13.5px;
+                line-height: 1.25;
+                margin-bottom: 4px;
+            }
+
+            .stock-info {
+                font-size: 11px;
+                margin-bottom: 8px;
+            }
+
+            .product-price {
+                font-size: 15px;
             }
 
             .button-group {
                 flex-direction: column;
+                gap: 6px;
+            }
+
+            .btn-add, .btn-buy {
+                padding: 8px 6px;
+                font-size: 11.5px;
+                border-radius: 8px;
+            }
+
+            .toast {
+                left: 15px;
+                right: 15px;
+                bottom: 15px;
+                text-align: center;
+                font-size: 13px;
+                padding: 10px 16px;
+            }
+        }
+
+        /* 📱 Small Compact Phones (< 360px) */
+        @media (max-width: 360px) {
+            .products-grid {
+                grid-template-columns: 1fr;
+                gap: 14px;
+            }
+
+            .product-img {
+                height: 180px;
+            }
+
+            .button-group {
+                flex-direction: row;
             }
         }
     </style>
