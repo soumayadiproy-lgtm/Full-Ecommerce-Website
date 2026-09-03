@@ -1,274 +1,789 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<title>About - Soumyadip Store</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <title>About Us | Soumyadip Fashion & Store</title>
 
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
-<style>
-body {
-    margin: 0;
-    font-family: 'Segoe UI', Arial;
-    background: #eef3f8;
-    color: #222;
-}
+    <style>
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
 
-/* NAVBAR */
-.navbar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 15px 30px;
-    background: linear-gradient(90deg, #2874f0, #4facfe);
-    color: white;
-}
-.navbar a {
-    color: white;
-    text-decoration: none;
-    margin: 0 12px;
-}
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: linear-gradient(135deg, #0b0f19 0%, #111827 50%, #1a102f 100%);
+            color: #e2e8f0;
+            min-height: 100vh;
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
 
-/* HERO */
-.hero {
-    text-align: center;
-    padding: 70px 20px;
-    background: linear-gradient(135deg, #2874f0, #6dd5fa);
-    color: white;
-}
-.hero h1 {
-    font-size: 40px;
-}
+        /* Ambient Glow Orbs */
+        .ambient-orb-1, .ambient-orb-2 {
+            position: fixed;
+            width: 400px;
+            height: 400px;
+            border-radius: 50%;
+            filter: blur(120px);
+            z-index: 0;
+            pointer-events: none;
+            opacity: 0.35;
+        }
 
-/* SECTION */
-.section {
-    width: 85%;
-    margin: 40px auto;
-}
+        .ambient-orb-1 {
+            background: #ff4d4d;
+            top: -100px;
+            left: -100px;
+        }
 
-/* CARD */
-.card {
-    background: white;
-    padding: 25px;
-    border-radius: 15px;
-    box-shadow: 0 8px 25px rgba(0,0,0,0.08);
-}
+        .ambient-orb-2 {
+            background: #6366f1;
+            bottom: -100px;
+            right: -100px;
+        }
 
-/* FEATURES */
-.features {
-    display: flex;
-    justify-content: space-around;
-    flex-wrap: wrap;
-    gap: 20px;
-}
-.feature {
-    flex: 1;
-    min-width: 200px;
-    text-align: center;
-    padding: 20px;
-    background: #f4f7fb;
-    border-radius: 12px;
-    transition: 0.3s;
-}
-.feature:hover {
-    transform: translateY(-8px);
-}
+        /* TOP NAVBAR */
+        .navbar {
+            position: sticky;
+            top: 0;
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 14px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 100;
+        }
 
-/* STATS */
-.stats {
-    display: flex;
-    justify-content: space-around;
-    flex-wrap: wrap;
-}
-.stat {
-    text-align: center;
-}
-.stat h2 {
-    color: #2874f0;
-}
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            color: #fff;
+            font-weight: 800;
+            font-size: 18px;
+        }
 
-/* TEAM */
-.team {
-    display: flex;
-    gap: 20px;
-    justify-content: center;
-    flex-wrap: wrap;
-}
-.member {
-    width: 200px;
-    padding: 20px;
-    background: #f4f7fb;
-    border-radius: 12px;
-    text-align: center;
-}
+        .brand-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #ff4d4d, #ff6a00);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 16px;
+            box-shadow: 0 4px 12px rgba(255, 77, 77, 0.3);
+        }
 
-/* TIMELINE */
-.timeline {
-    border-left: 3px solid #2874f0;
-    padding-left: 20px;
-}
-.timeline div {
-    margin-bottom: 20px;
-}
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
 
-/* BUTTON */
-.btn {
-    display: inline-block;
-    padding: 12px 25px;
-    background: #fb641b;
-    color: white;
-    border-radius: 5px;
-    text-decoration: none;
-}
+        .nav-link {
+            color: #94a3b8;
+            text-decoration: none;
+            font-size: 13.5px;
+            font-weight: 600;
+            padding: 8px 14px;
+            border-radius: 20px;
+            transition: all 0.2s;
+        }
 
-/* FOOTER */
-.footer {
-    background: #172337;
-    color: white;
-    text-align: center;
-    padding: 20px;
-}
-.about-container {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 20px;
-  width: 85%;
-  margin: 40px auto;
-}
+        .nav-link:hover, .nav-link.active {
+            color: #fff;
+            background: rgba(255, 255, 255, 0.08);
+        }
 
-.about-card {
-  background: white;
-  padding: 25px;
-  border-radius: 15px;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.1);
-  transition: 0.3s;
-}
+        .nav-btn-store {
+            background: linear-gradient(135deg, #ff4d4d, #ff6a00);
+            color: #fff;
+            font-weight: 700;
+            padding: 8px 18px;
+            border-radius: 20px;
+            text-decoration: none;
+            font-size: 13.5px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 4px 15px rgba(255, 77, 77, 0.35);
+            transition: transform 0.2s;
+        }
 
-.about-card:hover {
-  transform: translateY(-10px);
-  box-shadow: 0 15px 30px rgba(0,0,0,0.2);
-}
+        .nav-btn-store:hover {
+            transform: translateY(-2px);
+        }
 
-.about-card h3 {
-  color: #2874f0;
-  margin-bottom: 10px;
-}
+        /* HERO SECTION */
+        .hero {
+            position: relative;
+            z-index: 10;
+            text-align: center;
+            padding: 70px 20px 50px;
+            max-width: 900px;
+            margin: 0 auto;
+        }
 
-.about-card p {
-  line-height: 1.6;
-}
-/* MOBILE */
-@media(max-width:600px){
-    .features, .stats, .team {
-        flex-direction: column;
-        align-items: center;
-    }
-}
-</style>
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255, 77, 77, 0.12);
+            border: 1px solid rgba(255, 77, 77, 0.25);
+            color: #ff6a00;
+            padding: 6px 16px;
+            border-radius: 30px;
+            font-size: 13px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            margin-bottom: 20px;
+        }
+
+        .hero h1 {
+            font-size: clamp(32px, 5vw, 54px);
+            font-weight: 800;
+            color: #fff;
+            line-height: 1.2;
+            margin-bottom: 18px;
+            letter-spacing: -0.02em;
+        }
+
+        .hero h1 span {
+            background: linear-gradient(135deg, #ff4d4d, #f59e0b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero p {
+            font-size: clamp(15px, 2.5vw, 18px);
+            color: #94a3b8;
+            max-width: 680px;
+            margin: 0 auto 30px;
+        }
+
+        /* STATS STRIP */
+        .stats-strip {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            max-width: 1000px;
+            margin: 0 auto 60px;
+            padding: 0 20px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 18px;
+            padding: 24px 18px;
+            text-align: center;
+            backdrop-filter: blur(15px);
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(255, 77, 77, 0.3);
+            background: rgba(255, 255, 255, 0.06);
+        }
+
+        .stat-number {
+            font-size: clamp(26px, 3.5vw, 36px);
+            font-weight: 800;
+            background: linear-gradient(135deg, #fff, #cbd5e1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            font-size: 13px;
+            color: #94a3b8;
+            font-weight: 500;
+        }
+
+        /* SECTION WRAPPER */
+        .section-container {
+            max-width: 1100px;
+            margin: 0 auto 70px;
+            padding: 0 20px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .section-tag {
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            color: #6366f1;
+            margin-bottom: 8px;
+            display: inline-block;
+        }
+
+        .section-title {
+            font-size: clamp(24px, 3.5vw, 34px);
+            font-weight: 800;
+            color: #fff;
+            letter-spacing: -0.02em;
+        }
+
+        /* 4-PILLAR VALUE CARDS */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+        }
+
+        .info-card {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            padding: 30px 24px;
+            backdrop-filter: blur(20px);
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .info-card:hover {
+            transform: translateY(-6px);
+            border-color: rgba(99, 102, 241, 0.35);
+            box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.5);
+        }
+
+        .card-icon-box {
+            width: 50px;
+            height: 50px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .icon-blue { background: rgba(99, 102, 241, 0.15); color: #818cf8; border: 1px solid rgba(99, 102, 241, 0.3); }
+        .icon-red { background: rgba(255, 77, 77, 0.15); color: #ff6a00; border: 1px solid rgba(255, 77, 77, 0.3); }
+        .icon-green { background: rgba(34, 197, 94, 0.15); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.3); }
+        .icon-yellow { background: rgba(234, 179, 8, 0.15); color: #facc15; border: 1px solid rgba(234, 179, 8, 0.3); }
+
+        .info-card h3 {
+            font-size: 18px;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .info-card p {
+            font-size: 14px;
+            color: #94a3b8;
+            line-height: 1.6;
+        }
+
+        /* TIMELINE SECTION */
+        .timeline-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 24px;
+            padding: 40px 32px;
+            backdrop-filter: blur(20px);
+        }
+
+        .timeline-list {
+            position: relative;
+            padding-left: 32px;
+            border-left: 2px solid rgba(255, 255, 255, 0.12);
+            display: flex;
+            flex-direction: column;
+            gap: 32px;
+        }
+
+        .timeline-item {
+            position: relative;
+        }
+
+        .timeline-dot {
+            position: absolute;
+            left: -43px;
+            top: 4px;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #0f172a;
+            border: 3px solid #ff4d4d;
+            box-shadow: 0 0 12px rgba(255, 77, 77, 0.6);
+        }
+
+        .timeline-year {
+            font-size: 13px;
+            font-weight: 700;
+            color: #ff6a00;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            margin-bottom: 4px;
+        }
+
+        .timeline-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 6px;
+        }
+
+        .timeline-desc {
+            font-size: 14px;
+            color: #94a3b8;
+        }
+
+        /* TEAM SECTION */
+        .team-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+        }
+
+        .team-card {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            padding: 28px 20px;
+            text-align: center;
+            backdrop-filter: blur(15px);
+            transition: all 0.3s;
+        }
+
+        .team-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.06);
+        }
+
+        .team-avatar {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #6366f1, #ec4899);
+            margin: 0 auto 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            box-shadow: 0 8px 20px rgba(99, 102, 241, 0.3);
+        }
+
+        .team-name {
+            font-size: 17px;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 4px;
+        }
+
+        .team-role {
+            font-size: 13px;
+            color: #ff6a00;
+            font-weight: 600;
+        }
+
+        /* CTA BOX */
+        .cta-banner {
+            background: linear-gradient(135deg, rgba(255, 77, 77, 0.2) 0%, rgba(99, 102, 241, 0.2) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 24px;
+            padding: 50px 30px;
+            text-align: center;
+            backdrop-filter: blur(25px);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        .cta-banner h2 {
+            font-size: clamp(24px, 4vw, 36px);
+            font-weight: 800;
+            color: #fff;
+            margin-bottom: 12px;
+        }
+
+        .cta-banner p {
+            font-size: 15px;
+            color: #cbd5e1;
+            max-width: 540px;
+            margin: 0 auto 26px;
+        }
+
+        .cta-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: linear-gradient(135deg, #ff4d4d, #ff6a00);
+            color: #fff;
+            text-decoration: none;
+            padding: 14px 32px;
+            border-radius: 30px;
+            font-weight: 700;
+            font-size: 15px;
+            box-shadow: 0 10px 25px rgba(255, 77, 77, 0.4);
+            transition: all 0.25s ease;
+        }
+
+        .cta-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 14px 30px rgba(255, 77, 77, 0.55);
+        }
+
+        /* FOOTER */
+        .footer {
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 24px 20px;
+            text-align: center;
+            font-size: 13px;
+            color: #64748b;
+            position: relative;
+            z-index: 10;
+        }
+
+        .footer a {
+            color: #94a3b8;
+            text-decoration: none;
+            margin: 0 8px;
+        }
+
+        .footer a:hover {
+            color: #ff4d4d;
+        }
+
+        /* ================================================================ */
+        /* 📱 RESPONSIVE MEDIA QUERIES (Tablets & Mobile Phones)             */
+        /* ================================================================ */
+
+        @media (max-width: 900px) {
+            .stats-strip {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 12px;
+            }
+
+            .cards-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 680px) {
+            .navbar {
+                padding: 12px 16px;
+            }
+
+            .nav-link {
+                display: none;
+            }
+
+            .hero {
+                padding: 45px 16px 35px;
+            }
+
+            .hero-badge {
+                font-size: 11px;
+                padding: 5px 12px;
+            }
+
+            .stats-strip {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+                padding: 0 14px;
+                margin-bottom: 45px;
+            }
+
+            .stat-card {
+                padding: 16px 12px;
+            }
+
+            .stat-number {
+                font-size: 24px;
+            }
+
+            .stat-label {
+                font-size: 12px;
+            }
+
+            .section-container {
+                padding: 0 14px;
+                margin-bottom: 50px;
+            }
+
+            .section-header {
+                margin-bottom: 24px;
+            }
+
+            .cards-grid {
+                grid-template-columns: 1fr;
+                gap: 14px;
+            }
+
+            .info-card {
+                padding: 22px 18px;
+            }
+
+            .timeline-card {
+                padding: 28px 18px;
+            }
+
+            .timeline-list {
+                padding-left: 24px;
+                gap: 24px;
+            }
+
+            .timeline-dot {
+                left: -35px;
+                width: 16px;
+                height: 16px;
+            }
+
+            .team-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 12px;
+            }
+
+            .team-card {
+                padding: 20px 14px;
+            }
+
+            .team-avatar {
+                width: 54px;
+                height: 54px;
+                font-size: 22px;
+                margin-bottom: 12px;
+            }
+
+            .team-name {
+                font-size: 15px;
+            }
+
+            .cta-banner {
+                padding: 35px 20px;
+            }
+
+            .cta-btn {
+                padding: 12px 24px;
+                font-size: 14px;
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 380px) {
+            .stats-strip {
+                grid-template-columns: 1fr;
+            }
+
+            .team-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
 </head>
 
 <body>
 
-<!-- NAVBAR -->
-<div class="navbar">
-    <h2>Soumyadip Store</h2>
-    <div>
-        <a href="index.html">Home</a>
-        <a href="products.html">Products</a>
-        <a href="grocery.html">Grocery</a>
-    </div>
-</div>
+    <div class="ambient-orb-1"></div>
+    <div class="ambient-orb-2"></div>
 
-<!-- HERO -->
-<div class="hero">
-    <h1>About Our Store</h1>
-    <p>Delivering quality products with trust & speed</p>
-</div>
+    <!-- NAVBAR -->
+    <header class="navbar">
+        <a href="/index.html" class="nav-brand">
+            <div class="brand-icon">
+                <i class="fa fa-gem"></i>
+            </div>
+            <span>Soumyadip Store</span>
+        </a>
 
-<!-- ABOUT -->
-<div class="about-container">
+        <div class="nav-links">
+            <a href="/index.html" class="nav-link">Home</a>
+            <a href="/Products.html" class="nav-link">Products</a>
+            <a href="/contact.html" class="nav-link">Contact</a>
+            <a href="/Products.html" class="nav-btn-store">
+                <i class="fa fa-bag-shopping"></i>
+                <span>Shop Now</span>
+            </a>
+        </div>
+    </header>
 
-  <div class="about-card">
-    <h3>🛒 Who We Are</h3>
-    <p>
-      Soumyadip Store is your trusted online shopping destination offering
-      electronics, fashion, and fresh grocery items all in one place.
-    </p>
-  </div>
+    <!-- HERO -->
+    <section class="hero">
+        <div class="hero-badge">
+            <i class="fa fa-crown"></i> India's Trusted Online Store
+        </div>
+        <h1>Shopping Made <span>Simple, Fast & Premium</span></h1>
+        <p>
+            At Soumyadip Store, we bring you trending fashion, everyday groceries, and top-tier electronics at the best guaranteed prices, delivered right to your doorstep.
+        </p>
+    </section>
 
-  <div class="about-card">
-    <h3>🎯 Our Mission</h3>
-    <p>
-      Our goal is to make shopping simple, fast ⚡, and reliable for everyone
-      with a smooth and secure experience.
-    </p>
-  </div>
+    <!-- STATS STRIP -->
+    <section class="stats-strip">
+        <div class="stat-card">
+            <div class="stat-number">500+</div>
+            <div class="stat-label">Verified Products 📦</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">10,000+</div>
+            <div class="stat-label">Happy Shoppers 😊</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">99.8%</div>
+            <div class="stat-label">On-Time Delivery ⚡</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">24/7</div>
+            <div class="stat-label">Live Support 💬</div>
+        </div>
+    </section>
 
-  <div class="about-card">
-    <h3>⭐ Quality & Trust</h3>
-    <p>
-      We focus on quality, affordability 💰, and customer satisfaction 😊
-      to deliver the best products every time.
-    </p>
-  </div>
+    <!-- CORE VALUES & MISSION -->
+    <section class="section-container">
+        <div class="section-header">
+            <span class="section-tag">Why Choose Us</span>
+            <h2 class="section-title">Built on Trust & Excellence</h2>
+        </div>
 
-  <div class="about-card">
-    <h3>🚚 Fast Delivery</h3>
-    <p>
-      From daily essentials 🏠 to trending items 🔥, we deliver everything
-      directly to your doorstep with care.
-    </p>
-  </div>
+        <div class="cards-grid">
+            <div class="info-card">
+                <div class="card-icon-box icon-red">
+                    <i class="fa fa-truck-fast"></i>
+                </div>
+                <h3>Lightning Delivery</h3>
+                <p>Express doorstep shipping across all pin codes in India with real-time tracking from dispatch to delivery.</p>
+            </div>
 
-</div>
+            <div class="info-card">
+                <div class="card-icon-box icon-blue">
+                    <i class="fa fa-shield-halved"></i>
+                </div>
+                <h3>100% Secure Checkout</h3>
+                <p>Industry-standard end-to-end encrypted payments with support for UPI, Cards, Net Banking, and Cash on Delivery.</p>
+            </div>
 
-<!-- FEATURES -->
-<div class="section">
-    <div class="features">
-        <div class="feature">🚚 Free Delivery</div>
-        <div class="feature">💳 Secure Payment</div>
-        <div class="feature">🔄 Easy Return</div>
-        <div class="feature">⭐ Best Quality</div>
-    </div>
-</div>
+            <div class="info-card">
+                <div class="card-icon-box icon-green">
+                    <i class="fa fa-arrow-rotate-left"></i>
+                </div>
+                <h3>Hassle-Free Returns</h3>
+                <p>Simple 7-day return and exchange policy with instantaneous refunds directly back to your original payment method.</p>
+            </div>
 
-<!-- STATS -->
-<div class="section">
-    <div class="card stats">
-        <div class="stat"><h2>500+</h2><p>Products</p></div>
-        <div class="stat"><h2>300+</h2><p>Customers</p></div>
-        <div class="stat"><h2>200+</h2><p>Orders</p></div>
-    </div>
-</div>
+            <div class="info-card">
+                <div class="card-icon-box icon-yellow">
+                    <i class="fa fa-certificate"></i>
+                </div>
+                <h3>Curated Quality</h3>
+                <p>Every garment, grocery batch, and accessory undergoes strict multi-point quality inspections before shipping.</p>
+            </div>
+        </div>
+    </section>
 
-<!-- TEAM -->
-<div class="section">
-    <h2 style="text-align:center;">Our Team</h2>
-    <div class="team">
-        <div class="member">👨‍💻 Soumyadip<br>Developer</div>
-        <div class="member">👩‍💼 Manager</div>
-        <div class="member">📦 Delivery Team</div>
-    </div>
-</div>
+    <!-- COMPANY JOURNEY TIMELINE -->
+    <section class="section-container">
+        <div class="section-header">
+            <span class="section-tag">Milestones</span>
+            <h2 class="section-title">Our Growth Story</h2>
+        </div>
 
-<!-- TIMELINE -->
-<div class="section">
-    <h2>Our Journey</h2>
-    <div class="timeline">
-        <div>📅 2024 - Started Store</div>
-        <div>📦 2025 - 200+ Orders Completed</div>
-        <div>🚀 2026 - Expanding Nationwide</div>
-    </div>
-</div>
+        <div class="timeline-card">
+            <div class="timeline-list">
+                <div class="timeline-item">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-year">2024 • The Beginning</div>
+                    <div class="timeline-title">Store Launch 🚀</div>
+                    <div class="timeline-desc">Founded with a single core mission: delivering affordable fashion and groceries with honesty, reliability, and speed.</div>
+                </div>
 
-<!-- CTA -->
-<div style="text-align:center; margin:40px;">
-    <a href="products.html" class="btn">Start Shopping 🛒</a>
-</div>
+                <div class="timeline-item">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-year">2025 • Rapid Expansion</div>
+                    <div class="timeline-title">5,000+ Orders Milestone 📦</div>
+                    <div class="timeline-desc">Expanded our logistics footprint, added seamless UPI payments, and integrated customer support for smooth shopping.</div>
+                </div>
 
-<!-- FOOTER -->
-<div class="footer">
-    © 2026 Soumyadip Store | All Rights Reserved
-</div>
+                <div class="timeline-item">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-year">2026 • Nationwide Reach</div>
+                    <div class="timeline-title">Next-Gen Shopping Experience 👑</div>
+                    <div class="timeline-desc">Upgraded our complete technology stack with responsive mobile interfaces, live order tracking, and instant delivery networks.</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- TEAM -->
+    <section class="section-container">
+        <div class="section-header">
+            <span class="section-tag">Leadership</span>
+            <h2 class="section-title">The People Behind the Brand</h2>
+        </div>
+
+        <div class="team-grid">
+            <div class="team-card">
+                <div class="team-avatar">👨‍💻</div>
+                <div class="team-name">Soumyadip Roy</div>
+                <div class="team-role">Founder & Lead Engineer</div>
+            </div>
+
+            <div class="team-card">
+                <div class="team-avatar">👩‍💼</div>
+                <div class="team-name">Operations Team</div>
+                <div class="team-role">Quality & Supply Chain</div>
+            </div>
+
+            <div class="team-card">
+                <div class="team-avatar">🚚</div>
+                <div class="team-name">Dispatch Squad</div>
+                <div class="team-role">Logistics & Fulfilment</div>
+            </div>
+
+            <div class="team-card">
+                <div class="team-avatar">💬</div>
+                <div class="team-name">Care Champions</div>
+                <div class="team-role">24/7 Customer Success</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA BANNER -->
+    <section class="section-container">
+        <div class="cta-banner">
+            <h2>Ready to Elevate Your Shopping? 🛍️</h2>
+            <p>Explore hundreds of handpicked styles, trending fits, and fresh daily essentials now.</p>
+            <a href="/Products.html" class="cta-btn">
+                <i class="fa fa-cart-shopping"></i>
+                <span>Explore Catalog</span>
+            </a>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+        <p>© 2026 Soumyadip Store. Built with passion for seamless online shopping.</p>
+        <div style="margin-top: 8px;">
+            <a href="/index.html">Home</a> • 
+            <a href="/Products.html">Products</a> • 
+            <a href="/contact.html">Contact Us</a>
+        </div>
+    </footer>
 
 </body>
 </html>
