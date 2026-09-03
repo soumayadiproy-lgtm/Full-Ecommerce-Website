@@ -70,24 +70,21 @@
         .nav-brand {
             display: flex;
             align-items: center;
-            gap: 10px;
             text-decoration: none;
-            color: #fff;
-            font-weight: 800;
-            font-size: 18px;
         }
 
-        .brand-icon {
-            width: 36px;
-            height: 36px;
+        .custom-nav-logo {
+            height: 44px;
+            width: auto;
             border-radius: 10px;
-            background: linear-gradient(135deg, #ff4d4d, #ff6a00);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #fff;
-            font-size: 16px;
-            box-shadow: 0 4px 12px rgba(255, 77, 77, 0.3);
+            object-fit: contain;
+            display: block;
+            box-shadow: 0 4px 15px rgba(255, 77, 77, 0.2);
+            transition: transform 0.2s ease;
+        }
+
+        .custom-nav-logo:hover {
+            transform: scale(1.04);
         }
 
         .nav-links {
@@ -630,11 +627,8 @@
 
     <!-- NAVBAR -->
     <header class="navbar">
-        <a href="/index.html" class="nav-brand">
-            <div class="brand-icon">
-                <i class="fa fa-gem"></i>
-            </div>
-            <span>Soumyadip Store</span>
+        <a href="/index.html" class="nav-brand" title="Soumyadip Store">
+            <img src="/images/logo-custom.png" alt="Soumyadip Store" class="custom-nav-logo">
         </a>
 
         <div class="nav-links">

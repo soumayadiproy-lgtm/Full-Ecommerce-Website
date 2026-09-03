@@ -92,13 +92,24 @@
             transform: translateX(-3px);
         }
 
-        .brand-badge {
-            font-size: 14px;
-            font-weight: 700;
-            color: #ff4d4d;
-            display: flex;
+        .brand-logo-link {
+            display: inline-flex;
             align-items: center;
-            gap: 6px;
+            text-decoration: none;
+        }
+
+        .custom-nav-logo {
+            height: 40px;
+            width: auto;
+            border-radius: 10px;
+            object-fit: contain;
+            display: block;
+            box-shadow: 0 4px 15px rgba(255, 77, 77, 0.2);
+            transition: transform 0.2s ease;
+        }
+
+        .custom-nav-logo:hover {
+            transform: scale(1.04);
         }
 
         /* MAIN GLASS CONTAINER */
@@ -529,9 +540,9 @@
             <i class="fa fa-arrow-left"></i>
             <span>Back to Store</span>
         </a>
-        <div class="brand-badge">
-            <i class="fa fa-gem"></i> Soumyadip Fashion & Grocery
-        </div>
+        <a href="/index.html" class="brand-logo-link" title="Soumyadip Store">
+            <img src="/images/logo-custom.png" alt="Soumyadip Store" class="custom-nav-logo">
+        </a>
     </div>
 
     <!-- MAIN CONTACT CARD -->
