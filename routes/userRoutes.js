@@ -531,7 +531,7 @@ router.put("/profile", verifyToken, async (req, res) => {
     }
 });
 // ================= GET ALL USERS (ADMIN) =================
-router.get("/", async (req, res) => {
+router.get(["/", "/all", "/all-users", "/users"], async (req, res) => {
     try {
         try {
             await connectDB();
@@ -544,16 +544,17 @@ router.get("/", async (req, res) => {
             console.warn("DB user fetch error:", dbErr.message);
         }
 
-        // Merge DB users and memoryUsers so all registered users are returned
+        // Merge DB users, memoryUsers, and any users from orders so ALL users show in admin panel
         const userMap = new Map();
 
         if (Array.isArray(dbUsers)) {
             dbUsers.forEach(u => {
-                if (u && u.email) {
-                    userMap.set(u.email.toLowerCase(), {
+                if (u) {
+                    const key = (u.email ? u.email.toLowerCase() : (u.phone || String(u._id)));
+                    userMap.set(key, {
                         _id: u._id,
-                        email: u.email,
-                        name: u.name || "",
+                        email: u.email || (u.phone ? `user_${u.phone}@mobile` : `user_${String(u._id).slice(-6)}`),
+                        name: u.name || (u.email ? u.email.split("@")[0] : (u.phone || "User")),
                         phone: u.phone || "",
                         role: u.role || "user",
                         isBlocked: !!u.isBlocked,
@@ -564,20 +565,52 @@ router.get("/", async (req, res) => {
             });
         }
 
-        memoryUsers.forEach(u => {
-            if (u && u.email && !userMap.has(u.email.toLowerCase())) {
-                userMap.set(u.email.toLowerCase(), {
-                    _id: u._id,
-                    email: u.email,
-                    name: u.name || "",
-                    phone: u.phone || "",
-                    role: u.role || "user",
-                    isBlocked: !!u.isBlocked,
-                    membership: u.membership || "free",
-                    createdAt: new Date()
+        if (Array.isArray(memoryUsers)) {
+            memoryUsers.forEach(u => {
+                if (u) {
+                    const key = (u.email ? u.email.toLowerCase() : (u.phone || String(u._id)));
+                    if (!userMap.has(key)) {
+                        userMap.set(key, {
+                            _id: u._id,
+                            email: u.email || (u.phone ? `user_${u.phone}@mobile` : `user_${String(u._id).slice(-6)}`),
+                            name: u.name || (u.email ? u.email.split("@")[0] : "User"),
+                            phone: u.phone || "",
+                            role: u.role || "user",
+                            isBlocked: !!u.isBlocked,
+                            membership: u.membership || "free",
+                            createdAt: new Date()
+                        });
+                    }
+                }
+            });
+        }
+
+        // Also check Order collection for any customer accounts that placed orders
+        try {
+            const Order = require("../models/Order");
+            const customerOrders = await Order.find().select("customer userId createdAt").sort({ createdAt: -1 });
+            if (Array.isArray(customerOrders)) {
+                customerOrders.forEach(o => {
+                    if (o && o.customer && (o.customer.phone || o.customer.name)) {
+                        const key = (o.customer.phone || String(o.userId || o._id));
+                        if (!userMap.has(key)) {
+                            userMap.set(key, {
+                                _id: o.userId || ("cust_" + String(o._id).slice(-8)),
+                                email: o.customer.email || (o.customer.phone ? `user_${o.customer.phone}@mobile` : "Customer"),
+                                name: o.customer.name || "Customer",
+                                phone: o.customer.phone || "",
+                                role: "user",
+                                isBlocked: false,
+                                membership: "free",
+                                createdAt: o.createdAt || new Date()
+                            });
+                        }
+                    }
                 });
             }
-        });
+        } catch (ordErr) {
+            console.warn("Notice checking customer orders for users:", ordErr.message);
+        }
 
         const allUsers = Array.from(userMap.values());
         return res.json(allUsers);
@@ -586,7 +619,7 @@ router.get("/", async (req, res) => {
         console.error("Error in GET /api/users:", err);
         return res.json(memoryUsers.map(u => ({
             _id: u._id,
-            email: u.email,
+            email: u.email || "User",
             name: u.name || "",
             role: u.role || "user",
             isBlocked: !!u.isBlocked

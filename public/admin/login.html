@@ -421,6 +421,7 @@
       localStorage.setItem("token", data.token);      // for existing admin pages
       localStorage.setItem("adminEmail", data.user.email);
       localStorage.setItem("adminRole", "admin");
+      localStorage.setItem("user", JSON.stringify(data.user));
 
       showMsg("success", "✅ Login successful! Redirecting to dashboard...");
 

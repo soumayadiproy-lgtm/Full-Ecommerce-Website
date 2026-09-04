@@ -644,21 +644,24 @@ let activeFilter = "all";
 let searchTerm = "";
 
 // 1. LOAD USERS
-async function loadUsers() {
+async function loadUsers(silent = false) {
     const tbody = document.getElementById("userTableBody");
-    tbody.innerHTML = `
-        <tr>
-            <td colspan="4" class="empty-state">
-                <i class="fa fa-spinner fa-spin"></i>
-                <h3>Loading users...</h3>
-            </td>
-        </tr>
-    `;
+    if (!silent && allUsers.length === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="4" class="empty-state">
+                    <i class="fa fa-spinner fa-spin"></i>
+                    <h3>Loading users...</h3>
+                </td>
+            </tr>
+        `;
+    }
 
     try {
         const res = await fetch(BASE_URL + "/api/users", {
             headers: {
-                "Authorization": "Bearer " + token
+                "Authorization": "Bearer " + token,
+                "token": "Bearer " + token
             }
         });
 
@@ -688,15 +691,17 @@ async function loadUsers() {
         renderUsers();
     } catch (err) {
         console.error("Users Load Error:", err);
-        tbody.innerHTML = `
-            <tr>
-                <td colspan="4" class="empty-state">
-                    <i class="fa fa-triangle-exclamation"></i>
-                    <h3>Network Error</h3>
-                    <p>Could not connect to server</p>
-                </td>
-            </tr>
-        `;
+        if (!silent && allUsers.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="4" class="empty-state">
+                        <i class="fa fa-triangle-exclamation"></i>
+                        <h3>Network Error</h3>
+                        <p>Could not connect to server</p>
+                    </td>
+                </tr>
+            `;
+        }
     }
 }
 
@@ -881,6 +886,12 @@ function toggleAdminSidebar() {
 
 // Initial load
 loadUsers();
+
+// Auto-refresh every 10 seconds silently
+setInterval(() => loadUsers(true), 10000);
+
+// Refresh immediately when window/tab is focused
+window.addEventListener("focus", () => loadUsers(true));
 </script>
 
 </body>

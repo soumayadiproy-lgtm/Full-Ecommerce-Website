@@ -74,8 +74,9 @@ router.post("/checkout", verifyToken, async (req, res) => {
         }));
 
         // 5. Create Order
+        const orderId = "ord_" + Date.now() + "_" + Math.floor(Math.random() * 10000);
         let savedOrder = {
-            _id: "ord_" + Date.now() + "_" + Math.floor(Math.random()*1000),
+            _id: orderId,
             userId,
             items: formattedItems,
             total,
@@ -87,6 +88,7 @@ router.post("/checkout", verifyToken, async (req, res) => {
 
         try {
             const newOrder = new Order({
+                _id: orderId,
                 userId,
                 items: formattedItems,
                 total,
@@ -95,8 +97,9 @@ router.post("/checkout", verifyToken, async (req, res) => {
                 status: "Placed"
             });
             savedOrder = await newOrder.save();
+            console.log("Order saved to MongoDB successfully ✅ ID:", savedOrder._id);
         } catch (e) {
-            memoryOrders.unshift(savedOrder);
+            console.error("MongoDB Order save error:", e.message);
         }
         memoryOrders.unshift(savedOrder);
 
@@ -144,11 +147,27 @@ router.get("/", verifyToken, async (req, res) => {
             orders = await Order.find({ userId }).sort({ createdAt: -1 });
         } catch (e) {}
 
-        if (!orders || orders.length === 0) {
-            orders = memoryOrders.filter(o => String(o.userId) === userId);
+        const orderMap = new Map();
+        if (Array.isArray(orders)) {
+            orders.forEach(o => {
+                if (o && o._id) orderMap.set(String(o._id), o);
+            });
+        }
+        if (Array.isArray(memoryOrders)) {
+            memoryOrders.filter(o => String(o.userId) === userId).forEach(o => {
+                if (o && o._id && !orderMap.has(String(o._id))) {
+                    orderMap.set(String(o._id), o);
+                }
+            });
         }
 
-        return res.json(orders || []);
+        const userOrders = Array.from(orderMap.values()).sort((a, b) => {
+            const dateA = new Date(a.createdAt || 0);
+            const dateB = new Date(b.createdAt || 0);
+            return dateB - dateA;
+        });
+
+        return res.json(userOrders);
 
     } catch (err) {
         console.log("ORDER FETCH ERROR:", err);
@@ -192,22 +211,40 @@ router.delete("/:id", verifyToken, async (req, res) => {
 
 
 // ================= ADMIN: ALL ORDERS =================
-router.get("/all-orders", verifyToken, isAdmin, async (req, res) => {
+router.get(["/all-orders", "/all", "/admin/all"], verifyToken, isAdmin, async (req, res) => {
     try {
         let orders = [];
         try {
             orders = await Order.find().sort({ createdAt: -1 });
-        } catch (e) {}
-
-        if (!orders || orders.length === 0) {
-            orders = memoryOrders;
+        } catch (e) {
+            console.warn("DB Order fetch notice:", e.message);
         }
 
-        res.json(orders || []);
+        const orderMap = new Map();
+        if (Array.isArray(orders)) {
+            orders.forEach(o => {
+                if (o && o._id) orderMap.set(String(o._id), o);
+            });
+        }
+        if (Array.isArray(memoryOrders)) {
+            memoryOrders.forEach(o => {
+                if (o && o._id && !orderMap.has(String(o._id))) {
+                    orderMap.set(String(o._id), o);
+                }
+            });
+        }
+
+        const combined = Array.from(orderMap.values()).sort((a, b) => {
+            const dateA = new Date(a.createdAt || 0);
+            const dateB = new Date(b.createdAt || 0);
+            return dateB - dateA;
+        });
+
+        return res.json(combined);
 
     } catch (err) {
-        console.log("ERROR:", err);
-        res.json(memoryOrders || []);
+        console.error("ADMIN ALL-ORDERS ERROR:", err);
+        return res.json(memoryOrders || []);
     }
 });
 
@@ -247,17 +284,38 @@ router.delete("/admin-delete/:id", verifyToken, isAdmin, async (req, res) => {
 router.put("/update-status/:id", verifyToken, isAdmin, async (req, res) => {
     try {
         const { status } = req.body;
+        const orderId = req.params.id;
 
-        const order = await Order.findByIdAndUpdate(
-            req.params.id,
-            { $set: { status } }, // 🔥 FIXED
-            { new: true }
-        );
+        let order = null;
+        try {
+            order = await Order.findOneAndUpdate(
+                { _id: orderId },
+                { $set: { status } },
+                { new: true }
+            );
+        } catch (e) {
+            try {
+                order = await Order.findByIdAndUpdate(
+                    orderId,
+                    { $set: { status } },
+                    { new: true }
+                );
+            } catch (err) {}
+        }
 
-        res.json(order);
+        // Sync in memoryOrders
+        for (let i = 0; i < memoryOrders.length; i++) {
+            if (String(memoryOrders[i]._id) === String(orderId)) {
+                memoryOrders[i].status = status;
+                if (!order) order = memoryOrders[i];
+                break;
+            }
+        }
+
+        return res.json({ msg: "Status updated successfully ✅", order: order || { _id: orderId, status } });
 
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        return res.status(500).json({ error: err.message });
     }
 });
 

@@ -3,24 +3,23 @@ const SECRET = process.env.JWT_SECRET || "secretkey";
 
 // 🔐 VERIFY TOKEN
 function verifyToken(req, res, next) {
+    const rawHeader = req.headers.authorization || req.headers.token || req.headers["x-access-token"] || req.headers["x-auth-token"];
 
-    const authHeader = req.headers.authorization;
-
-    if (!authHeader) {
+    if (!rawHeader) {
         return res.status(401).json({ message: "Login required ❌" });
     }
 
-    // 🔥 check Bearer format
-    if (!authHeader.startsWith("Bearer ")) {
+    let token = String(rawHeader).trim();
+    if (token.startsWith("Bearer ")) {
+        token = token.slice(7).trim();
+    }
+
+    if (!token) {
         return res.status(401).json({ message: "Invalid token format ❌" });
     }
 
-    const token = authHeader.split(" ")[1];
-
     try {
         const decoded = jwt.verify(token, SECRET);
-
-        console.log("DECODED TOKEN:", decoded);
 
         // ✅ safe userId & user role
         req.userId = decoded.id || decoded._id;
@@ -47,13 +46,10 @@ function verifyToken(req, res, next) {
 
 // 👑 ADMIN CHECK
 function isAdmin(req, res, next) {
-
-    console.log("CHECK ADMIN:", req.user);
-
-    // 🔥 allow both role and isAdmin
+    // 🔥 allow role, isAdmin, or decoded role
     const isAdminUser =
-        req.user &&
-        (req.user.role === "admin" || req.user.isAdmin === true);
+        (req.user && (req.user.role === "admin" || req.user.isAdmin === true)) ||
+        req.role === "admin";
 
     if (!isAdminUser) {
         return res.status(403).json({ message: "Admin only ❌" });

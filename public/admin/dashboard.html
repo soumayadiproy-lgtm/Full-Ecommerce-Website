@@ -256,20 +256,26 @@ function renderOrders(orders) {
         return;
     }
     tbody.innerHTML = orders.slice(0,8).map(o => {
-        const status = o.status || "pending";
-        const bc = status==="delivered"?"badge-green":status==="shipped"?"badge-blue":status==="cancelled"?"badge-red":"badge-yellow";
-        const total = o.totalAmount || o.total || (o.items ? o.items.reduce((s,i) => s+(i.price*(i.qty||1)),0) : 0);
+        const rawStatus = (o.status || "Ordered").toLowerCase();
+        const bc = rawStatus.includes("deliver") ? "badge-green" : rawStatus.includes("ship") ? "badge-blue" : rawStatus.includes("cancel") ? "badge-red" : "badge-yellow";
+        const total = o.totalAmount || o.total || (o.items ? o.items.reduce((s,i) => s+(i.price*(i.quantity||i.qty||1)),0) : 0);
+        const cust = o.customer?.name || o.customer?.phone || o.userId?.name || o.userId?.email || o.email || "Customer";
         return `<tr>
-            <td style="font-size:11px;color:#64748b">${String(o._id).slice(-8).toUpperCase()}</td>
-            <td>${o.userId?.email || o.email || "Customer"}</td>
+            <td style="font-size:11px;color:#64748b;font-family:monospace">${String(o._id).slice(-8).toUpperCase()}</td>
+            <td><b>${cust}</b></td>
             <td>${o.items ? o.items.length : 1} item${(o.items?.length||1)!==1?"s":""}</td>
             <td>₹${Number(total).toLocaleString("en-IN")}</td>
-            <td><span class="badge ${bc}">${status}</span></td>
+            <td><span class="badge ${bc}">${o.status || "Placed"}</span></td>
         </tr>`;
     }).join("");
 }
 
 async function loadStats() {
+    const headers = { 
+        "Authorization": "Bearer " + token,
+        "token": "Bearer " + token 
+    };
+
     try {
         const r = await fetch("/api/products");
         const d = await r.json();
@@ -277,13 +283,13 @@ async function loadStats() {
     } catch { document.getElementById("productCount").textContent = "0"; }
 
     try {
-        const r = await fetch("/api/users");
+        const r = await fetch("/api/users", { headers });
         const d = await r.json();
         document.getElementById("userCount").textContent = Array.isArray(d) ? d.length : "0";
     } catch { document.getElementById("userCount").textContent = "0"; }
 
     try {
-        const r = await fetch("/api/orders/all-orders", { headers: { "Authorization": "Bearer " + token } });
+        const r = await fetch("/api/orders/all-orders", { headers });
         if (r.ok) {
             const d = await r.json();
             document.getElementById("orderCount").textContent = Array.isArray(d) ? d.length : "0";
@@ -295,7 +301,7 @@ async function loadStats() {
     } catch { document.getElementById("orderCount").textContent = "0"; }
 
     try {
-        const r = await fetch("/api/contact", { headers: { "Authorization": "Bearer " + token } });
+        const r = await fetch("/api/contact", { headers });
         if (r.ok) {
             const d = await r.json();
             document.getElementById("contactCount").textContent = Array.isArray(d) ? d.length : "0";
@@ -312,7 +318,12 @@ function toggleAdminSidebar() {
     }
 }
 
+// Initial load
 loadStats();
+
+// Auto-refresh stats every 10 seconds & when tab is focused
+setInterval(loadStats, 10000);
+window.addEventListener("focus", loadStats);
 </script>
 </body>
 </html>

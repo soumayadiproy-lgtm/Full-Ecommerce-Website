@@ -2,7 +2,8 @@ const mongoose = require("mongoose");
 
 const orderSchema = new mongoose.Schema({
     _id: {
-        type: mongoose.Schema.Types.Mixed
+        type: mongoose.Schema.Types.Mixed,
+        default: () => "ord_" + Date.now() + "_" + Math.floor(Math.random() * 10000)
     },
     userId: {
         type: String,
