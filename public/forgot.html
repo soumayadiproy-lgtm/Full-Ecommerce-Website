@@ -373,13 +373,15 @@ async function sendOtp() {
             throw new Error(data.msg || "Failed to send reset code");
         }
 
-        let alertHtml = data.msg || "Password reset code sent to your email! Check your inbox.";
-        if (data.devOtp) {
-            alertHtml += `<br><strong>Dev Mode Code:</strong> <span style="font-size:15px; font-weight:800; color:#facc15;">${data.devOtp}</span>`;
+        let alertHtml = data.msg;
+        if (data.emailSent) {
+            alertHtml = "✅ Password reset code sent to your email! Please check your inbox (and spam folder).";
+        } else if (data.devOtp) {
+            alertHtml = `⚠️ Real email sending requires Gmail App Password in Vercel settings.<br><strong>Your One-Time Reset Code:</strong> <span style="font-size:17px; font-weight:800; color:#facc15; letter-spacing:2px;">${data.devOtp}</span> (Pre-filled below)`;
             document.getElementById("otp").value = data.devOtp;
         }
 
-        showMsg(alertHtml, "success");
+        showMsg(alertHtml, data.emailSent ? "success" : "info");
         document.getElementById("otp").focus();
 
         startTimer(60);
@@ -450,7 +452,7 @@ async function resetPassword() {
         const data = await response.json();
 
         if (!response.ok) {
-            throw new Error(data.msg || "Password reset failed");
+            throw new Error(data.msg || data.error || "Password reset failed");
         }
 
         showMsg("Password changed successfully! ✅ Redirecting to login...", "success");

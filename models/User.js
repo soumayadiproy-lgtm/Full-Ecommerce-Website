@@ -11,7 +11,11 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    phone: String,
+    phone: {
+        type: String,
+        sparse: true,
+        default: undefined
+    },
     name: String,
     address: String,
     city: String,

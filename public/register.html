@@ -1,12 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Create Account & Verify Email - Soumyadip Store</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
 
     <style>
         * {
@@ -28,9 +30,17 @@
         }
 
         @keyframes gradientShift {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
+            0% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+
+            100% {
+                background-position: 0% 50%;
+            }
         }
 
         .auth-card {
@@ -143,7 +153,7 @@
             justify-content: center;
             border-top-left-radius: 32px;
             border-bottom-left-radius: 32px;
-            box-shadow: -10px 0 30px rgba(0,0,0,0.06);
+            box-shadow: -10px 0 30px rgba(0, 0, 0, 0.06);
         }
 
         .form-header {
@@ -304,8 +314,15 @@
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-5px); }
-            to { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(-5px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .alert-info {
@@ -351,10 +368,12 @@
                 flex-direction: column;
                 max-width: 440px;
             }
+
             .brand-panel {
                 width: 100%;
                 padding: 30px 24px;
             }
+
             .form-panel {
                 width: 100%;
                 border-radius: 0;
@@ -363,275 +382,283 @@
         }
     </style>
 </head>
+
 <body>
 
-<div class="auth-card">
-    <!-- LEFT BRAND SIDE -->
-    <div class="brand-panel">
-        <div>
-            <a href="index.html" class="brand-logo-badge">
-                <img src="/images/logo-transparent.png" alt="Logo" onerror="this.style.display='none';">
-                <span>Soumyadip Store</span>
-            </a>
+    <div class="auth-card">
+        <!-- LEFT BRAND SIDE -->
+        <div class="brand-panel">
+            <div>
+                <a href="index.html" class="brand-logo-badge">
+                    <img src="/images/logo-transparent.png" alt="Logo" onerror="this.style.display='none';">
+                </a>
+            </div>
+
+            <div class="brand-content">
+                <h2>Join <span>Soumyadip Store</span> Today.</h2>
+                <p>Experience ultra-fast checkout, verified authentic products, and personalized member rewards.</p>
+
+                <ul class="features-list">
+                    <li>
+                        <span class="feature-icon">✉️</span>
+                        <span>100% Real Email Security Verification</span>
+                    </li>
+                    <li>
+                        <span class="feature-icon">⚡</span>
+                        <span>Instant Order Tracking & Updates</span>
+                    </li>
+                    <li>
+                        <span class="feature-icon">💎</span>
+                        <span>Exclusive Member Discounts & Deals</span>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="brand-footer">
+                &copy; 2026 Soumyadip Store. Secured with End-to-End Encryption.
+            </div>
         </div>
 
-        <div class="brand-content">
-            <h2>Join <span>Soumyadip Store</span> Today.</h2>
-            <p>Experience ultra-fast checkout, verified authentic products, and personalized member rewards.</p>
+        <!-- RIGHT FORM SIDE -->
+        <div class="form-panel">
+            <div class="form-header">
+                <h3>Create an Account</h3>
+                <p>Enter your details and verify your email with a one-time code.</p>
+            </div>
 
-            <ul class="features-list">
-                <li>
-                    <span class="feature-icon">✉️</span>
-                    <span>100% Real Email Security Verification</span>
-                </li>
-                <li>
-                    <span class="feature-icon">⚡</span>
-                    <span>Instant Order Tracking & Updates</span>
-                </li>
-                <li>
-                    <span class="feature-icon">💎</span>
-                    <span>Exclusive Member Discounts & Deals</span>
-                </li>
-            </ul>
-        </div>
+            <div id="alertBox" class="alert-box"></div>
 
-        <div class="brand-footer">
-            &copy; 2026 Soumyadip Store. Secured with End-to-End Encryption.
+            <form id="registerForm" onsubmit="event.preventDefault(); submitRegister();">
+                <!-- Name Field -->
+                <div class="form-group">
+                    <label class="form-label" for="userName">Full Name</label>
+                    <div class="input-wrapper">
+                        <input type="text" id="userName" class="input-field" placeholder="e.g. Soumyadip Roy" required
+                            autocomplete="name">
+                    </div>
+                </div>
+
+                <!-- Email & Send Code Button -->
+                <div class="form-group">
+                    <label class="form-label" for="userEmail">Email Address</label>
+                    <div class="otp-row">
+                        <input type="email" id="userEmail" class="input-field" placeholder="name@example.com" required
+                            autocomplete="email">
+                        <button type="button" id="sendCodeBtn" class="btn-send-code" onclick="sendVerificationCode()">
+                            <span id="sendBtnText">Get Code</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 6-Digit OTP Code (Activated after sending) -->
+                <div id="codeSection" class="form-group code-container" style="display: none;">
+                    <label class="form-label" for="otpCode" style="color: #ea580c; font-weight: 700;">
+                        6-Digit Email Verification Code 📩
+                    </label>
+                    <div class="input-wrapper">
+                        <input type="text" id="otpCode" class="input-field code-input" placeholder="Enter 6-digit code"
+                            maxlength="6" inputmode="numeric" autocomplete="one-time-code">
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 6px;">
+                        <span style="font-size: 12px; color: #64748b;">Code expires in 5 minutes</span>
+                        <span id="resendTimer" style="font-size: 12px; color: #ea580c; font-weight: 600;"></span>
+                    </div>
+                </div>
+
+                <!-- Password Field -->
+                <div class="form-group">
+                    <label class="form-label" for="userPassword">Password</label>
+                    <div class="input-wrapper">
+                        <input type="password" id="userPassword" class="input-field"
+                            placeholder="Create a strong password (min 4 chars)" minlength="4" required
+                            autocomplete="new-password">
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" id="submitBtn" class="btn-submit">
+                    <span id="submitBtnText">Verify & Create Account</span>
+                </button>
+            </form>
+
+            <div class="form-footer">
+                Already have an account? <a href="login.html">Login here</a>
+            </div>
         </div>
     </div>
 
-    <!-- RIGHT FORM SIDE -->
-    <div class="form-panel">
-        <div class="form-header">
-            <h3>Create an Account</h3>
-            <p>Enter your details and verify your email with a one-time code.</p>
-        </div>
+    <script>
+        let cooldownTimer = null;
+        let cooldownRemaining = 0;
 
-        <div id="alertBox" class="alert-box"></div>
-
-        <form id="registerForm" onsubmit="event.preventDefault(); submitRegister();">
-            <!-- Name Field -->
-            <div class="form-group">
-                <label class="form-label" for="userName">Full Name</label>
-                <div class="input-wrapper">
-                    <input type="text" id="userName" class="input-field" placeholder="e.g. Soumyadip Roy" required autocomplete="name">
-                </div>
-            </div>
-
-            <!-- Email & Send Code Button -->
-            <div class="form-group">
-                <label class="form-label" for="userEmail">Email Address</label>
-                <div class="otp-row">
-                    <input type="email" id="userEmail" class="input-field" placeholder="name@example.com" required autocomplete="email">
-                    <button type="button" id="sendCodeBtn" class="btn-send-code" onclick="sendVerificationCode()">
-                        <span id="sendBtnText">Get Code</span>
-                    </button>
-                </div>
-            </div>
-
-            <!-- 6-Digit OTP Code (Activated after sending) -->
-            <div id="codeSection" class="form-group code-container" style="display: none;">
-                <label class="form-label" for="otpCode" style="color: #ea580c; font-weight: 700;">
-                    6-Digit Email Verification Code 📩
-                </label>
-                <div class="input-wrapper">
-                    <input type="text" id="otpCode" class="input-field code-input" placeholder="Enter 6-digit code" maxlength="6" inputmode="numeric" autocomplete="one-time-code">
-                </div>
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 6px;">
-                    <span style="font-size: 12px; color: #64748b;">Code expires in 5 minutes</span>
-                    <span id="resendTimer" style="font-size: 12px; color: #ea580c; font-weight: 600;"></span>
-                </div>
-            </div>
-
-            <!-- Password Field -->
-            <div class="form-group">
-                <label class="form-label" for="userPassword">Password</label>
-                <div class="input-wrapper">
-                    <input type="password" id="userPassword" class="input-field" placeholder="Create a strong password (min 4 chars)" minlength="4" required autocomplete="new-password">
-                </div>
-            </div>
-
-            <!-- Submit Button -->
-            <button type="submit" id="submitBtn" class="btn-submit">
-                <span id="submitBtnText">Verify & Create Account</span>
-            </button>
-        </form>
-
-        <div class="form-footer">
-            Already have an account? <a href="login.html">Login here</a>
-        </div>
-    </div>
-</div>
-
-<script>
-let cooldownTimer = null;
-let cooldownRemaining = 0;
-
-function showAlert(message, type = "info") {
-    const box = document.getElementById("alertBox");
-    box.className = `alert-box alert-${type}`;
-    box.innerHTML = message;
-    box.style.display = "block";
-}
-
-function hideAlert() {
-    const box = document.getElementById("alertBox");
-    box.style.display = "none";
-}
-
-// 1️⃣ SEND VERIFICATION CODE TO EMAIL
-async function sendVerificationCode() {
-    const emailInput = document.getElementById("userEmail");
-    const email = emailInput.value.trim();
-
-    if (!email) {
-        showAlert("Please enter your email address first ❌", "error");
-        emailInput.focus();
-        return;
-    }
-
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-        showAlert("Please enter a valid email address (e.g. user@gmail.com) ❌", "error");
-        emailInput.focus();
-        return;
-    }
-
-    const sendBtn = document.getElementById("sendCodeBtn");
-    const sendBtnText = document.getElementById("sendBtnText");
-
-    sendBtn.disabled = true;
-    sendBtnText.textContent = "Sending...";
-    showAlert("Sending verification code to your email...", "info");
-
-    try {
-        const res = await fetch("/api/users/send-register-otp", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ email })
-        });
-
-        const data = await res.json();
-
-        if (!res.ok) {
-            throw new Error(data.msg || "Failed to send verification code");
+        function showAlert(message, type = "info") {
+            const box = document.getElementById("alertBox");
+            box.className = `alert-box alert-${type}`;
+            box.innerHTML = message;
+            box.style.display = "block";
         }
 
-        // Reveal Code Input Section
-        const codeSection = document.getElementById("codeSection");
-        codeSection.style.display = "block";
-
-        let alertMsg = data.msg || "Verification code sent to your inbox! Check your email.";
-        if (data.devOtp) {
-            alertMsg += `<br><strong>Dev Mode Code:</strong> <span style="font-size:15px; font-weight:800; color:#ea580c;">${data.devOtp}</span>`;
-            document.getElementById("otpCode").value = data.devOtp;
+        function hideAlert() {
+            const box = document.getElementById("alertBox");
+            box.style.display = "none";
         }
 
-        showAlert(alertMsg, "success");
-        document.getElementById("otpCode").focus();
+        // 1️⃣ SEND VERIFICATION CODE TO EMAIL
+        async function sendVerificationCode() {
+            const emailInput = document.getElementById("userEmail");
+            const email = emailInput.value.trim();
 
-        // Start 60-Second Cooldown
-        startCooldown(60);
+            if (!email) {
+                showAlert("Please enter your email address first ❌", "error");
+                emailInput.focus();
+                return;
+            }
 
-    } catch (err) {
-        console.error("Send OTP error:", err);
-        showAlert(err.message || "Failed to send verification code ❌", "error");
-        sendBtn.disabled = false;
-        sendBtnText.textContent = "Get Code";
-    }
-}
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                showAlert("Please enter a valid email address (e.g. user@gmail.com) ❌", "error");
+                emailInput.focus();
+                return;
+            }
 
-function startCooldown(seconds) {
-    const sendBtn = document.getElementById("sendCodeBtn");
-    const sendBtnText = document.getElementById("sendBtnText");
-    const resendTimer = document.getElementById("resendTimer");
+            const sendBtn = document.getElementById("sendCodeBtn");
+            const sendBtnText = document.getElementById("sendBtnText");
 
-    cooldownRemaining = seconds;
-    sendBtn.disabled = true;
+            sendBtn.disabled = true;
+            sendBtnText.textContent = "Sending...";
+            showAlert("Sending verification code to your email...", "info");
 
-    if (cooldownTimer) clearInterval(cooldownTimer);
+            try {
+                const res = await fetch("/api/users/send-register-otp", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ email })
+                });
 
-    cooldownTimer = setInterval(() => {
-        cooldownRemaining--;
-        if (cooldownRemaining > 0) {
-            sendBtnText.textContent = `Wait ${cooldownRemaining}s`;
-            if (resendTimer) resendTimer.textContent = `Resend in ${cooldownRemaining}s`;
-        } else {
-            clearInterval(cooldownTimer);
-            sendBtn.disabled = false;
-            sendBtnText.textContent = "Resend Code";
-            if (resendTimer) resendTimer.textContent = "";
-        }
-    }, 1000);
-}
+                const data = await res.json();
 
-// 2️⃣ VERIFY OTP AND COMPLETE REGISTRATION
-async function submitRegister() {
-    const name = document.getElementById("userName").value.trim();
-    const email = document.getElementById("userEmail").value.trim();
-    const password = document.getElementById("userPassword").value;
-    const otp = document.getElementById("otpCode").value.trim();
+                if (!res.ok) {
+                    throw new Error(data.msg || "Failed to send verification code");
+                }
 
-    if (!email || !password) {
-        showAlert("Email and Password are required ❌", "error");
-        return;
-    }
+                // Reveal Code Input Section
+                const codeSection = document.getElementById("codeSection");
+                codeSection.style.display = "block";
 
-    if (!otp) {
-        showAlert("Please click 'Get Code' and enter the 6-digit verification code sent to your email ❌", "error");
-        document.getElementById("otpCode").focus();
-        return;
-    }
+                let alertMsg = data.msg;
+                if (data.emailSent) {
+                    alertMsg = "✅ Verification code sent to your email! Please check your inbox (and spam folder).";
+                } else if (data.devOtp) {
+                    alertMsg = `⚠️ Real email sending requires Gmail App Password in Vercel settings.<br><strong>Your One-Time Code:</strong> <span style="font-size:17px; font-weight:800; color:#ea580c; letter-spacing:2px;">${data.devOtp}</span> (Pre-filled below)`;
+                    document.getElementById("otpCode").value = data.devOtp;
+                }
 
-    if (otp.length < 6) {
-        showAlert("The verification code must be 6 digits ❌", "error");
-        return;
-    }
+                showAlert(alertMsg, data.emailSent ? "success" : "info");
+                document.getElementById("otpCode").focus();
 
-    const submitBtn = document.getElementById("submitBtn");
-    const submitBtnText = document.getElementById("submitBtnText");
+                // Start 60-Second Cooldown
+                startCooldown(60);
 
-    submitBtn.disabled = true;
-    submitBtnText.textContent = "Verifying & Registering...";
-    showAlert("Verifying code and setting up your account...", "info");
-
-    try {
-        const res = await fetch("/api/users/register", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                name,
-                email,
-                password,
-                otp
-            })
-        });
-
-        const data = await res.json();
-
-        if (!res.ok) {
-            throw new Error(data.msg || "Registration failed");
+            } catch (err) {
+                console.error("Send OTP error:", err);
+                showAlert(err.message || "Failed to send verification code ❌", "error");
+                sendBtn.disabled = false;
+                sendBtnText.textContent = "Get Code";
+            }
         }
 
-        showAlert("Account created & email verified successfully! 🎉 Redirecting to login...", "success");
+        function startCooldown(seconds) {
+            const sendBtn = document.getElementById("sendCodeBtn");
+            const sendBtnText = document.getElementById("sendBtnText");
+            const resendTimer = document.getElementById("resendTimer");
 
-        // Save email locally for quick login prefill
-        try {
-            localStorage.setItem("lastRegisteredEmail", email);
-        } catch (e) {}
+            cooldownRemaining = seconds;
+            sendBtn.disabled = true;
 
-        setTimeout(() => {
-            window.location.href = "login.html";
-        }, 1500);
+            if (cooldownTimer) clearInterval(cooldownTimer);
 
-    } catch (err) {
-        console.error("Register Error:", err);
-        showAlert(err.message || "Registration failed ❌", "error");
-        submitBtn.disabled = false;
-        submitBtnText.textContent = "Verify & Create Account";
-    }
-}
-</script>
+            cooldownTimer = setInterval(() => {
+                cooldownRemaining--;
+                if (cooldownRemaining > 0) {
+                    sendBtnText.textContent = `Wait ${cooldownRemaining}s`;
+                    if (resendTimer) resendTimer.textContent = `Resend in ${cooldownRemaining}s`;
+                } else {
+                    clearInterval(cooldownTimer);
+                    sendBtn.disabled = false;
+                    sendBtnText.textContent = "Resend Code";
+                    if (resendTimer) resendTimer.textContent = "";
+                }
+            }, 1000);
+        }
+
+        // 2️⃣ VERIFY OTP AND COMPLETE REGISTRATION
+        async function submitRegister() {
+            const name = document.getElementById("userName").value.trim();
+            const email = document.getElementById("userEmail").value.trim();
+            const password = document.getElementById("userPassword").value;
+            const otp = document.getElementById("otpCode").value.trim();
+
+            if (!email || !password) {
+                showAlert("Email and Password are required ❌", "error");
+                return;
+            }
+
+            if (!otp) {
+                showAlert("Please click 'Get Code' and enter the 6-digit verification code sent to your email ❌", "error");
+                document.getElementById("otpCode").focus();
+                return;
+            }
+
+            if (otp.length < 6) {
+                showAlert("The verification code must be 6 digits ❌", "error");
+                return;
+            }
+
+            const submitBtn = document.getElementById("submitBtn");
+            const submitBtnText = document.getElementById("submitBtnText");
+
+            submitBtn.disabled = true;
+            submitBtnText.textContent = "Verifying & Registering...";
+            showAlert("Verifying code and setting up your account...", "info");
+
+            try {
+                const res = await fetch("/api/users/register", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        name,
+                        email,
+                        password,
+                        otp
+                    })
+                });
+
+                const data = await res.json();
+
+                if (!res.ok) {
+                    throw new Error(data.msg || data.error || "Registration failed");
+                }
+
+                showAlert("Account created & email verified successfully! 🎉 Redirecting to login...", "success");
+
+                // Save email locally for quick login prefill
+                try {
+                    localStorage.setItem("lastRegisteredEmail", email);
+                } catch (e) { }
+
+                setTimeout(() => {
+                    window.location.href = "login.html";
+                }, 1500);
+
+            } catch (err) {
+                console.error("Register Error:", err);
+                showAlert(err.message || "Registration failed ❌", "error");
+                submitBtn.disabled = false;
+                submitBtnText.textContent = "Verify & Create Account";
+            }
+        }
+    </script>
 
 </body>
+
 </html>

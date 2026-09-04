@@ -12,6 +12,71 @@ const mailer = require("../config/mailer");
 const SECRET = process.env.JWT_SECRET || "secretkey";
 
 const memoryUsers = [];
+const memoryOtps = new Map(); // key: `${type}:${normalizedEmail}`, value: { otp, expiresAt }
+
+// 🛡️ Fail-safe OTP storage (MongoDB + In-Memory Fallback)
+async function storeOtp(key, type, otp) {
+    const normKey = String(key).trim().toLowerCase();
+    // 1. In-memory store (instant & 100% immune to DB drops/timeouts)
+    memoryOtps.set(`${type}:${normKey}`, {
+        otp: String(otp).trim(),
+        expiresAt: Date.now() + 5 * 60 * 1000 // 5 minutes
+    });
+
+    // 2. MongoDB store (if connected)
+    try {
+        await connectDB();
+        await Otp.findOneAndUpdate(
+            { key: normKey, type },
+            { otp: Number(otp), createdAt: new Date() },
+            { upsert: true }
+        );
+    } catch (e) {
+        console.warn(`[OTP] MongoDB save notice for ${normKey}:`, e.message);
+    }
+}
+
+// 🛡️ Fail-safe OTP validation & consumption
+async function checkAndConsumeOtp(key, type, inputOtp) {
+    const normKey = String(key).trim().toLowerCase();
+    const inputStr = String(inputOtp).trim();
+
+    // 1. Check in-memory store
+    const mem = memoryOtps.get(`${type}:${normKey}`);
+    if (mem) {
+        if (Date.now() > mem.expiresAt) {
+            memoryOtps.delete(`${type}:${normKey}`);
+            return { valid: false, reason: "expired" };
+        }
+        if (mem.otp === inputStr) {
+            memoryOtps.delete(`${type}:${normKey}`);
+            try { await Otp.deleteOne({ key: normKey, type }); } catch (e) {}
+            return { valid: true };
+        }
+    }
+
+    // 2. Check MongoDB
+    try {
+        await connectDB();
+        const mongoRecord = await Otp.findOne({ key: normKey, type });
+        if (mongoRecord) {
+            if (String(mongoRecord.otp) === inputStr) {
+                try { await Otp.deleteOne({ key: normKey, type }); } catch (e) {}
+                memoryOtps.delete(`${type}:${normKey}`);
+                return { valid: true };
+            }
+            return { valid: false, reason: "invalid" };
+        }
+    } catch (e) {
+        console.warn(`[OTP] MongoDB check notice for ${normKey}:`, e.message);
+    }
+
+    if (mem) {
+        return { valid: false, reason: "invalid" };
+    }
+
+    return { valid: false, reason: "not_found" };
+}
 
 // ================= SEND REGISTRATION OTP =================
 router.post(["/send-register-otp", "/register/send-otp"], async (req, res) => {
@@ -46,16 +111,8 @@ router.post(["/send-register-otp", "/register/send-otp"], async (req, res) => {
         // Generate 6-digit OTP
         const otp = Math.floor(100000 + Math.random() * 900000);
 
-        // Store OTP in MongoDB (expires in 5 minutes via TTL index)
-        try {
-            await Otp.findOneAndUpdate(
-                { key: normalizedEmail, type: "register" },
-                { otp, createdAt: new Date() },
-                { upsert: true, new: true }
-            );
-        } catch (dbErr) {
-            console.warn("MongoDB Otp upsert warning:", dbErr.message);
-        }
+        // Store OTP in MongoDB and memory store
+        await storeOtp(normalizedEmail, "register", otp);
 
         // Dispatch real email via mailer
         const mailResult = await mailer.sendRegistrationOtp(normalizedEmail, otp);
@@ -63,8 +120,11 @@ router.post(["/send-register-otp", "/register/send-otp"], async (req, res) => {
         const responsePayload = {
             msg: mailResult.sent 
                 ? "Verification code sent to your email! ✉️ Please check your inbox (and spam folder)."
-                : "Verification code generated! ✅ (Check server terminal for code if SMTP is not configured)",
-            email: normalizedEmail
+                : (mailResult.devOtp 
+                    ? `Verification code: ${otp} (⚠️ To receive real emails in your inbox, configure EMAIL_USER and EMAIL_PASS in Vercel settings)`
+                    : "Verification code sent! Check your email."),
+            email: normalizedEmail,
+            emailSent: !!mailResult.sent
         };
 
         if (!mailResult.sent && mailResult.devOtp) {
@@ -75,7 +135,7 @@ router.post(["/send-register-otp", "/register/send-otp"], async (req, res) => {
 
     } catch (err) {
         console.error("Send Register OTP Error:", err);
-        return res.status(500).json({ error: err.message || "Failed to send verification code ❌" });
+        return res.status(500).json({ msg: err.message || "Failed to send verification code ❌", error: err.message });
     }
 });
 
@@ -99,18 +159,20 @@ router.post("/register", async (req, res) => {
             return res.status(400).json({ msg: "Email verification code is required ❌ Click 'Get Code' first." });
         }
 
+        const verification = await checkAndConsumeOtp(normalizedEmail, "register", otp);
+        if (!verification.valid) {
+            if (verification.reason === "expired") {
+                return res.status(400).json({ msg: "Verification code expired ❌ Please click 'Resend Code'." });
+            }
+            if (verification.reason === "invalid") {
+                return res.status(400).json({ msg: "Invalid verification code ❌ Please check your email and try again." });
+            }
+            return res.status(400).json({ msg: "Verification code not found or expired ❌ Please click 'Get Code'." });
+        }
+
         try {
             await connectDB();
         } catch (e) {}
-
-        const otpRecord = await Otp.findOne({ key: normalizedEmail, type: "register" });
-        if (!otpRecord) {
-            return res.status(400).json({ msg: "Verification code expired or not requested ❌ Please click 'Resend Code'." });
-        }
-
-        if (String(otpRecord.otp) !== String(otp).trim()) {
-            return res.status(400).json({ msg: "Invalid verification code ❌ Please check your email." });
-        }
 
         let existingUser = null;
         try {
@@ -126,11 +188,12 @@ router.post("/register", async (req, res) => {
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
+        const userPhone = (phone && String(phone).trim()) ? String(phone).trim() : undefined;
 
         const newUser = new User({
             email: normalizedEmail,
             password: hashedPassword,
-            phone: phone || "",
+            phone: userPhone,
             name: name || normalizedEmail.split("@")[0],
             role: "user",
             isBlocked: false,
@@ -146,17 +209,12 @@ router.post("/register", async (req, res) => {
             console.error("❌ MongoDB User save error:", dbErr.message);
         }
 
-        // Delete used OTP
-        try {
-            await Otp.deleteOne({ key: normalizedEmail, type: "register" });
-        } catch (e) {}
-
         const userId = savedUser ? savedUser._id : ("u_" + Date.now());
         memoryUsers.push({
             _id: userId,
             email: normalizedEmail,
             password: hashedPassword,
-            phone: phone || "",
+            phone: userPhone || "",
             name: name || normalizedEmail.split("@")[0],
             role: "user",
             isBlocked: false,
@@ -168,7 +226,7 @@ router.post("/register", async (req, res) => {
 
     } catch (err) {
         console.error("Register Error:", err);
-        return res.status(500).json({ error: err.message || "Registration failed ❌" });
+        return res.status(500).json({ msg: err.message || "Registration failed ❌", error: err.message });
     }
 });
 
@@ -805,16 +863,8 @@ router.post(["/send-reset-otp", "/forgot-password/send-otp"], async (req, res) =
 
         const otp = Math.floor(100000 + Math.random() * 900000);
 
-        // ✅ Store reset OTP in MongoDB (auto-expires via TTL index in 5 minutes)
-        try {
-            await Otp.findOneAndUpdate(
-                { key: normalizedEmail, type: "reset" },
-                { otp, createdAt: new Date() },
-                { upsert: true, new: true }
-            );
-        } catch (dbErr) {
-            console.warn("MongoDB Reset OTP upsert notice:", dbErr.message);
-        }
+        // Store OTP in MongoDB and memory store
+        await storeOtp(normalizedEmail, "reset", otp);
 
         // Dispatch real email via mailer
         const mailResult = await mailer.sendPasswordResetOtp(normalizedEmail, otp);
@@ -822,7 +872,10 @@ router.post(["/send-reset-otp", "/forgot-password/send-otp"], async (req, res) =
         const responsePayload = {
             msg: mailResult.sent 
                 ? "Password reset code sent to your email! ✉️ Check your inbox."
-                : "Reset code generated! ✅ (Check server terminal for code if SMTP is not configured)"
+                : (mailResult.devOtp 
+                    ? `Reset code: ${otp} (⚠️ To receive real emails in your inbox, configure EMAIL_USER and EMAIL_PASS in Vercel settings)`
+                    : "Reset code generated! Check your email."),
+            emailSent: !!mailResult.sent
         };
 
         if (!mailResult.sent && mailResult.devOtp) {
@@ -853,22 +906,18 @@ router.post(["/verify-reset-otp", "/forgot-password/reset"], async (req, res) =>
 
         const normalizedEmail = email.trim().toLowerCase();
 
+        const verification = await checkAndConsumeOtp(normalizedEmail, "reset", otp);
+        if (!verification.valid) {
+            if (verification.reason === "expired") {
+                return res.status(400).json({ msg: "Reset code expired ❌ Please request a new code." });
+            }
+            if (verification.reason === "invalid") {
+                return res.status(400).json({ msg: "Invalid verification code ❌ Please check your email." });
+            }
+            return res.status(400).json({ msg: "Reset code not found or expired ❌ Please request a new code." });
+        }
+
         try { await connectDB(); } catch (e) {}
-
-        // ✅ Find reset OTP from MongoDB
-        const record = await Otp.findOne({ key: normalizedEmail, type: "reset" });
-
-        if (!record) {
-            return res.status(400).json({
-                msg: "Reset code expired or not requested ❌ Please request a new code."
-            });
-        }
-
-        if (String(record.otp) !== String(otp).trim()) {
-            return res.status(400).json({
-                msg: "Invalid verification code ❌ Please check your email."
-            });
-        }
 
         let user = null;
         try {
@@ -895,11 +944,6 @@ router.post(["/verify-reset-otp", "/forgot-password/reset"], async (req, res) =>
         if (memUser) {
             memUser.password = hashedPassword;
         }
-
-        // ✅ Delete used OTP
-        try {
-            await Otp.deleteOne({ key: normalizedEmail, type: "reset" });
-        } catch (e) {}
 
         return res.json({
             msg: "Password changed successfully ✅ You can now login with your new password!"
