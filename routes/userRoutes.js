@@ -7,25 +7,110 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const connectDB = require("../config/db");
 const { verifyToken, isAdmin } = require("../middleware/auth");
+const mailer = require("../config/mailer");
 
 const SECRET = process.env.JWT_SECRET || "secretkey";
 
 const memoryUsers = [];
 
+// ================= SEND REGISTRATION OTP =================
+router.post(["/send-register-otp", "/register/send-otp"], async (req, res) => {
+    try {
+        const { email } = req.body;
+        if (!email) {
+            return res.status(400).json({ msg: "Email is required ❌" });
+        }
+
+        const normalizedEmail = email.trim().toLowerCase();
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(normalizedEmail)) {
+            return res.status(400).json({ msg: "Please provide a valid email address ❌" });
+        }
+
+        try { await connectDB(); } catch (e) {}
+
+        // Check if user already exists
+        let existingUser = null;
+        try {
+            existingUser = await User.findOne({ email: normalizedEmail });
+        } catch (e) {}
+
+        if (!existingUser) {
+            existingUser = memoryUsers.find(u => u.email && u.email.toLowerCase() === normalizedEmail);
+        }
+
+        if (existingUser) {
+            return res.status(400).json({ msg: "An account with this email already exists ❌ Please login!" });
+        }
+
+        // Generate 6-digit OTP
+        const otp = Math.floor(100000 + Math.random() * 900000);
+
+        // Store OTP in MongoDB (expires in 5 minutes via TTL index)
+        try {
+            await Otp.findOneAndUpdate(
+                { key: normalizedEmail, type: "register" },
+                { otp, createdAt: new Date() },
+                { upsert: true, new: true }
+            );
+        } catch (dbErr) {
+            console.warn("MongoDB Otp upsert warning:", dbErr.message);
+        }
+
+        // Dispatch real email via mailer
+        const mailResult = await mailer.sendRegistrationOtp(normalizedEmail, otp);
+
+        const responsePayload = {
+            msg: mailResult.sent 
+                ? "Verification code sent to your email! ✉️ Please check your inbox (and spam folder)."
+                : "Verification code generated! ✅ (Check server terminal for code if SMTP is not configured)",
+            email: normalizedEmail
+        };
+
+        if (!mailResult.sent && mailResult.devOtp) {
+            responsePayload.devOtp = mailResult.devOtp;
+        }
+
+        return res.json(responsePayload);
+
+    } catch (err) {
+        console.error("Send Register OTP Error:", err);
+        return res.status(500).json({ error: err.message || "Failed to send verification code ❌" });
+    }
+});
+
 // ================= REGISTER =================
 router.post("/register", async (req, res) => {
     try {
-        const { email, password, phone, name } = req.body;
+        const { email, password, phone, name, otp } = req.body;
 
         if (!email || !password) {
             return res.status(400).json({ msg: "Email and password are required ❌" });
         }
 
+        if (password.length < 4) {
+            return res.status(400).json({ msg: "Password must be at least 4 characters ❌" });
+        }
+
         const normalizedEmail = email.trim().toLowerCase();
+
+        // 🔐 Require OTP verification for genuine registration
+        if (!otp) {
+            return res.status(400).json({ msg: "Email verification code is required ❌ Click 'Get Code' first." });
+        }
 
         try {
             await connectDB();
         } catch (e) {}
+
+        const otpRecord = await Otp.findOne({ key: normalizedEmail, type: "register" });
+        if (!otpRecord) {
+            return res.status(400).json({ msg: "Verification code expired or not requested ❌ Please click 'Resend Code'." });
+        }
+
+        if (String(otpRecord.otp) !== String(otp).trim()) {
+            return res.status(400).json({ msg: "Invalid verification code ❌ Please check your email." });
+        }
 
         let existingUser = null;
         try {
@@ -49,6 +134,7 @@ router.post("/register", async (req, res) => {
             name: name || normalizedEmail.split("@")[0],
             role: "user",
             isBlocked: false,
+            isVerified: true,
             membership: "free"
         });
 
@@ -60,6 +146,11 @@ router.post("/register", async (req, res) => {
             console.error("❌ MongoDB User save error:", dbErr.message);
         }
 
+        // Delete used OTP
+        try {
+            await Otp.deleteOne({ key: normalizedEmail, type: "register" });
+        } catch (e) {}
+
         const userId = savedUser ? savedUser._id : ("u_" + Date.now());
         memoryUsers.push({
             _id: userId,
@@ -69,10 +160,11 @@ router.post("/register", async (req, res) => {
             name: name || normalizedEmail.split("@")[0],
             role: "user",
             isBlocked: false,
+            isVerified: true,
             membership: "free"
         });
 
-        return res.json({ msg: "Registered successfully ✅ You can now login!" });
+        return res.json({ msg: "Registered and email verified successfully ✅ You can now login!" });
 
     } catch (err) {
         console.error("Register Error:", err);
@@ -678,62 +770,114 @@ router.put("/unblock/:id", verifyToken, isAdmin, async (req, res) => {
 });
 
 // ================= FORGOT PASSWORD =================
-router.post("/send-reset-otp", async (req, res) => {
+router.post(["/send-reset-otp", "/forgot-password/send-otp"], async (req, res) => {
     try {
         const { email } = req.body;
 
-        const user = await User.findOne({ email });
+        if (!email) {
+            return res.status(400).json({ msg: "Email is required ❌" });
+        }
+
+        const normalizedEmail = email.trim().toLowerCase();
+
+        try { await connectDB(); } catch (e) {}
+
+        let user = null;
+        try {
+            user = await User.findOne({ email: normalizedEmail });
+        } catch (e) {}
+
+        if (!user) {
+            user = memoryUsers.find(u => u.email && u.email.toLowerCase() === normalizedEmail);
+        }
 
         if (!user) {
             return res.status(404).json({
-                msg: "User not found ❌"
+                msg: "No account found with this email ❌ Please check your spelling or register."
             });
         }
 
-        const otp = Math.floor(
-            100000 + Math.random() * 900000
-        );
+        if (user.isBlocked) {
+            return res.status(403).json({
+                msg: "This account is blocked 🚫 Please contact store support."
+            });
+        }
 
-        // ✅ Store reset OTP in MongoDB (auto-expires via TTL)
-        await Otp.findOneAndUpdate(
-            { key: email, type: "reset" },
-            { otp, createdAt: new Date() },
-            { upsert: true, new: true }
-        );
+        const otp = Math.floor(100000 + Math.random() * 900000);
 
-        console.log("RESET OTP:", otp);
+        // ✅ Store reset OTP in MongoDB (auto-expires via TTL index in 5 minutes)
+        try {
+            await Otp.findOneAndUpdate(
+                { key: normalizedEmail, type: "reset" },
+                { otp, createdAt: new Date() },
+                { upsert: true, new: true }
+            );
+        } catch (dbErr) {
+            console.warn("MongoDB Reset OTP upsert notice:", dbErr.message);
+        }
 
-        res.json({
-            msg: "OTP Sent Successfully ✅"
-        });
+        // Dispatch real email via mailer
+        const mailResult = await mailer.sendPasswordResetOtp(normalizedEmail, otp);
+
+        const responsePayload = {
+            msg: mailResult.sent 
+                ? "Password reset code sent to your email! ✉️ Check your inbox."
+                : "Reset code generated! ✅ (Check server terminal for code if SMTP is not configured)"
+        };
+
+        if (!mailResult.sent && mailResult.devOtp) {
+            responsePayload.devOtp = mailResult.devOtp;
+        }
+
+        return res.json(responsePayload);
 
     } catch (err) {
-        res.status(500).json({
-            msg: err.message
+        console.error("Send Reset OTP Error:", err);
+        return res.status(500).json({
+            msg: err.message || "Failed to send reset code ❌"
         });
     }
 });
 
-router.post("/verify-reset-otp", async (req, res) => {
+router.post(["/verify-reset-otp", "/forgot-password/reset"], async (req, res) => {
     try {
         const { email, otp, newPassword } = req.body;
 
+        if (!email || !otp || !newPassword) {
+            return res.status(400).json({ msg: "All fields are required ❌" });
+        }
+
+        if (newPassword.length < 4) {
+            return res.status(400).json({ msg: "New password must be at least 4 characters ❌" });
+        }
+
+        const normalizedEmail = email.trim().toLowerCase();
+
+        try { await connectDB(); } catch (e) {}
+
         // ✅ Find reset OTP from MongoDB
-        const record = await Otp.findOne({ key: email, type: "reset" });
+        const record = await Otp.findOne({ key: normalizedEmail, type: "reset" });
 
         if (!record) {
             return res.status(400).json({
-                msg: "OTP expired ❌"
+                msg: "Reset code expired or not requested ❌ Please request a new code."
             });
         }
 
-        if (record.otp != otp) {
+        if (String(record.otp) !== String(otp).trim()) {
             return res.status(400).json({
-                msg: "Invalid OTP ❌"
+                msg: "Invalid verification code ❌ Please check your email."
             });
         }
 
-        const user = await User.findOne({ email });
+        let user = null;
+        try {
+            user = await User.findOne({ email: normalizedEmail });
+        } catch (e) {}
+
+        if (!user) {
+            user = memoryUsers.find(u => u.email && u.email.toLowerCase() === normalizedEmail);
+        }
 
         if (!user) {
             return res.status(404).json({
@@ -741,23 +885,30 @@ router.post("/verify-reset-otp", async (req, res) => {
             });
         }
 
-        user.password = await bcrypt.hash(
-            newPassword,
-            10
-        );
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+        user.password = hashedPassword;
+        try {
+            await user.save();
+        } catch (e) {}
 
-        await user.save();
+        const memUser = memoryUsers.find(u => u.email && u.email.toLowerCase() === normalizedEmail);
+        if (memUser) {
+            memUser.password = hashedPassword;
+        }
 
         // ✅ Delete used OTP
-        await Otp.deleteOne({ key: email, type: "reset" });
+        try {
+            await Otp.deleteOne({ key: normalizedEmail, type: "reset" });
+        } catch (e) {}
 
-        res.json({
-            msg: "Password changed successfully ✅"
+        return res.json({
+            msg: "Password changed successfully ✅ You can now login with your new password!"
         });
 
     } catch (err) {
-        res.status(500).json({
-            msg: err.message
+        console.error("Verify Reset OTP Error:", err);
+        return res.status(500).json({
+            msg: err.message || "Failed to reset password ❌"
         });
     }
 });

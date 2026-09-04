@@ -30,6 +30,12 @@ const userSchema = new mongoose.Schema({
         default: false
     },
 
+    // ✉️ EMAIL VERIFICATION
+    isVerified: {
+        type: Boolean,
+        default: false
+    },
+
     // 💎 MEMBERSHIP SYSTEM
     membership: {
         type: String,

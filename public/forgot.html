@@ -1,276 +1,471 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Forgot Password</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Forgot Password - Soumyadip Store</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
-<style>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
 
-*{
-margin:0;
-padding:0;
-box-sizing:border-box;
-font-family:'Poppins',sans-serif;
-}
+        body {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #0f172a, #1e1b4b, #312e81, #1e293b);
+            background-size: 300% 300%;
+            animation: bgShift 15s ease infinite;
+            padding: 20px;
+        }
 
-body{
-height:100vh;
-display:flex;
-justify-content:center;
-align-items:center;
-background:linear-gradient(135deg,#6a11cb,#2575fc);
-overflow:hidden;
-}
+        @keyframes bgShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
 
-.card{
-width:430px;
-padding:35px;
-background:rgba(255,255,255,0.12);
-backdrop-filter:blur(20px);
-border-radius:25px;
-box-shadow:0 15px 35px rgba(0,0,0,.3);
-text-align:center;
-}
+        .card {
+            width: 100%;
+            max-width: 460px;
+            padding: 38px 32px;
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border-radius: 28px;
+            border: 1px solid rgba(255, 255, 255, 0.16);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.55);
+            text-align: center;
+            color: #ffffff;
+            animation: cardEntrance 0.4s ease-out;
+        }
 
-.logo{
-font-size:55px;
-margin-bottom:10px;
-}
+        @keyframes cardEntrance {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
 
-.store{
-font-size:22px;
-font-weight:700;
-color:white;
-margin-bottom:5px;
-}
+        .brand-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 8px;
+            text-decoration: none;
+            color: #ffffff;
+        }
 
-.subtitle{
-color:#dbeafe;
-font-size:14px;
-margin-bottom:25px;
-}
+        .brand-badge img {
+            height: 38px;
+            width: auto;
+            object-fit: contain;
+        }
 
-h2{
-color:white;
-font-size:42px;
-margin-bottom:25px;
-}
+        .store-name {
+            font-size: 20px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
 
-input{
-width:100%;
-padding:14px;
-margin-bottom:15px;
-border:none;
-outline:none;
-border-radius:12px;
-background:rgba(255,255,255,.18);
-color:white;
-font-size:16px;
-}
+        .icon-circle {
+            width: 58px;
+            height: 58px;
+            margin: 12px auto 14px;
+            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 26px;
+            box-shadow: 0 10px 25px rgba(79, 70, 229, 0.4);
+        }
 
-input::placeholder{
-color:#e5e7eb;
-}
+        h2 {
+            font-size: 24px;
+            font-weight: 800;
+            margin-bottom: 6px;
+            letter-spacing: -0.5px;
+        }
 
-.email-row{
-display:flex;
-gap:10px;
-margin-bottom:15px;
-}
+        .subtitle {
+            color: #94a3b8;
+            font-size: 13.5px;
+            margin-bottom: 24px;
+            line-height: 1.5;
+        }
 
-.email-row input{
-margin-bottom:0;
-flex:1;
-}
+        .form-group {
+            margin-bottom: 14px;
+            text-align: left;
+        }
 
-.send-btn{
-width:140px;
-border:none;
-border-radius:12px;
-background:linear-gradient(135deg,#4f46e5,#7c3aed);
-color:white;
-font-size:16px;
-font-weight:600;
-cursor:pointer;
-}
+        .form-label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: #cbd5e1;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
 
-.reset-btn{
-width:100%;
-padding:14px;
-border:none;
-border-radius:12px;
-background:linear-gradient(135deg,#ef4444,#dc2626);
-color:white;
-font-size:18px;
-font-weight:600;
-cursor:pointer;
-margin-top:5px;
-}
+        .email-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 14px;
+        }
 
-.send-btn:hover,
-.reset-btn:hover{
-transform:translateY(-2px);
-}
+        input {
+            width: 100%;
+            padding: 13px 16px;
+            border: 1.5px solid rgba(255, 255, 255, 0.15);
+            outline: none;
+            border-radius: 14px;
+            background: rgba(255, 255, 255, 0.07);
+            color: #ffffff;
+            font-size: 14.5px;
+            transition: all 0.2s ease;
+        }
 
-#msg{
-margin-top:15px;
-color:white;
-font-weight:600;
-}
+        input::placeholder {
+            color: #94a3b8;
+        }
 
-.back{
-margin-top:20px;
-}
+        input:focus {
+            border-color: #818cf8;
+            background: rgba(255, 255, 255, 0.12);
+            box-shadow: 0 0 0 3px rgba(129, 140, 248, 0.25);
+        }
 
-.back a{
-color:white;
-text-decoration:none;
-font-weight:600;
-}
+        .send-btn {
+            padding: 0 18px;
+            border: none;
+            border-radius: 14px;
+            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+            color: #ffffff;
+            font-size: 13.5px;
+            font-weight: 700;
+            cursor: pointer;
+            white-space: nowrap;
+            min-width: 120px;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
 
-.back a:hover{
-color:#facc15;
-}
-</style>
+        .send-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(79, 70, 229, 0.4);
+        }
+
+        .send-btn:disabled {
+            background: #475569;
+            cursor: not-allowed;
+            transform: none;
+            opacity: 0.7;
+        }
+
+        .otp-input {
+            letter-spacing: 6px;
+            text-align: center;
+            font-size: 18px;
+            font-weight: 700;
+            color: #fcd34d !important;
+            border-color: rgba(252, 211, 77, 0.4) !important;
+            background: rgba(252, 211, 77, 0.08) !important;
+        }
+
+        .otp-input::placeholder {
+            letter-spacing: normal;
+            font-size: 14px;
+            font-weight: 400;
+        }
+
+        .reset-btn {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 14px;
+            background: linear-gradient(135deg, #ea580c, #dc2626);
+            color: #ffffff;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 8px;
+            box-shadow: 0 6px 20px rgba(220, 38, 38, 0.35);
+            transition: all 0.2s ease;
+        }
+
+        .reset-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(220, 38, 38, 0.5);
+        }
+
+        .reset-btn:disabled {
+            opacity: 0.65;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Message Box */
+        .msg-box {
+            margin-top: 14px;
+            padding: 10px 14px;
+            border-radius: 12px;
+            font-size: 13px;
+            line-height: 1.45;
+            display: none;
+            text-align: left;
+            animation: fadeIn 0.25s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .msg-info {
+            background: rgba(59, 130, 246, 0.15);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            color: #bfdbfe;
+        }
+
+        .msg-success {
+            background: rgba(16, 185, 129, 0.15);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            color: #a7f3d0;
+        }
+
+        .msg-error {
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #fecaca;
+        }
+
+        .back {
+            margin-top: 22px;
+            font-size: 13.5px;
+            color: #94a3b8;
+        }
+
+        .back a {
+            color: #ffffff;
+            text-decoration: none;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: color 0.2s ease;
+        }
+
+        .back a:hover {
+            color: #facc15;
+        }
+    </style>
 </head>
 <body>
 
 <div class="card">
-<div class="logo">🔐</div>
-    <div class="store">Soumyadip Store</div>
-    <div class="subtitle">Secure Account Recovery System</div>
+    <a href="index.html" class="brand-badge">
+        <img src="/images/logo-transparent.png" alt="Logo" onerror="this.style.display='none';">
+        <span class="store-name">Soumyadip Store</span>
+    </a>
 
-    <h2>Forgot Password</h2>
+    <div class="icon-circle">🔐</div>
 
-   <div class="email-row">
-<input
-type="email"
-id="email"
-placeholder="Enter Email">
-
-<button
-class="send-btn"
-onclick="sendOtp()">
-Send OTP
-</button>
-</div>
-
-    <input
-        type="text"
-        id="otp"
-        placeholder="Enter OTP"
-    >
-
-    <input
-        type="password"
-        id="newPassword"
-        placeholder="Enter New Password"
-    >
-
-    <button
-        class="btn reset-btn"
-        onclick="resetPassword()"
-    >
-        Reset Password
-    </button>
-
-    <div id="msg"></div>
-
-    <div class="back">
-        <a href="/">⬅ Back To Login</a>
+    <h2>Reset Password</h2>
+    <div class="subtitle">
+        Enter your registered email to receive a 6-digit verification code.
     </div>
 
+    <div id="msgBox" class="msg-box"></div>
+
+    <form onsubmit="event.preventDefault(); resetPassword();">
+        <!-- Email + Send Code Button -->
+        <div class="form-group">
+            <label class="form-label" for="email">Account Email</label>
+            <div class="email-row">
+                <input type="email" id="email" placeholder="name@example.com" required autocomplete="email">
+                <button type="button" class="send-btn" id="sendBtn" onclick="sendOtp()">
+                    <span id="sendBtnText">Send Code</span>
+                </button>
+            </div>
+            <div id="resendNotice" style="font-size: 12px; color: #facc15; text-align: right; display: none;"></div>
+        </div>
+
+        <!-- 6-Digit OTP Code -->
+        <div class="form-group">
+            <label class="form-label" for="otp">6-Digit Security Code</label>
+            <input type="text" id="otp" class="otp-input" placeholder="Enter 6-digit code" maxlength="6" inputmode="numeric" required autocomplete="one-time-code">
+        </div>
+
+        <!-- New Password -->
+        <div class="form-group">
+            <label class="form-label" for="newPassword">New Password</label>
+            <input type="password" id="newPassword" placeholder="Enter new strong password" minlength="4" required autocomplete="new-password">
+        </div>
+
+        <!-- Submit Button -->
+        <button type="submit" class="reset-btn" id="resetBtn">
+            <span id="resetBtnText">Change Password & Login</span>
+        </button>
+    </form>
+
+    <div class="back">
+        <a href="login.html">⬅ Back To Login</a>
+    </div>
 </div>
 
 <script>
+let countdown = null;
+let secondsLeft = 0;
 
-async function sendOtp(){
+function showMsg(message, type = "info") {
+    const box = document.getElementById("msgBox");
+    box.className = `msg-box msg-${type}`;
+    box.innerHTML = message;
+    box.style.display = "block";
+}
 
-    const email =
-    document.getElementById("email").value;
+// 1️⃣ SEND RESET OTP
+async function sendOtp() {
+    const emailInput = document.getElementById("email");
+    const email = emailInput.value.trim();
 
-    if(!email){
-        document.getElementById("msg").innerHTML =
-        "Enter email first ❌";
+    if (!email) {
+        showMsg("Please enter your account email first ❌", "error");
+        emailInput.focus();
         return;
     }
 
-    try{
-
-        const response = await fetch(
-            "/api/users/send-reset-otp",
-            {
-                method:"POST",
-                headers:{
-                    "Content-Type":"application/json"
-                },
-                body:JSON.stringify({
-                    email
-                })
-            }
-        );
-
-        const data = await response.json();
-
-        document.getElementById("msg").innerHTML =
-        data.msg;
-
-    }catch(err){
-
-        document.getElementById("msg").innerHTML =
-        "Failed to send OTP ❌";
-    }
-}
-
-async function resetPassword(){
-
-    const email =
-    document.getElementById("email").value;
-
-    const otp =
-    document.getElementById("otp").value;
-
-    const newPassword =
-    document.getElementById("newPassword").value;
-
-    if(!email || !otp || !newPassword){
-
-        document.getElementById("msg").innerHTML =
-        "Fill all fields ❌";
-
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+        showMsg("Please enter a valid email address ❌", "error");
+        emailInput.focus();
         return;
     }
 
-    try{
+    const sendBtn = document.getElementById("sendBtn");
+    const sendBtnText = document.getElementById("sendBtnText");
 
-        const response = await fetch(
-            "/api/users/verify-reset-otp",
-            {
-                method:"POST",
-                headers:{
-                    "Content-Type":"application/json"
-                },
-                body:JSON.stringify({
-                    email,
-                    otp,
-                    newPassword
-                })
-            }
-        );
+    sendBtn.disabled = true;
+    sendBtnText.textContent = "Sending...";
+    showMsg("Checking account and sending reset code...", "info");
+
+    try {
+        const response = await fetch("/api/users/send-reset-otp", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email })
+        });
 
         const data = await response.json();
 
-        document.getElementById("msg").innerHTML =
-        data.msg;
+        if (!response.ok) {
+            throw new Error(data.msg || "Failed to send reset code");
+        }
 
-    }catch(err){
+        let alertHtml = data.msg || "Password reset code sent to your email! Check your inbox.";
+        if (data.devOtp) {
+            alertHtml += `<br><strong>Dev Mode Code:</strong> <span style="font-size:15px; font-weight:800; color:#facc15;">${data.devOtp}</span>`;
+            document.getElementById("otp").value = data.devOtp;
+        }
 
-        document.getElementById("msg").innerHTML =
-        "Reset Failed ❌";
+        showMsg(alertHtml, "success");
+        document.getElementById("otp").focus();
+
+        startTimer(60);
+
+    } catch (err) {
+        console.error("Send OTP Error:", err);
+        showMsg(err.message || "Failed to send reset code ❌", "error");
+        sendBtn.disabled = false;
+        sendBtnText.textContent = "Send Code";
     }
 }
 
+function startTimer(duration) {
+    const sendBtn = document.getElementById("sendBtn");
+    const sendBtnText = document.getElementById("sendBtnText");
+    const resendNotice = document.getElementById("resendNotice");
+
+    secondsLeft = duration;
+    sendBtn.disabled = true;
+    resendNotice.style.display = "block";
+
+    if (countdown) clearInterval(countdown);
+
+    countdown = setInterval(() => {
+        secondsLeft--;
+        if (secondsLeft > 0) {
+            sendBtnText.textContent = `Wait ${secondsLeft}s`;
+            resendNotice.textContent = `You can request another code in ${secondsLeft}s`;
+        } else {
+            clearInterval(countdown);
+            sendBtn.disabled = false;
+            sendBtnText.textContent = "Resend Code";
+            resendNotice.style.display = "none";
+        }
+    }, 1000);
+}
+
+// 2️⃣ VERIFY OTP AND CHANGE PASSWORD
+async function resetPassword() {
+    const email = document.getElementById("email").value.trim();
+    const otp = document.getElementById("otp").value.trim();
+    const newPassword = document.getElementById("newPassword").value;
+
+    if (!email || !otp || !newPassword) {
+        showMsg("Please fill in all fields (Email, OTP code, and New Password) ❌", "error");
+        return;
+    }
+
+    if (newPassword.length < 4) {
+        showMsg("New password must be at least 4 characters ❌", "error");
+        return;
+    }
+
+    const resetBtn = document.getElementById("resetBtn");
+    const resetBtnText = document.getElementById("resetBtnText");
+
+    resetBtn.disabled = true;
+    resetBtnText.textContent = "Updating Password...";
+    showMsg("Verifying code and resetting your password...", "info");
+
+    try {
+        const response = await fetch("/api/users/verify-reset-otp", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email, otp, newPassword })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.msg || "Password reset failed");
+        }
+
+        showMsg("Password changed successfully! ✅ Redirecting to login...", "success");
+
+        setTimeout(() => {
+            window.location.href = "login.html";
+        }, 1500);
+
+    } catch (err) {
+        console.error("Reset Password Error:", err);
+        showMsg(err.message || "Failed to reset password ❌", "error");
+        resetBtn.disabled = false;
+        resetBtnText.textContent = "Change Password & Login";
+    }
+}
 </script>
 
 </body>
