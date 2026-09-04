@@ -2,13 +2,13 @@
   "version": 2,
   "functions": {
     "server.js": {
-      "includeFiles": "public/**"
+      "includeFiles": "{public/**,data/**}"
     },
     "index.js": {
-      "includeFiles": "public/**"
+      "includeFiles": "{public/**,data/**}"
     },
     "api/index.js": {
-      "includeFiles": "public/**"
+      "includeFiles": "{public/**,data/**}"
     }
   },
   "rewrites": [
